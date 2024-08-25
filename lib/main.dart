@@ -50,19 +50,19 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.blue,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Image.asset('assets/icons/home.png', width: 24, height: 24),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+            icon: Image.asset('assets/icons/search.png', width: 24, height: 24),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: Image.asset('assets/icons/notifications.png', width: 24, height: 24),
             label: 'Notifications',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Image.asset('assets/icons/profile.png', width: 24, height: 24),
             label: 'Profile',
           ),
         ],
