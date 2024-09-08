@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
-import 'pages/search_page.dart';
-import 'pages/notifications_page.dart';
-import 'pages/profile_page.dart';
+import 'routes/home_page.dart';
+import 'routes/search_page.dart';
+import 'routes/notifications_page.dart';
+import 'routes/profile_page.dart';
 import 'package:flutter_side_menu/flutter_side_menu.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -29,6 +27,34 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        primaryColor: Colors.lightGreen, // 设置主要颜色为浅绿色
+        scaffoldBackgroundColor: Colors.white, // 背景颜色
+        appBarTheme: AppBarTheme(
+          color: Colors.lightGreen, // AppBar 的背景颜色为浅绿色
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          iconTheme: IconThemeData(color: Colors.white), // AppBar 图标颜色
+        ),
+        textTheme: TextTheme(
+          bodyText1: TextStyle(color: Colors.black87),
+          bodyText2: TextStyle(color: Colors.black54),
+          headline6: TextStyle(
+            color: Colors.lightGreen, // 标题颜色
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.lightGreen, // 按钮的背景颜色
+          textTheme: ButtonTextTheme.primary, // 按钮的文字颜色
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Colors.lightGreen, // 浮动按钮背景色
+        ),
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: Text('Flutter Side Menu Example'),
@@ -36,6 +62,7 @@ class _MyAppState extends State<MyApp> {
         body: Row(
           children: [
             SideMenu(
+              backgroundColor: Colors.lightGreen, // 设置侧边栏背景色为浅绿色
               builder: (data) {
                 return SideMenuData(
                   items: [
