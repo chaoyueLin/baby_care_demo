@@ -44,7 +44,7 @@ dev_dependencies:
   sqflite: ^2.0.1
   path_provider: ^2.1.4
   shared_preferences: ^2.0.10
-
+  fluttertoast: ^8.0.9
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -66,10 +66,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/icons/home.png
-     - assets/icons/notifications.png
-     - assets/icons/profile.png
-     - assets/icons/search.png
+     - assets/icons/mother_milk.png
+     - assets/icons/formula_milk.png
+     - assets/icons/water.png
+     - assets/icons/poop.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

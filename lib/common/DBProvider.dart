@@ -3,7 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-import '../models/Persion.dart';
+import '../models/Baby.dart';
 
 class DBProvider {
 
@@ -30,7 +30,7 @@ class DBProvider {
   Future<Database> _initDB() async {
     // 获取数据库文件的存储路径
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, 'demo.db');
+    String path = join(documentsDirectory.path, 'babyCare.db');
     //定义了数据库的版本
     return await openDatabase(path,
       version: 1, onCreate: _onCreate);
@@ -48,13 +48,13 @@ class DBProvider {
   }
 
   // 插入人员信息
-  Future<Person> insert(Person person) async {
+  Future<Baby> insert(Baby person) async {
     person.id = await _db!.insert(tablePerson, person.toMap());
     return person;
   }
 
   // 查找所有人员信息
-  Future<List<Person>?> queryAll() async {
+  Future<List<Baby>?> queryAll() async {
     List<Map> maps = await _db!.query(tablePerson, columns: [
       columnId,
       columnName,
@@ -66,16 +66,16 @@ class DBProvider {
       return null;
     }
 
-    List<Person> books = [];
+    List<Baby> books = [];
     for (int i = 0; i < maps.length; i++) {
-      books.add(Person.fromMap(maps[i]));
+      books.add(Baby.fromMap(maps[i]));
     }
 
     return books;
   }
 
   // 根据ID查找个人信息
-  Future<Person?> getBook(int id) async {
+  Future<Baby?> getBook(int id) async {
     List<Map> maps = await _db!.query(tablePerson,
         columns: [
           columnId,
@@ -86,7 +86,7 @@ class DBProvider {
         where: '$columnId = ?',
         whereArgs: [id]);
     if (maps.isNotEmpty) {
-      return Person.fromMap(maps.first);
+      return Baby.fromMap(maps.first);
     }
     return null;
   }
@@ -97,7 +97,7 @@ class DBProvider {
   }
 
   // 更新个人信息
-  Future<int> update(Person person) async {
+  Future<int> update(Baby person) async {
     return await _db!.update(tablePerson, person.toMap(),
         where: '$columnId = ?', whereArgs: [person.id]);
   }
