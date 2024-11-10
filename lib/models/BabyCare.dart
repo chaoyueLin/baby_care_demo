@@ -1,16 +1,16 @@
-const String tablePerson = 'babyCare';
-const String columnId = '_id';
+const String tableCare = 'babyCare';
+const String columnCareId = '_id';
 const String columnMilk = 'milk';
 const String columnWater = 'water';
 const String columnDefecate = 'defecate';
 
-class Baby {
+class BabyCare {
   int? id;
   int? milk;
   int? water;
   int? defecate;
 
-  Baby({required this.id, required this.milk, required this.water, required this.defecate});
+  BabyCare({required this.id, required this.milk, required this.water, required this.defecate});
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -18,12 +18,12 @@ class Baby {
       columnWater: water,
       columnDefecate: defecate
     };
-    map[columnId] = id;
+    map[columnCareId] = id;
     return map;
   }
 
-  Baby.fromMap(Map<dynamic, dynamic> map) {
-    id = map[columnId];
+  BabyCare.fromMap(Map<dynamic, dynamic> map) {
+    id = map[columnCareId];
     milk = map[columnMilk];
     water = map[columnWater];
     defecate = map[columnDefecate];

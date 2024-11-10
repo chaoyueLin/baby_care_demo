@@ -1,31 +1,29 @@
 const String tablePerson = 'baby';
-const String columnId = '_id';
+const String columnPersonId = '_id';
 const String columnName = 'name';
 const String columnSex = 'sex';
-const String columnAge = 'age';
+const String columnBirthdate = 'birthdate';
 
 class Baby {
   int? id;
-  String? name;
-  String? sex;
-  int? age;
+  String name;
+  String sex;
+  DateTime birthdate;
 
-  Baby({required this.id, required this.name, required this.sex, required this.age});
+  Baby({this.id, required this.name, required this.sex, required this.birthdate});
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
+    return {
+      columnPersonId: id,
       columnName: name,
       columnSex: sex,
-      columnAge: age
+      columnBirthdate: birthdate.millisecondsSinceEpoch, // Store as an integer
     };
-    map[columnId] = id;
-    return map;
   }
 
-  Baby.fromMap(Map<dynamic, dynamic> map) {
-    id = map[columnId];
-    name = map[columnName];
-    sex = map[columnSex];
-    age = map[columnAge];
-  }
+  Baby.fromMap(Map<String, dynamic> map)
+      : id = map[columnPersonId] as int?,
+        name = map[columnName] as String,
+        sex = map[columnSex] as String,
+        birthdate = DateTime.fromMillisecondsSinceEpoch(map[columnBirthdate] as int);
 }

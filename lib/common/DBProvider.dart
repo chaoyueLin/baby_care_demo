@@ -4,10 +4,11 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../models/Baby.dart';
+import '../models/BabyCare.dart';
+
 
 class DBProvider {
-
-  //创建单例模式SQLite
+  // Singleton pattern for SQLite
   static final DBProvider _singleton = DBProvider._internal();
 
   factory DBProvider() {
@@ -26,79 +27,157 @@ class DBProvider {
     return _db!;
   }
 
-  //初始化数据库
+  // Initialize the database with both tables
   Future<Database> _initDB() async {
-    // 获取数据库文件的存储路径
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, 'babyCare.db');
-    //定义了数据库的版本
-    return await openDatabase(path,
-      version: 1, onCreate: _onCreate);
+    String path = join(documentsDirectory.path, 'babyApp.db');
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
-  //创建数据库表
+  // Create both tables in the database
   Future _onCreate(Database db, int version) async {
-    return await db.execute('''
-          CREATE TABLE $tablePerson (
-            $columnId INTEGER PRIMARY KEY,
-            $columnName TEXT,
-            $columnSex TEXT,
-            $columnAge INTEGER,
-          ''');
+    await db.execute('''
+      CREATE TABLE $tablePerson (
+        $columnPersonId INTEGER PRIMARY KEY,
+        $columnName TEXT,
+        $columnSex TEXT,
+        $columnBirthdate TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE $tableCare (
+        $columnCareId INTEGER PRIMARY KEY,
+        $columnMilk INTEGER,
+        $columnWater INTEGER,
+        $columnDefecate INTEGER
+      )
+    ''');
   }
 
-  // 插入人员信息
-  Future<Baby> insert(Baby person) async {
-    person.id = await _db!.insert(tablePerson, person.toMap());
+  // CRUD methods for tablePerson
+
+  // Insert a Baby record into tablePerson
+  Future<Baby> insertPerson(Baby person) async {
+    final dbClient = await db;
+    person.id = await dbClient.insert(tablePerson, person.toMap());
     return person;
   }
 
-  // 查找所有人员信息
-  Future<List<Baby>?> queryAll() async {
-    List<Map> maps = await _db!.query(tablePerson, columns: [
-      columnId,
+  // Query all Baby records from tablePerson
+  Future<List<Baby>?> queryAllPersons() async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(tablePerson, columns: [
+      columnPersonId,
       columnName,
       columnSex,
-      columnAge
+      columnBirthdate
     ]);
 
     if (maps.isEmpty) {
       return null;
     }
 
-    List<Baby> books = [];
-    for (int i = 0; i < maps.length; i++) {
-      books.add(Baby.fromMap(maps[i]));
-    }
-
-    return books;
+    return maps.map((map) => Baby.fromMap(map)).toList();
   }
 
-  // 根据ID查找个人信息
-  Future<Baby?> getBook(int id) async {
-    List<Map> maps = await _db!.query(tablePerson,
-        columns: [
-          columnId,
-          columnName,
-          columnSex,
-          columnAge
-        ],
-        where: '$columnId = ?',
-        whereArgs: [id]);
+  // Query a Baby record by ID from tablePerson
+  Future<Baby?> getPersonById(int id) async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(
+      tablePerson,
+      columns: [
+        columnPersonId,
+        columnName,
+        columnSex,
+        columnBirthdate
+      ],
+      where: '$columnPersonId = ?',
+      whereArgs: [id],
+    );
     if (maps.isNotEmpty) {
       return Baby.fromMap(maps.first);
     }
     return null;
   }
 
-  // 根据ID删除个人信息
-  Future<int> delete(int id) async {
-    return await _db!.delete(tablePerson, where: '$columnId = ?', whereArgs: [id]);
+  // Delete a Baby record by ID from tablePerson
+  Future<int> deletePerson(int id) async {
+    final dbClient = await db;
+    return await dbClient.delete(tablePerson, where: '$columnPersonId = ?', whereArgs: [id]);
   }
 
-  // 更新个人信息
-  Future<int> update(Baby person) async {
-    return await _db!.update(tablePerson, person.toMap(),
-        where: '$columnId = ?', whereArgs: [person.id]);
+  // Update a Baby record in tablePerson
+  Future<int> updatePerson(Baby person) async {
+    final dbClient = await db;
+    return await dbClient.update(
+      tablePerson,
+      person.toMap(),
+      where: '$columnPersonId = ?',
+      whereArgs: [person.id],
+    );
+  }
+
+  // CRUD methods for tableCare
+
+  // Insert a BabyCare record into tableCare
+  Future<BabyCare> insertCare(BabyCare care) async {
+    final dbClient = await db;
+    care.id = await dbClient.insert(tableCare, care.toMap());
+    return care;
+  }
+
+  // Query all BabyCare records from tableCare
+  Future<List<BabyCare>?> queryAllCare() async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(tableCare, columns: [
+      columnCareId,
+      columnMilk,
+      columnWater,
+      columnDefecate
+    ]);
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return maps.map((map) => BabyCare.fromMap(map)).toList();
+  }
+
+  // Query a BabyCare record by ID from tableCare
+  Future<BabyCare?> getCareById(int id) async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(
+      tableCare,
+      columns: [
+        columnCareId,
+        columnMilk,
+        columnWater,
+        columnDefecate
+      ],
+      where: '$columnCareId = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return BabyCare.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // Delete a BabyCare record by ID from tableCare
+  Future<int> deleteCare(int id) async {
+    final dbClient = await db;
+    return await dbClient.delete(tableCare, where: '$columnCareId = ?', whereArgs: [id]);
+  }
+
+  // Update a BabyCare record in tableCare
+  Future<int> updateCare(BabyCare care) async {
+    final dbClient = await db;
+    return await dbClient.update(
+      tableCare,
+      care.toMap(),
+      where: '$columnCareId = ?',
+      whereArgs: [care.id],
+    );
   }
 }
