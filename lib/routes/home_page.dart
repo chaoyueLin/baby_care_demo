@@ -29,11 +29,55 @@ class _HomePageState extends StatelessWidget {
     }
   }
 
+  void showFormulaMilkDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('配方奶'),
+          content: Container(
+            width: double.maxFinite,
+            height: 300,
+            child: ListView.builder(
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) {
+                int value = (index + 1) * 10;
+                return ListTile(
+                  title: Text('${value}ml'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    // 显示 SnackBar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('您选择了: ${value}ml')),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('取消'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // 构建自定义组件
-  Widget _buildCustomComponent(BuildContext context, String label, String imagePath) {
+  Widget _buildCustomComponent(
+      BuildContext context, String label, String imagePath) {
     return GestureDetector(
       onTap: () {
-        _showTimePickerDialog(context);
+        if (label == "Formula") {
+          showFormulaMilkDialog(context);
+        } else {
+          _showTimePickerDialog(context);
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -67,7 +111,8 @@ class _HomePageState extends StatelessWidget {
             child: PageView(
               children: [
                 Center(child: Text('Today', style: TextStyle(fontSize: 24))),
-                Center(child: Text('Yesterday', style: TextStyle(fontSize: 24))),
+                Center(
+                    child: Text('Yesterday', style: TextStyle(fontSize: 24))),
                 Center(child: Text('Tomorrow', style: TextStyle(fontSize: 24))),
               ],
             ),
@@ -79,9 +124,12 @@ class _HomePageState extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildCustomComponent(context, 'Breast Milk', 'assets/icons/mother_milk.png'),
-                _buildCustomComponent(context, 'Formula', 'assets/icons/formula_milk.png'),
-                _buildCustomComponent(context, 'Water', 'assets/icons/water.png'),
+                _buildCustomComponent(
+                    context, 'Breast Milk', 'assets/icons/mother_milk.png'),
+                _buildCustomComponent(
+                    context, 'Formula', 'assets/icons/formula_milk.png'),
+                _buildCustomComponent(
+                    context, 'Water', 'assets/icons/water.png'),
                 _buildCustomComponent(context, 'Poop', 'assets/icons/poop.png'),
               ],
             ),

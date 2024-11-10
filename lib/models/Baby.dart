@@ -8,7 +8,7 @@ class Baby {
   int? id;
   String name;
   String sex;
-  DateTime birthdate;
+  int? birthdate;
 
   Baby({this.id, required this.name, required this.sex, required this.birthdate});
 
@@ -17,7 +17,7 @@ class Baby {
       columnPersonId: id,
       columnName: name,
       columnSex: sex,
-      columnBirthdate: birthdate.millisecondsSinceEpoch, // Store as an integer
+      columnBirthdate: birthdate, // Store as an integer
     };
   }
 
@@ -25,5 +25,5 @@ class Baby {
       : id = map[columnPersonId] as int?,
         name = map[columnName] as String,
         sex = map[columnSex] as String,
-        birthdate = DateTime.fromMillisecondsSinceEpoch(map[columnBirthdate] as int);
+        birthdate = map[columnBirthdate] as int;
 }

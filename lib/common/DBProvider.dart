@@ -48,6 +48,7 @@ class DBProvider {
     await db.execute('''
       CREATE TABLE $tableCare (
         $columnCareId INTEGER PRIMARY KEY,
+        $columnDate INTEGER,
         $columnMilk INTEGER,
         $columnWater INTEGER,
         $columnDefecate INTEGER
@@ -132,6 +133,7 @@ class DBProvider {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(tableCare, columns: [
       columnCareId,
+      columnDate,
       columnMilk,
       columnWater,
       columnDefecate
@@ -151,6 +153,7 @@ class DBProvider {
       tableCare,
       columns: [
         columnCareId,
+        columnDate,
         columnMilk,
         columnWater,
         columnDefecate
