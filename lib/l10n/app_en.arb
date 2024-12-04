@@ -1,0 +1,38 @@
+{
+  "@@locale": "en",
+  "appTitle": "Flutter Side Menu Example",
+  "home": "Home",
+  "search": "Search",
+  "notifications": "Notifications",
+  "profile": "Profile",
+  "exitPrompt": "Press again to exit",
+  "sideMenuTitleStyle": "Title Style",
+  "sideMenuSelectedStyle": "Selected Style",
+    "pageTitle": "PageView and Custom Components",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "breastMilk": "Breast Milk",
+    "formula": "Formula",
+    "water": "Water",
+    "poop": "Poop",
+    "cancel": "Cancel",
+    "selectedTime": "Selected time: {time}",
+    "@selectedTime": {
+      "description": "Message displayed when a time is selected",
+      "placeholders": {
+        "time": {
+          "example": "3:00 PM"
+        }
+      }
+    },
+    "selectedVolume": "You selected: {volume}ml",
+    "@selectedVolume": {
+      "description": "Message displayed when a milk volume is selected",
+      "placeholders": {
+        "volume": {
+          "example": "150"
+        }
+      }
+    }
+}

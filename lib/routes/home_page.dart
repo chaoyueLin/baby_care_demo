@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
 
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'PageView and Custom Components',
-      theme: ThemeData(
-        primarySwatch: Colors.lightGreen,
-      ),
-      home: _HomePageState(),
-    );
+    return HomePageContent();
   }
 }
 
-class _HomePageState extends StatelessWidget {
-  // 显示时间选择器对话框
+class HomePageContent extends StatelessWidget {
   Future<void> _showTimePickerDialog(BuildContext context) async {
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
@@ -24,18 +17,18 @@ class _HomePageState extends StatelessWidget {
 
     if (pickedTime != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected time: ${pickedTime.format(context)}')),
+        SnackBar(content: Text(S.of(context)?.selectedTime(pickedTime.format(context))??"")),
       );
     }
   }
 
-  void showFormulaMilkDialog(BuildContext context) {
+  void _showFormulaMilkDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('配方奶'),
-          content: Container(
+          title: Text(S.of(context)?.formula??""),
+          content: SizedBox(
             width: double.maxFinite,
             height: 300,
             child: ListView.builder(
@@ -43,12 +36,11 @@ class _HomePageState extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) {
                 int value = (index + 1) * 10;
                 return ListTile(
-                  title: Text('${value}ml'),
+                  title: Text('$value ml'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    // 显示 SnackBar
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('您选择了: ${value}ml')),
+                      SnackBar(content: Text(S.of(context)?.selectedVolume(value.toString())??"")),
                     );
                   },
                 );
@@ -60,7 +52,7 @@ class _HomePageState extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('取消'),
+              child: Text(S.of(context)?.cancel??""),
             ),
           ],
         );
@@ -68,17 +60,69 @@ class _HomePageState extends StatelessWidget {
     );
   }
 
-  // 构建自定义组件
-  Widget _buildCustomComponent(
-      BuildContext context, String label, String imagePath) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView(
+              children: [
+                Center(child: Text(S.of(context)?.today??"", style: TextStyle(fontSize: 24))),
+                Center(child: Text(S.of(context)?.yesterday??"", style: TextStyle(fontSize: 24))),
+                Center(child: Text(S.of(context)?.tomorrow??"", style: TextStyle(fontSize: 24))),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                CustomComponent(
+                  label: S.of(context)?.breastMilk??"",
+                  imagePath: 'assets/icons/mother_milk.png',
+                  onTap: () => _showTimePickerDialog(context),
+                ),
+                CustomComponent(
+                  label: S.of(context)?.formula??"",
+                  imagePath: 'assets/icons/formula_milk.png',
+                  onTap: () => _showFormulaMilkDialog(context),
+                ),
+                CustomComponent(
+                  label: S.of(context)?.water??"",
+                  imagePath: 'assets/icons/water.png',
+                  onTap: () => _showTimePickerDialog(context),
+                ),
+                CustomComponent(
+                  label: S.of(context)?.poop??"",
+                  imagePath: 'assets/icons/poop.png',
+                  onTap: () => _showTimePickerDialog(context),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomComponent extends StatelessWidget {
+  final String label;
+  final String imagePath;
+  final VoidCallback onTap;
+
+  const CustomComponent({
+    required this.label,
+    required this.imagePath,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        if (label == "Formula") {
-          showFormulaMilkDialog(context);
-        } else {
-          _showTimePickerDialog(context);
-        }
-      },
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -92,47 +136,6 @@ class _HomePageState extends StatelessWidget {
           Text(
             label,
             style: TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('PageView and Custom Components'),
-      ),
-      body: Column(
-        children: [
-          // PageView 部分
-          Expanded(
-            child: PageView(
-              children: [
-                Center(child: Text('Today', style: TextStyle(fontSize: 24))),
-                Center(
-                    child: Text('Yesterday', style: TextStyle(fontSize: 24))),
-                Center(child: Text('Tomorrow', style: TextStyle(fontSize: 24))),
-              ],
-            ),
-          ),
-
-          // 底部的四个自定义组件
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildCustomComponent(
-                    context, 'Breast Milk', 'assets/icons/mother_milk.png'),
-                _buildCustomComponent(
-                    context, 'Formula', 'assets/icons/formula_milk.png'),
-                _buildCustomComponent(
-                    context, 'Water', 'assets/icons/water.png'),
-                _buildCustomComponent(context, 'Poop', 'assets/icons/poop.png'),
-              ],
-            ),
           ),
         ],
       ),

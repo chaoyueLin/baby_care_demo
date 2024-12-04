@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; // 引入定时器功能
+import 'dart:async';
 import 'routes/home_page.dart';
 import 'routes/search_page.dart';
 import 'routes/notifications_page.dart';
 import 'routes/profile_page.dart';
 import 'package:flutter_side_menu/flutter_side_menu.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -18,7 +20,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
-  DateTime? _lastPressedAt; // 记录上次按下返回键的时间
+  DateTime? _lastPressedAt;
 
   final List<Widget> _pages = [
     HomePage(),
@@ -29,21 +31,18 @@ class _MyAppState extends State<MyApp> {
 
   Future<bool> _onWillPop() async {
     if (_currentIndex != 0) {
-      // 当不在首页时，返回键返回到首页
       setState(() {
         _currentIndex = 0;
       });
-      return false; // 阻止默认的 pop 行为
+      return false;
     } else {
-      // 当在首页时，处理双击返回键退出
       final DateTime now = DateTime.now();
       if (_lastPressedAt == null ||
           now.difference(_lastPressedAt!) > Duration(seconds: 2)) {
-        // 如果距离上次点击超过2秒
         _lastPressedAt = now;
 
         Fluttertoast.showToast(
-          msg: "再次点击退出",
+          msg: S.of(context)?.exitPrompt ?? "",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.black,
@@ -51,9 +50,9 @@ class _MyAppState extends State<MyApp> {
           fontSize: 16.0,
         );
 
-        return false; // 阻止默认的 pop 行为
+        return false;
       }
-      return true; // 允许退出应用
+      return true;
     }
   }
 
@@ -62,50 +61,52 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       theme: ThemeData(
         primaryColor: Colors.lightGreen,
-        // 设置主要颜色为浅绿色
         scaffoldBackgroundColor: Colors.white,
-        // 背景颜色
         appBarTheme: AppBarTheme(
-          color: Colors.lightGreen, // AppBar 的背景颜色为浅绿色
+          color: Colors.lightGreen,
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
-          iconTheme: IconThemeData(color: Colors.white), // AppBar 图标颜色
+          iconTheme: IconThemeData(color: Colors.white),
         ),
         textTheme: TextTheme(
           bodyText1: TextStyle(color: Colors.black87),
           bodyText2: TextStyle(color: Colors.black54),
           headline6: TextStyle(
-            color: Colors.lightGreen, // 标题颜色
+            color: Colors.lightGreen,
             fontWeight: FontWeight.bold,
           ),
         ),
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.lightGreen, // 按钮的背景颜色
-          textTheme: ButtonTextTheme.primary, // 按钮的文字颜色
+          buttonColor: Colors.lightGreen,
+          textTheme: ButtonTextTheme.primary,
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Colors.lightGreen, // 浮动按钮背景色
+          backgroundColor: Colors.lightGreen,
         ),
       ),
+      locale: const Locale('zh'),
+      // 默认语言
+      localizationsDelegates: S.localizationsDelegates,
+      supportedLocales: S.supportedLocales,
       home: WillPopScope(
-        onWillPop: _onWillPop, // 拦截返回键事件
+        onWillPop: _onWillPop,
         child: Scaffold(
           appBar: AppBar(
-            title: Text('Flutter Side Menu Example'),
+            title: Text(S.of(context)?.appTitle ?? ""),
           ),
           body: Row(
             children: [
               SideMenu(
-                backgroundColor: Colors.lightGreen, // 设置侧边栏背景色为浅绿色
+                backgroundColor: Colors.lightGreen,
                 builder: (data) {
                   return SideMenuData(
                     items: [
                       SideMenuItemDataTile(
                         isSelected: _currentIndex == 0,
-                        title: 'Home',
+                        title: S.of(context)?.home ?? "",
                         onTap: () {
                           setState(() {
                             _currentIndex = 0;
@@ -119,7 +120,7 @@ class _MyAppState extends State<MyApp> {
                       ),
                       SideMenuItemDataTile(
                         isSelected: _currentIndex == 1,
-                        title: 'Search',
+                        title: S.of(context)?.search ?? "",
                         onTap: () {
                           setState(() {
                             _currentIndex = 1;
@@ -133,7 +134,7 @@ class _MyAppState extends State<MyApp> {
                       ),
                       SideMenuItemDataTile(
                         isSelected: _currentIndex == 2,
-                        title: 'Notifications',
+                        title: S.of(context)?.notifications ?? "",
                         onTap: () {
                           setState(() {
                             _currentIndex = 2;
@@ -147,7 +148,7 @@ class _MyAppState extends State<MyApp> {
                       ),
                       SideMenuItemDataTile(
                         isSelected: _currentIndex == 3,
-                        title: 'Profile',
+                        title: S.of(context)?.profile ?? "",
                         onTap: () {
                           setState(() {
                             _currentIndex = 3;
@@ -164,8 +165,7 @@ class _MyAppState extends State<MyApp> {
                 },
               ),
               Expanded(
-                child:
-                    _pages[_currentIndex], // Displays the current selected page
+                child: _pages[_currentIndex],
               ),
             ],
           ),
