@@ -4,10 +4,8 @@ import 'routes/home_page.dart';
 import 'routes/search_page.dart';
 import 'routes/notifications_page.dart';
 import 'routes/profile_page.dart';
-import 'package:flutter_side_menu/flutter_side_menu.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
-
 
 void main() {
   runApp(MyApp());
@@ -42,7 +40,7 @@ class _MyAppState extends State<MyApp> {
         _lastPressedAt = now;
 
         Fluttertoast.showToast(
-          msg: S.of(context)?.exitPrompt ?? "",
+          msg: S.of(context)?.exitPrompt ?? "Press again to exit",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.black,
@@ -87,7 +85,7 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: Colors.lightGreen,
         ),
       ),
-      locale: const Locale('zh'),
+      locale: const Locale('en'),
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
@@ -95,80 +93,68 @@ class _MyAppState extends State<MyApp> {
         onWillPop: _onWillPop,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(S.of(context)?.appTitle ?? ""),
+            title: Text(S.of(context)?.appTitle ?? "App"),
           ),
-          body: Row(
-            children: [
-              SideMenu(
-                backgroundColor: Colors.lightGreen,
-                builder: (data) {
-                  return SideMenuData(
-                    items: [
-                      SideMenuItemDataTile(
-                        isSelected: _currentIndex == 0,
-                        title: S.of(context)?.home ?? "",
-                        onTap: () {
-                          setState(() {
-                            _currentIndex = 0;
-                          });
-                        },
-                        icon: const Icon(Icons.home),
-                        selectedIcon:
-                            const Icon(Icons.home, color: Colors.black),
-                        titleStyle: TextStyle(color: Colors.blue),
-                        selectedTitleStyle: TextStyle(color: Colors.black),
-                      ),
-                      SideMenuItemDataTile(
-                        isSelected: _currentIndex == 1,
-                        title: S.of(context)?.search ?? "",
-                        onTap: () {
-                          setState(() {
-                            _currentIndex = 1;
-                          });
-                        },
-                        icon: const Icon(Icons.search),
-                        selectedIcon:
-                            const Icon(Icons.search, color: Colors.black),
-                        titleStyle: TextStyle(color: Colors.blue),
-                        selectedTitleStyle: TextStyle(color: Colors.black),
-                      ),
-                      SideMenuItemDataTile(
-                        isSelected: _currentIndex == 2,
-                        title: S.of(context)?.notifications ?? "",
-                        onTap: () {
-                          setState(() {
-                            _currentIndex = 2;
-                          });
-                        },
-                        icon: const Icon(Icons.notifications),
-                        selectedIcon: const Icon(Icons.notifications,
-                            color: Colors.black),
-                        titleStyle: TextStyle(color: Colors.blue),
-                        selectedTitleStyle: TextStyle(color: Colors.black),
-                      ),
-                      SideMenuItemDataTile(
-                        isSelected: _currentIndex == 3,
-                        title: S.of(context)?.profile ?? "",
-                        onTap: () {
-                          setState(() {
-                            _currentIndex = 3;
-                          });
-                        },
-                        icon: const Icon(Icons.person),
-                        selectedIcon:
-                            const Icon(Icons.person, color: Colors.black),
-                        titleStyle: TextStyle(color: Colors.blue),
-                        selectedTitleStyle: TextStyle(color: Colors.black),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              Expanded(
-                child: _pages[_currentIndex],
-              ),
-            ],
+          drawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.lightGreen,
+                  ),
+                  child: Text(
+                    S.of(context)?.appTitle ?? "App",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.home),
+                  title: Text(S.of(context)?.home ?? "Home"),
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = 0;
+                    });
+                    Navigator.pop(context); // Close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.search),
+                  title: Text(S.of(context)?.search ?? "Search"),
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = 1;
+                    });
+                    Navigator.pop(context); // Close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.notifications),
+                  title: Text(S.of(context)?.notifications ?? "Notifications"),
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = 2;
+                    });
+                    Navigator.pop(context); // Close the drawer
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text(S.of(context)?.profile ?? "Profile"),
+                  onTap: () {
+                    setState(() {
+                      _currentIndex = 3;
+                    });
+                    Navigator.pop(context); // Close the drawer
+                  },
+                ),
+              ],
+            ),
           ),
+          body: _pages[_currentIndex],
         ),
       ),
     );

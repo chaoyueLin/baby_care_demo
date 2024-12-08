@@ -43,7 +43,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   image_picker: ^0.8.7+3
-  flutter_side_menu: ^0.4.0
   sqflite: ^2.0.1
   path_provider: ^2.1.4
   shared_preferences: ^2.0.10
