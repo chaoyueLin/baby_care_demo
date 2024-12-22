@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/S.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -8,56 +8,35 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class HomePageContent extends StatelessWidget {
-  Future<void> _showTimePickerDialog(BuildContext context) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
+class HomePageContent extends StatefulWidget {
+  @override
+  _HomePageContentState createState() => _HomePageContentState();
+}
 
-    if (pickedTime != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context)?.selectedTime(pickedTime.format(context))??"")),
-      );
-    }
+class _HomePageContentState extends State<HomePageContent> {
+  late PageController _pageController;
+  final int initialPage = 10000; // 设置初始页面索引
+  final DateTime today = DateTime.now(); // 当前日期
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: initialPage);
   }
 
-  void _showFormulaMilkDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(S.of(context)?.formula??""),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: ListView.builder(
-              itemCount: 50,
-              itemBuilder: (BuildContext context, int index) {
-                int value = (index + 1) * 10;
-                return ListTile(
-                  title: Text('$value ml'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(S.of(context)?.selectedVolume(value.toString())??"")),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(S.of(context)?.cancel??""),
-            ),
-          ],
-        );
-      },
-    );
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  DateTime _calculateDate(int pageIndex) {
+    int offset = pageIndex - initialPage; // 根据页面索引计算日期偏移
+    return today.add(Duration(days: offset));
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,39 +44,85 @@ class HomePageContent extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
+          // 顶部的日期视图部分
           Expanded(
-            child: PageView(
-              children: [
-                Center(child: Text(S.of(context)?.today??"", style: TextStyle(fontSize: 24))),
-                Center(child: Text(S.of(context)?.yesterday??"", style: TextStyle(fontSize: 24))),
-                Center(child: Text(S.of(context)?.tomorrow??"", style: TextStyle(fontSize: 24))),
-              ],
+            flex: 6, // 占据 6/10 的屏幕高度
+            child: PageView.builder(
+              controller: _pageController,
+              itemBuilder: (context, index) {
+                DateTime date = _calculateDate(index);
+                return Column(
+                  children: [
+                    // 日期标题
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        _formatDate(date),
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    // 日期对应的 ListView
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: 24,
+                        itemBuilder: (context, listIndex) {
+                          return Container(
+                            height: 50,
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            color: listIndex.isEven ? Colors.blue[100] : Colors.blue[200],
+                            child: Center(
+                              child: Text(
+                                'Item ${listIndex + 1}',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
+          // 底部固定的 tab 按钮部分
+          Container(
+            height: 100, // 固定高度
+            color: Colors.grey[200],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                CustomComponent(
-                  label: S.of(context)?.breastMilk??"",
-                  imagePath: 'assets/icons/mother_milk.png',
-                  onTap: () => _showTimePickerDialog(context),
+                CustomTabButton(
+                  label: "母乳",
+                  iconPath: 'assets/icons/mother_milk.png',
+                  onTap: () {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('母乳按钮被点击')));
+                  },
                 ),
-                CustomComponent(
-                  label: S.of(context)?.formula??"",
-                  imagePath: 'assets/icons/formula_milk.png',
-                  onTap: () => _showFormulaMilkDialog(context),
+                CustomTabButton(
+                  label: "奶粉",
+                  iconPath: 'assets/icons/formula_milk.png',
+                  onTap: () {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('奶粉按钮被点击')));
+                  },
                 ),
-                CustomComponent(
-                  label: S.of(context)?.water??"",
-                  imagePath: 'assets/icons/water.png',
-                  onTap: () => _showTimePickerDialog(context),
+                CustomTabButton(
+                  label: "水",
+                  iconPath: 'assets/icons/water.png',
+                  onTap: () {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('水按钮被点击')));
+                  },
                 ),
-                CustomComponent(
-                  label: S.of(context)?.poop??"",
-                  imagePath: 'assets/icons/poop.png',
-                  onTap: () => _showTimePickerDialog(context),
+                CustomTabButton(
+                  label: "便便",
+                  iconPath: 'assets/icons/poop.png',
+                  onTap: () {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('便便按钮被点击')));
+                  },
                 ),
               ],
             ),
@@ -108,14 +133,14 @@ class HomePageContent extends StatelessWidget {
   }
 }
 
-class CustomComponent extends StatelessWidget {
+class CustomTabButton extends StatelessWidget {
   final String label;
-  final String imagePath;
+  final String iconPath;
   final VoidCallback onTap;
 
-  const CustomComponent({
+  const CustomTabButton({
     required this.label,
-    required this.imagePath,
+    required this.iconPath,
     required this.onTap,
   });
 
@@ -125,17 +150,18 @@ class CustomComponent extends StatelessWidget {
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            imagePath,
-            width: 60,
-            height: 60,
+            iconPath,
+            width: 40,
+            height: 40,
             fit: BoxFit.cover,
           ),
           SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 14),
           ),
         ],
       ),
