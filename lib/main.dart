@@ -70,9 +70,9 @@ class _MyAppState extends State<MyApp> {
           iconTheme: IconThemeData(color: Colors.white),
         ),
         textTheme: TextTheme(
-          bodyText1: TextStyle(color: Colors.black87),
-          bodyText2: TextStyle(color: Colors.black54),
-          headline6: TextStyle(
+          bodyLarge: TextStyle(color: Colors.black87),
+          bodyMedium: TextStyle(color: Colors.black54),
+          bodySmall: TextStyle(
             color: Colors.lightGreen,
             fontWeight: FontWeight.bold,
           ),
