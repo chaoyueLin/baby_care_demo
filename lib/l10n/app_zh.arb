@@ -9,30 +9,30 @@
   "sideMenuTitleStyle": "标题样式",
   "sideMenuSelectedStyle": "选中样式",
   "pageTitle": "页面视图和自定义组件",
-    "today": "今天",
-    "yesterday": "昨天",
-    "tomorrow": "明天",
-    "breastMilk": "母乳",
-    "formula": "配方奶",
-    "water": "水",
-    "poop": "便便",
-    "cancel": "取消",
-    "selectedTime": "选择的时间：{time}",
-    "@selectedTime": {
-      "description": "选择时间后的提示",
-      "placeholders": {
-        "time": {
-          "example": "下午3:00"
-        }
-      }
-    },
-    "selectedVolume": "您选择了: {volume}ml",
-    "@selectedVolume": {
-      "description": "选择奶量后的提示",
-      "placeholders": {
-        "volume": {
-          "example": "150"
-        }
+  "today": "今天",
+  "yesterday": "昨天",
+  "tomorrow": "明天",
+  "breastMilk": "母乳",
+  "formula": "配方奶",
+  "water": "水",
+  "poop": "便便",
+  "cancel": "取消",
+  "selectedTime": "选择的时间：{time}",
+  "@selectedTime": {
+    "description": "选择时间后的提示",
+    "placeholders": {
+      "time": {
+        "example": "下午3:00"
       }
     }
+  },
+  "selectedVolume": "您选择了: {volume}ml",
+  "@selectedVolume": {
+    "description": "选择奶量后的提示",
+    "placeholders": {
+      "volume": {
+        "example": "150"
+      }
+    }
+  }
 }

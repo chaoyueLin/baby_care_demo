@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -58,7 +59,8 @@ class _HomePageContentState extends State<HomePageContent> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         _formatDate(date),
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ),
                     // 日期对应的 ListView
@@ -69,7 +71,9 @@ class _HomePageContentState extends State<HomePageContent> {
                           return Container(
                             height: 50,
                             margin: const EdgeInsets.symmetric(vertical: 4),
-                            color: listIndex.isEven ? Colors.blue[100] : Colors.blue[200],
+                            color: listIndex.isEven
+                                ? Colors.blue[100]
+                                : Colors.blue[200],
                             child: Center(
                               child: Text(
                                 'Item ${listIndex + 1}',
@@ -93,7 +97,7 @@ class _HomePageContentState extends State<HomePageContent> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 CustomTabButton(
-                  label: "母乳",
+                  label: S.of(context)?.breastMilk ?? "breastMilk",
                   iconPath: 'assets/icons/mother_milk.png',
                   onTap: () {
                     ScaffoldMessenger.of(context)
@@ -101,7 +105,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   },
                 ),
                 CustomTabButton(
-                  label: "奶粉",
+                  label: S.of(context)?.formula ?? "formula",
                   iconPath: 'assets/icons/formula_milk.png',
                   onTap: () {
                     ScaffoldMessenger.of(context)
@@ -109,7 +113,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   },
                 ),
                 CustomTabButton(
-                  label: "水",
+                  label: S.of(context)?.water ?? "water",
                   iconPath: 'assets/icons/water.png',
                   onTap: () {
                     ScaffoldMessenger.of(context)
@@ -117,7 +121,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   },
                 ),
                 CustomTabButton(
-                  label: "便便",
+                  label: S.of(context)?.poop ??"poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
                     ScaffoldMessenger.of(context)
