@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -18,7 +19,7 @@ class _HomePageContentState extends State<HomePageContent> {
   late PageController _pageController;
   final int initialPage = 10000; // 设置初始页面索引
   final DateTime today = DateTime.now(); // 当前日期
-
+  DateTime currentDate = DateTime.now(); // 当前日期
   @override
   void initState() {
     super.initState();
@@ -40,6 +41,20 @@ class _HomePageContentState extends State<HomePageContent> {
     super.dispose();
   }
 
+  void _showTimePicker() {
+    DatePicker.showTimePicker(
+      context,
+      showSecondsColumn: false, // 只显示小时和分钟
+      currentTime: currentDate, // 默认当前时间
+      onConfirm: (time) {
+        setState(() {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(_formatDate(time))));
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,14 +66,14 @@ class _HomePageContentState extends State<HomePageContent> {
             child: PageView.builder(
               controller: _pageController,
               itemBuilder: (context, index) {
-                DateTime date = _calculateDate(index);
+                currentDate = _calculateDate(index);
                 return Column(
                   children: [
                     // 日期标题
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        _formatDate(date),
+                        _formatDate(currentDate),
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),
@@ -100,8 +115,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   label: S.of(context)?.breastMilk ?? "breastMilk",
                   iconPath: 'assets/icons/mother_milk.png',
                   onTap: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text('母乳按钮被点击')));
+                    _showTimePicker();
                   },
                 ),
                 CustomTabButton(
@@ -121,7 +135,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   },
                 ),
                 CustomTabButton(
-                  label: S.of(context)?.poop ??"poop",
+                  label: S.of(context)?.poop ?? "poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
                     ScaffoldMessenger.of(context)
