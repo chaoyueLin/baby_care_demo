@@ -3,8 +3,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-import '../models/Baby.dart';
-import '../models/BabyCare.dart';
+import '../models/baby.dart';
+import '../models/baby_care.dart';
 
 
 class DBProvider {

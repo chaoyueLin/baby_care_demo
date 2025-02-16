@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
+import '../utils/date_util.dart';
+
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -26,9 +28,7 @@ class _HomePageContentState extends State<HomePageContent> {
     _pageController = PageController(initialPage: initialPage);
   }
 
-  String _formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
+
 
   DateTime _calculateDate(int pageIndex) {
     int offset = pageIndex - initialPage; // 根据页面索引计算日期偏移
@@ -49,7 +49,7 @@ class _HomePageContentState extends State<HomePageContent> {
       onConfirm: (time) {
         setState(() {
           ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(_formatDate(time))));
+              .showSnackBar(SnackBar(content: Text(DateUtil.dateToString(time,format: 'yyyy-MM-dd HH:mm:ss'))));
         });
       },
     );
@@ -73,7 +73,7 @@ class _HomePageContentState extends State<HomePageContent> {
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        _formatDate(currentDate),
+                        DateUtil.dateToString(currentDate),
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),
