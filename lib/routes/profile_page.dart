@@ -2,63 +2,125 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class ProfilePage extends StatelessWidget {
+  final List<double> heightData = [45, 50, 55, 60, 65, 70, 75, 80, 85, 90,90,90];
+  final List<double> weightData = [2, 3, 4, 4.5, 5, 5.5,6,7,7.5,8];
+  final List<int> months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12];
+
+  // 身高数据映射：45-90 -> 30-100（确保身高起点距离 X 轴 30dp）
+  List<FlSpot> getHeightSpots() {
+    const double minHeight = 45;
+    const double maxHeight = 90;
+    const double yStart = 60; // 60dp 偏移量
+    const double yRange = 100 - yStart;
+
+    return heightData.asMap().entries.map((entry) {
+      final double x = months[entry.key].toDouble();
+      final double y = yStart + ((entry.value - minHeight) / (maxHeight - minHeight)) * yRange;
+      return FlSpot(x, y);
+    }).toList();
+  }
+
+  // 体重数据映射：0-15 -> 0-100
+  List<FlSpot> getWeightSpots() {
+    const double maxWeight = 15;
+    return weightData.asMap().entries.map((entry) {
+      final double x = months[entry.key].toDouble();
+      final double y = (entry.value / maxWeight) * 100;
+      return FlSpot(x, y);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(26.0),
         child: LineChart(
           LineChartData(
+            lineTouchData: LineTouchData(enabled: false),
             gridData: FlGridData(show: true),
             titlesData: FlTitlesData(
               show: true,
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 44,
-                  getTitlesWidget: (value, meta) {
-                    return Text('${value.toInt()} cm',
-                        style: TextStyle(fontSize: 12));
-                  },
-                ),
-              ),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 30,
+                  reservedSize: 22,
+                  getTitlesWidget: (value, meta) => Text(
+                    value.toInt().toString(),
+                    style: const TextStyle(
+                      color: Color(0xff72719b),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 28,
                   getTitlesWidget: (value, meta) {
-                    return Text('${value.toInt()}',
-                        style: TextStyle(fontSize: 12));
+                    // 反向映射：Y轴显示实际身高（45-90）
+                    const double minHeight = 45;
+                    const double maxHeight = 90;
+                    const double yStart = 60;
+                    const double yRange = 100 - yStart;
+                    final double actualHeight =
+                        minHeight + ((value - yStart) / yRange) * (maxHeight - minHeight);
+                    return Text(
+                      actualHeight.toStringAsFixed(0),
+                      style: const TextStyle(
+                        color: Color(0xff75729e),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    );
                   },
                 ),
               ),
               rightTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              topTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 28,
+                  getTitlesWidget: (value, meta) {
+                    // 反向映射：Y轴显示实际体重（0-15）
+                    const double maxWeight = 15;
+                    final double actualWeight = (value / 100) * maxWeight;
+                    return Text(
+                      actualWeight.toStringAsFixed(1),
+                      style: const TextStyle(
+                        color: Color(0xff75729e),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-            borderData: FlBorderData(show: true),
-            minX: 0,
-            maxX: 30,  // 30个数据点
-            minY: 40,  // 假设身高的最小值是40
-            maxY: 80,  // 假设身高的最大值是80
+            borderData: FlBorderData(
+              show: true,
+              border: Border.all(color: const Color(0xff37434d), width: 1),
+            ),
+            minX: 1,
+            maxX: 12,
+            minY: 0,
+            maxY: 100,
             lineBarsData: [
               LineChartBarData(
-                spots: _generateHeightData(),
+                spots: getHeightSpots(),
                 isCurved: true,
                 color: Colors.blue,
                 barWidth: 4,
-                isStrokeCapRound: true,
+                dotData: FlDotData(show: false),
                 belowBarData: BarAreaData(show: false),
               ),
               LineChartBarData(
-                spots: _generateWeightData(),
+                spots: getWeightSpots(),
                 isCurved: true,
-                color: Colors.green,
+                color: Colors.red,
                 barWidth: 4,
-                isStrokeCapRound: true,
+                dotData: FlDotData(show: false),
                 belowBarData: BarAreaData(show: false),
               ),
             ],
@@ -66,29 +128,5 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // 模拟身高数据（30个数据点）
-  List<FlSpot> _generateHeightData() {
-    return [
-      FlSpot(0, 50), FlSpot(1, 52), FlSpot(2, 53), FlSpot(3, 54), FlSpot(4, 55),
-      FlSpot(5, 56), FlSpot(6, 57), FlSpot(7, 58), FlSpot(8, 59), FlSpot(9, 60),
-      FlSpot(10, 61), FlSpot(11, 62), FlSpot(12, 63), FlSpot(13, 64), FlSpot(14, 65),
-      FlSpot(15, 66), FlSpot(16, 67), FlSpot(17, 68), FlSpot(18, 69), FlSpot(19, 70),
-      FlSpot(20, 71), FlSpot(21, 72), FlSpot(22, 73), FlSpot(23, 74), FlSpot(24, 75),
-      FlSpot(25, 76), FlSpot(26, 77), FlSpot(27, 78), FlSpot(28, 79), FlSpot(29, 80),
-    ];
-  }
-
-  // 模拟体重数据（30个数据点）
-  List<FlSpot> _generateWeightData() {
-    return [
-      FlSpot(0, 3.5), FlSpot(1, 3.6), FlSpot(2, 3.7), FlSpot(3, 3.8), FlSpot(4, 4.0),
-      FlSpot(5, 4.2), FlSpot(6, 4.3), FlSpot(7, 4.5), FlSpot(8, 4.7), FlSpot(9, 4.9),
-      FlSpot(10, 5.1), FlSpot(11, 5.3), FlSpot(12, 5.5), FlSpot(13, 5.7), FlSpot(14, 5.9),
-      FlSpot(15, 6.1), FlSpot(16, 6.3), FlSpot(17, 6.5), FlSpot(18, 6.7), FlSpot(19, 6.9),
-      FlSpot(20, 7.1), FlSpot(21, 7.3), FlSpot(22, 7.5), FlSpot(23, 7.7), FlSpot(24, 7.9),
-      FlSpot(25, 8.1), FlSpot(26, 8.3), FlSpot(27, 8.5), FlSpot(28, 8.7), FlSpot(29, 8.9),
-    ];
   }
 }
