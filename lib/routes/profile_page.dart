@@ -1,31 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:baby_care_demo/models/grow_standard.dart';
 
 class ProfilePage extends StatelessWidget {
-  // 3 条体重对年龄的曲线数据（0~13周）
-  final List<List<FlSpot>> weightData = [
-    [
-      // 第一条曲线（示例：正常增长曲线）
-      FlSpot(0, 3.0), FlSpot(1, 3.2), FlSpot(2, 3.5), FlSpot(3, 3.8),
-      FlSpot(4, 4.1), FlSpot(5, 4.4), FlSpot(6, 4.7), FlSpot(7, 5.0),
-      FlSpot(8, 5.3), FlSpot(9, 5.6), FlSpot(10, 6.0), FlSpot(11, 6.3),
-      FlSpot(12, 6.5), FlSpot(13, 6.8),
-    ],
-    [
-      // 第二条曲线（示例：较慢增长曲线）
-      FlSpot(0, 2.8), FlSpot(1, 3.0), FlSpot(2, 3.2), FlSpot(3, 3.4),
-      FlSpot(4, 3.7), FlSpot(5, 4.0), FlSpot(6, 4.2), FlSpot(7, 4.5),
-      FlSpot(8, 4.7), FlSpot(9, 5.0), FlSpot(10, 5.2), FlSpot(11, 5.5),
-      FlSpot(12, 5.7), FlSpot(13, 6.0),
-    ],
-    [
-      // 第三条曲线（示例：快速增长曲线）
-      FlSpot(0, 3.2), FlSpot(1, 3.5), FlSpot(2, 3.9), FlSpot(3, 4.3),
-      FlSpot(4, 4.7), FlSpot(5, 5.1), FlSpot(6, 5.5), FlSpot(7, 6.0),
-      FlSpot(8, 6.4), FlSpot(9, 6.8), FlSpot(10, 7.1), FlSpot(11, 7.5),
-      FlSpot(12, 7.8), FlSpot(13, 8.0),
-    ],
-  ];
+
 
   final List<Color> lineColors = [Colors.blue, Colors.red, Colors.green];
 
@@ -79,8 +57,8 @@ class ProfilePage extends StatelessWidget {
             minY: 2.5, // 体重最小值（略低于数据最小值）
             maxY: 8.5, // 体重最大值（略高于数据最大值）
             lineBarsData: List.generate(
-              weightData.length,
-                  (index) => _lineChartBarData(weightData[index], lineColors[index]),
+              GrowStandard.girlWeight3MonthData.length,
+                  (index) => _lineChartBarData(GrowStandard.girlWeight3MonthData[index], lineColors[index]),
             ),
           ),
         ),
