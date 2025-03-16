@@ -27,6 +27,7 @@ class _MyAppState extends State<MyApp> {
     ProfilePage(),
   ];
 
+  /// 监听返回键
   Future<bool> _onWillPop() async {
     if (_currentIndex != 0) {
       setState(() {
@@ -89,74 +90,84 @@ class _MyAppState extends State<MyApp> {
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      home: WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(S.of(context)?.appTitle ?? "App"),
-          ),
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Colors.lightGreen,
-                  ),
-                  child: Text(
-                    S.of(context)?.appTitle ?? "App",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: Icon(Icons.home),
-                  title: Text(S.of(context)?.home ?? "Home"),
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = 0;
-                    });
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.search),
-                  title: Text(S.of(context)?.search ?? "Search"),
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = 1;
-                    });
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.notifications),
-                  title: Text(S.of(context)?.notifications ?? "Notifications"),
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = 2;
-                    });
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text(S.of(context)?.profile ?? "Profile"),
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = 3;
-                    });
-                    Navigator.pop(context); // Close the drawer
-                  },
-                ),
-              ],
+      home: Builder(
+        builder: (context) => WillPopScope(
+          onWillPop: _onWillPop,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(S.of(context)?.appTitle ?? "App"),
             ),
+            drawer: _buildDrawer(context),
+            body: _pages[_currentIndex],
           ),
-          body: _pages[_currentIndex],
         ),
       ),
+    );
+  }
+
+  /// **封装 Drawer 以避免 Navigator 相关错误**
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.lightGreen,
+            ),
+            child: Text(
+              S.of(context)?.appTitle ?? "App",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          _buildDrawerItem(
+            icon: Icons.home,
+            text: S.of(context)?.home ?? "Home",
+            index: 0,
+            context: context,
+          ),
+          _buildDrawerItem(
+            icon: Icons.search,
+            text: S.of(context)?.search ?? "Search",
+            index: 1,
+            context: context,
+          ),
+          _buildDrawerItem(
+            icon: Icons.notifications,
+            text: S.of(context)?.notifications ?? "Notifications",
+            index: 2,
+            context: context,
+          ),
+          _buildDrawerItem(
+            icon: Icons.person,
+            text: S.of(context)?.profile ?? "Profile",
+            index: 3,
+            context: context,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// **封装 Drawer Item**
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String text,
+    required int index,
+    required BuildContext context,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(text),
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+        Navigator.of(context, rootNavigator: true).pop(); // 关闭 Drawer
+      },
     );
   }
 }
