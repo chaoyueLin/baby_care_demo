@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_page.dart';
 import 'search_page.dart';
 import 'notifications_page.dart';
 import 'profile_page.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -12,6 +14,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
+  DateTime? _lastPressedAt; // 记录上次按返回键的时间
+
   final List<Widget> _pages = [
     HomePage(),
     SearchPage(),
@@ -22,37 +26,64 @@ class _MainPageState extends State<MainPage> {
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool("isLoggedIn", false);
-    Navigator.pushReplacementNamed(context, '/login'); // 退出后跳转到登录页面
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
+  Future<bool> _onWillPop() async {
+    if (_currentIndex != 0) {
+      setState(() => _currentIndex = 0);
+      return false; // 不退出，先回到首页
+    } else {
+      final DateTime now = DateTime.now();
+      if (_lastPressedAt == null || now.difference(_lastPressedAt!) > Duration(seconds: 2)) {
+        _lastPressedAt = now;
+
+        Fluttertoast.showToast(
+          msg: S.of(context)?.exitPrompt ?? "Press again to exit",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black54,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        return false; // 第一次按返回键，不退出
+      }
+      return true; // 两秒内再次按返回键，退出应用
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("App"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: _logout,
-          ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.lightGreen),
-              child: Text("App", style: TextStyle(color: Colors.white, fontSize: 24)),
+    return WillPopScope(
+      onWillPop: _onWillPop, // 监听返回键
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("App"),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.exit_to_app),
+              onPressed: _logout,
             ),
-            _buildDrawerItem(Icons.home, "Home", 0),
-            _buildDrawerItem(Icons.search, "Search", 1),
-            _buildDrawerItem(Icons.notifications, "Notifications", 2),
-            _buildDrawerItem(Icons.person, "Profile", 3),
           ],
         ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(color: Colors.lightGreen),
+                child: Text("App", style: TextStyle(color: Colors.white, fontSize: 24)),
+              ),
+              _buildDrawerItem(Icons.home, "Home", 0),
+              _buildDrawerItem(Icons.search, "Search", 1),
+              _buildDrawerItem(Icons.notifications, "Notifications", 2),
+              _buildDrawerItem(Icons.person, "Profile", 3),
+            ],
+          ),
+        ),
+        body: _pages[_currentIndex],
       ),
-      body: _pages[_currentIndex],
     );
   }
 
