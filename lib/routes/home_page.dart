@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../utils/date_util.dart';
+import '../widget/custom_tab_button.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -144,42 +145,6 @@ class _HomePageContentState extends State<HomePageContent> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class CustomTabButton extends StatelessWidget {
-  final String label;
-  final String iconPath;
-  final VoidCallback onTap;
-
-  const CustomTabButton({
-    required this.label,
-    required this.iconPath,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            iconPath,
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-          SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(fontSize: 14),
           ),
         ],
       ),
