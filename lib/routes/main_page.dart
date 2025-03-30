@@ -23,11 +23,6 @@ class _MainPageState extends State<MainPage> {
     ProfilePage(),
   ];
 
-  Future<void> _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("isLoggedIn", false);
-    Navigator.pushReplacementNamed(context, '/login');
-  }
 
   Future<bool> _onWillPop() async {
     if (_currentIndex != 0) {
@@ -59,13 +54,7 @@ class _MainPageState extends State<MainPage> {
       onWillPop: _onWillPop, // 监听返回键
       child: Scaffold(
         appBar: AppBar(
-          title: Text("App"),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.exit_to_app),
-              onPressed: _logout,
-            ),
-          ],
+          title: Text("App")
         ),
         drawer: Drawer(
           child: ListView(
