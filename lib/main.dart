@@ -1,14 +1,22 @@
 import 'package:baby_care_demo/routes/login_page.dart';
 import 'package:baby_care_demo/routes/main_page.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 
+import 'common/db_provider.dart';
+import 'models/baby.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
+  bool isLoggedIn = false;
+  List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
+  if (visibleBabies != null) {
+    isLoggedIn = true;
+
+  } else {
+    isLoggedIn = false;
+
+  }
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }

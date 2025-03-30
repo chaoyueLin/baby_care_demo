@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
+import '../common/db_provider.dart';
+import '../models/baby.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -36,12 +37,21 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("name", name);
-    await prefs.setString("gender", _selectedGender);
-    await prefs.setString("birthdate", _selectedDate!.toIso8601String());
+    int sexValue = _selectedGender == "男" ? 1 : 0; // 1 = 男, 0 = 女
 
-    Navigator.pushReplacementNamed(context, '/main'); // 跳转主页面
+    // 创建 Baby 对象
+    Baby newBaby = Baby(
+      name: name,
+      sex: sexValue,
+      birthdate: _selectedDate!,
+      show: 1
+    );
+
+    // 插入数据库
+    await DBProvider().insertPerson(newBaby);
+
+    // 跳转到主页面
+    Navigator.pushReplacementNamed(context, '/main');
   }
 
   @override

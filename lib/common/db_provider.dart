@@ -40,8 +40,9 @@ class DBProvider {
       CREATE TABLE $tablePerson (
         $columnPersonId INTEGER PRIMARY KEY,
         $columnName TEXT,
-        $columnSex TEXT,
-        $columnBirthdate TEXT
+        $columnSex INTEGER,
+        $columnBirthdate TEXT,
+        $columnShow INTEGER
       )
     ''');
 
@@ -72,7 +73,8 @@ class DBProvider {
       columnPersonId,
       columnName,
       columnSex,
-      columnBirthdate
+      columnBirthdate,
+      columnShow
     ]);
 
     if (maps.isEmpty) {
@@ -81,6 +83,30 @@ class DBProvider {
 
     return maps.map((map) => Baby.fromMap(map)).toList();
   }
+
+
+  Future<List<Baby>?> getVisiblePersons() async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(
+      tablePerson,
+      columns: [
+        columnPersonId,
+        columnName,
+        columnSex,
+        columnBirthdate,
+        columnShow
+      ],
+      where: '$columnShow = ?',
+      whereArgs: [1]
+    );
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return maps.map((map) => Baby.fromMap(map)).toList();
+  }
+
 
   // Query a Baby record by ID from tablePerson
   Future<Baby?> getPersonById(int id) async {
@@ -91,7 +117,8 @@ class DBProvider {
         columnPersonId,
         columnName,
         columnSex,
-        columnBirthdate
+        columnBirthdate,
+        columnShow
       ],
       where: '$columnPersonId = ?',
       whereArgs: [id],
