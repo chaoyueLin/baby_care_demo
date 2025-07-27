@@ -55,6 +55,204 @@ class GrowStandard {
     ]
   ];
 
+  static List<List<FlSpot>> girlWeight0to12MonthData = [
+    // P50 百分位
+    [
+      FlSpot(0, 3.2),
+      FlSpot(1, 4.2),
+      FlSpot(2, 5.1),
+      FlSpot(3, 5.8),
+      FlSpot(4, 6.4),
+      FlSpot(5, 6.9),
+      FlSpot(6, 7.3),
+      FlSpot(7, 7.6),
+      FlSpot(8, 7.9),
+      FlSpot(9, 8.2),
+      FlSpot(10, 8.5),
+      FlSpot(11, 8.7),
+      FlSpot(12, 8.9)
+    ],
+
+    // P3 百分位
+    [
+      FlSpot(0, 2.4),
+      FlSpot(1, 3.2),
+      FlSpot(2, 4.0),
+      FlSpot(3, 4.6),
+      FlSpot(4, 5.1),
+      FlSpot(5, 5.5),
+      FlSpot(6, 5.8),
+      FlSpot(7, 6.1),
+      FlSpot(8, 6.3),
+      FlSpot(9, 6.6),
+      FlSpot(10, 6.8),
+      FlSpot(11, 7.0),
+      FlSpot(12, 7.1)
+    ],
+
+    // P97 百分位
+    [
+      FlSpot(0, 4.2),
+      FlSpot(1, 5.4),
+      FlSpot(2, 6.5),
+      FlSpot(3, 7.4),
+      FlSpot(4, 8.1),
+      FlSpot(5, 8.7),
+      FlSpot(6, 9.2),
+      FlSpot(7, 9.6),
+      FlSpot(8, 10.0),
+      FlSpot(9, 10.4),
+      FlSpot(10, 10.7),
+      FlSpot(11, 11.0),
+      FlSpot(12, 11.3)
+
+    ],
+  ];
+
+  static List<List<FlSpot>> girlWeight12to24MonthData = [
+    // P50 百分位
+    [
+      FlSpot(12, 8.9),
+      FlSpot(13, 9.2),
+      FlSpot(14, 9.4),
+      FlSpot(15, 9.6),
+      FlSpot(16, 9.8),
+      FlSpot(17, 10.0),
+      FlSpot(18, 10.2),
+      FlSpot(19, 10.4),
+      FlSpot(20, 10.6),
+      FlSpot(21, 10.9),
+      FlSpot(22, 11.1),
+      FlSpot(23, 11.3),
+      FlSpot(24, 11.5)
+    ],
+
+    // P3 百分位
+    [
+      FlSpot(12, 7.1),
+      FlSpot(13, 7.3),
+      FlSpot(14, 7.5),
+      FlSpot(15, 7.7),
+      FlSpot(16, 7.8),
+      FlSpot(17, 8.0),
+      FlSpot(18, 8.2),
+      FlSpot(19, 8.3),
+      FlSpot(20, 8.5),
+      FlSpot(21, 8.7),
+      FlSpot(22, 8.8),
+      FlSpot(23, 9.0),
+      FlSpot(24, 9.2)
+    ],
+
+    // P97 百分位
+    [
+      FlSpot(12, 11.3),
+      FlSpot(13, 11.6),
+      FlSpot(14, 11.9),
+      FlSpot(15, 12.2),
+      FlSpot(16, 12.5),
+      FlSpot(17, 12.7),
+      FlSpot(18, 13.0),
+      FlSpot(19, 13.3),
+      FlSpot(20, 13.5),
+      FlSpot(21, 13.8),
+      FlSpot(22, 14.1),
+      FlSpot(23, 14.3),
+      FlSpot(24, 14.6)
+
+    ],
+  ];
+
+  static List<List<FlSpot>> girlWeight0to24MonthData = [
+    // P50 百分位
+    [
+      FlSpot(0, 3.2),
+      FlSpot(1, 4.2),
+      FlSpot(2, 5.1),
+      FlSpot(3, 5.8),
+      FlSpot(4, 6.4),
+      FlSpot(5, 6.9),
+      FlSpot(6, 7.3),
+      FlSpot(7, 7.6),
+      FlSpot(8, 7.9),
+      FlSpot(9, 8.2),
+      FlSpot(10, 8.5),
+      FlSpot(11, 8.7),
+      FlSpot(12, 8.9),
+      FlSpot(13, 9.2),
+      FlSpot(14, 9.4),
+      FlSpot(15, 9.6),
+      FlSpot(16, 9.8),
+      FlSpot(17, 10.0),
+      FlSpot(18, 10.2),
+      FlSpot(19, 10.4),
+      FlSpot(20, 10.6),
+      FlSpot(21, 10.9),
+      FlSpot(22, 11.1),
+      FlSpot(23, 11.3),
+      FlSpot(24, 11.5)
+    ],
+
+    // P3 百分位
+    [
+      FlSpot(0, 2.4),
+      FlSpot(1, 3.2),
+      FlSpot(2, 4.0),
+      FlSpot(3, 4.6),
+      FlSpot(4, 5.1),
+      FlSpot(5, 5.5),
+      FlSpot(6, 5.8),
+      FlSpot(7, 6.1),
+      FlSpot(8, 6.3),
+      FlSpot(9, 6.6),
+      FlSpot(10, 6.8),
+      FlSpot(11, 7.0),
+      FlSpot(12, 7.1),
+      FlSpot(13, 7.3),
+      FlSpot(14, 7.5),
+      FlSpot(15, 7.7),
+      FlSpot(16, 7.8),
+      FlSpot(17, 8.0),
+      FlSpot(18, 8.2),
+      FlSpot(19, 8.3),
+      FlSpot(20, 8.5),
+      FlSpot(21, 8.7),
+      FlSpot(22, 8.8),
+      FlSpot(23, 9.0),
+      FlSpot(24, 9.2)
+    ],
+
+    // P97 百分位
+    [
+      FlSpot(0, 4.2),
+      FlSpot(1, 5.4),
+      FlSpot(2, 6.5),
+      FlSpot(3, 7.4),
+      FlSpot(4, 8.1),
+      FlSpot(5, 8.7),
+      FlSpot(6, 9.2),
+      FlSpot(7, 9.6),
+      FlSpot(8, 10.0),
+      FlSpot(9, 10.4),
+      FlSpot(10, 10.7),
+      FlSpot(11, 11.0),
+      FlSpot(12, 11.3),
+      FlSpot(13, 11.6),
+      FlSpot(14, 11.9),
+      FlSpot(15, 12.2),
+      FlSpot(16, 12.5),
+      FlSpot(17, 12.7),
+      FlSpot(18, 13.0),
+      FlSpot(19, 13.3),
+      FlSpot(20, 13.5),
+      FlSpot(21, 13.8),
+      FlSpot(22, 14.1),
+      FlSpot(23, 14.3),
+      FlSpot(24, 14.6)
+
+    ],
+  ];
+
   static List<List<FlSpot>> girlWeight0to6MonthData = [
     // P50 百分位
     [
@@ -252,6 +450,7 @@ class GrowStandard {
     ],
   ];
 
+
   static List<List<FlSpot>> boyWeight0to13WeekData = [
     // P50 percentile
     [
@@ -306,6 +505,193 @@ class GrowStandard {
     ]
   ];
 
+  static List<List<FlSpot>> boyWeight0to12MonthData = [
+    // P50 percentile
+    [
+      FlSpot(0, 3.3),
+      FlSpot(1, 4.5),
+      FlSpot(2, 5.6),
+      FlSpot(3, 6.4),
+      FlSpot(4, 7.0),
+      FlSpot(5, 7.5),
+      FlSpot(6, 7.9),
+      FlSpot(7, 8.3),
+      FlSpot(8, 8.6),
+      FlSpot(9, 8.9),
+      FlSpot(10, 9.2),
+      FlSpot(11, 9.4),
+      FlSpot(12, 9.6)
+    ],
+    // P3 percentile
+    [
+      FlSpot(0, 2.5),
+      FlSpot(1, 3.4),
+      FlSpot(2, 4.4),
+      FlSpot(3, 5.1),
+      FlSpot(4, 5.6),
+      FlSpot(5, 6.1),
+      FlSpot(6, 6.4),
+      FlSpot(7, 6.7),
+      FlSpot(8, 7.0),
+      FlSpot(9, 7.2),
+      FlSpot(10, 7.5),
+      FlSpot(11, 7.7),
+      FlSpot(12, 7.8)
+    ],
+    // P97 percentile
+    [
+      FlSpot(0, 4.3),
+      FlSpot(1, 5.7),
+      FlSpot(2, 7.0),
+      FlSpot(3, 7.9),
+      FlSpot(4, 8.6),
+      FlSpot(5, 9.2),
+      FlSpot(6, 9.7),
+      FlSpot(7, 10.2),
+      FlSpot(8, 10.5),
+      FlSpot(9, 10.9),
+      FlSpot(10, 11.2),
+      FlSpot(11, 11.5),
+      FlSpot(12, 11.8)
+    ]
+  ];
+
+  static List<List<FlSpot>> boyWeight12to24MonthData = [
+    // P50 percentile
+    [
+      FlSpot(12, 9.6),
+      FlSpot(13, 9.9),
+      FlSpot(14, 10.1),
+      FlSpot(15, 10.3),
+      FlSpot(16, 10.5),
+      FlSpot(17, 10.7),
+      FlSpot(18, 10.9),
+      FlSpot(19, 11.1),
+      FlSpot(20, 11.3),
+      FlSpot(21, 11.5),
+      FlSpot(22, 11.8),
+      FlSpot(23, 12.0),
+      FlSpot(24, 12.2)
+    ],
+    // P3 percentile
+    [
+      FlSpot(12, 7.8),
+      FlSpot(13, 8.0),
+      FlSpot(14, 8.2),
+      FlSpot(15, 8.4),
+      FlSpot(16, 8.5),
+      FlSpot(17, 8.7),
+      FlSpot(18, 8.9),
+      FlSpot(19, 9.0),
+      FlSpot(20, 9.2),
+      FlSpot(21, 9.3),
+      FlSpot(22, 9.5),
+      FlSpot(23, 9.7),
+      FlSpot(24, 9.8)
+    ],
+    // P97 percentile
+    [
+      FlSpot(12, 11.8),
+      FlSpot(13, 12.1),
+      FlSpot(14, 12.4),
+      FlSpot(15, 12.7),
+      FlSpot(16, 12.9),
+      FlSpot(17, 13.2),
+      FlSpot(18, 13.5),
+      FlSpot(19, 13.7),
+      FlSpot(20, 14.0),
+      FlSpot(21, 14.3),
+      FlSpot(22, 14.5),
+      FlSpot(23, 14.8),
+      FlSpot(24, 15.1)
+    ]
+  ];
+  static List<List<FlSpot>> boyWeight0to24MonthData = [
+    // P50 percentile
+    [
+      FlSpot(0, 3.3),
+      FlSpot(1, 4.5),
+      FlSpot(2, 5.6),
+      FlSpot(3, 6.4),
+      FlSpot(4, 7.0),
+      FlSpot(5, 7.5),
+      FlSpot(6, 7.9),
+      FlSpot(7, 8.3),
+      FlSpot(8, 8.6),
+      FlSpot(9, 8.9),
+      FlSpot(10, 9.2),
+      FlSpot(11, 9.4),
+      FlSpot(12, 9.6),
+      FlSpot(13, 9.9),
+      FlSpot(14, 10.1),
+      FlSpot(15, 10.3),
+      FlSpot(16, 10.5),
+      FlSpot(17, 10.7),
+      FlSpot(18, 10.9),
+      FlSpot(19, 11.1),
+      FlSpot(20, 11.3),
+      FlSpot(21, 11.5),
+      FlSpot(22, 11.8),
+      FlSpot(23, 12.0),
+      FlSpot(24, 12.2)
+    ],
+    // P3 percentile
+    [
+      FlSpot(0, 2.5),
+      FlSpot(1, 3.4),
+      FlSpot(2, 4.4),
+      FlSpot(3, 5.1),
+      FlSpot(4, 5.6),
+      FlSpot(5, 6.1),
+      FlSpot(6, 6.4),
+      FlSpot(7, 6.7),
+      FlSpot(8, 7.0),
+      FlSpot(9, 7.2),
+      FlSpot(10, 7.5),
+      FlSpot(11, 7.7),
+      FlSpot(12, 7.8),
+      FlSpot(13, 8.0),
+      FlSpot(14, 8.2),
+      FlSpot(15, 8.4),
+      FlSpot(16, 8.5),
+      FlSpot(17, 8.7),
+      FlSpot(18, 8.9),
+      FlSpot(19, 9.0),
+      FlSpot(20, 9.2),
+      FlSpot(21, 9.3),
+      FlSpot(22, 9.5),
+      FlSpot(23, 9.7),
+      FlSpot(24, 9.8)
+    ],
+    // P97 percentile
+    [
+      FlSpot(0, 4.3),
+      FlSpot(1, 5.7),
+      FlSpot(2, 7.0),
+      FlSpot(3, 7.9),
+      FlSpot(4, 8.6),
+      FlSpot(5, 9.2),
+      FlSpot(6, 9.7),
+      FlSpot(7, 10.2),
+      FlSpot(8, 10.5),
+      FlSpot(9, 10.9),
+      FlSpot(10, 11.2),
+      FlSpot(11, 11.5),
+      FlSpot(12, 11.8),
+      FlSpot(13, 12.1),
+      FlSpot(14, 12.4),
+      FlSpot(15, 12.7),
+      FlSpot(16, 12.9),
+      FlSpot(17, 13.2),
+      FlSpot(18, 13.5),
+      FlSpot(19, 13.7),
+      FlSpot(20, 14.0),
+      FlSpot(21, 14.3),
+      FlSpot(22, 14.5),
+      FlSpot(23, 14.8),
+      FlSpot(24, 15.1)
+    ]
+  ];
   static List<List<FlSpot>> boyWeight0to6MonthData = [
     // P50 percentile
     [
@@ -552,6 +938,108 @@ class GrowStandard {
       FlSpot(11, 62.5),
       FlSpot(12, 63.1),
       FlSpot(13, 63.7)
+    ]
+  ];
+
+  static List<List<FlSpot>> girlHeight0to12MonthData = [
+    // P50 percentile
+    [
+      FlSpot(0, 49.1),
+      FlSpot(1, 53.7),
+      FlSpot(2, 57.1),
+      FlSpot(3, 59.8),
+      FlSpot(4, 62.1),
+      FlSpot(5, 64.0),
+      FlSpot(6, 65.7),
+      FlSpot(7, 67.3),
+      FlSpot(8, 68.7),
+      FlSpot(9, 70.1),
+      FlSpot(10, 71.5),
+      FlSpot(11, 72.8),
+      FlSpot(12, 74.0)
+    ],
+    // P3 percentile
+    [
+      FlSpot(0, 45.6),
+      FlSpot(1, 50.0),
+      FlSpot(2, 53.2),
+      FlSpot(3, 55.8),
+      FlSpot(4, 58.0),
+      FlSpot(5, 59.9),
+      FlSpot(6, 61.5),
+      FlSpot(7, 62.9),
+      FlSpot(8, 64.3),
+      FlSpot(9, 65.6),
+      FlSpot(10, 66.8),
+      FlSpot(11, 68.0),
+      FlSpot(12, 69.2)
+    ],
+    // P97 percentile
+    [
+      FlSpot(0, 52.7),
+      FlSpot(1, 57.4),
+      FlSpot(2, 60.9),
+      FlSpot(3, 63.8),
+      FlSpot(4, 66.2),
+      FlSpot(5, 68.2),
+      FlSpot(6, 70.0),
+      FlSpot(7, 71.6),
+      FlSpot(8, 73.2),
+      FlSpot(9, 74.7),
+      FlSpot(10, 76.1),
+      FlSpot(11, 77.5),
+      FlSpot(12, 78.9)
+    ]
+  ];
+
+  static List<List<FlSpot>> girlHeight12to24MonthData = [
+    // P50 percentile
+    [
+      FlSpot(12, 74.0),
+      FlSpot(13, 75.2),
+      FlSpot(14, 76.4),
+      FlSpot(15, 77.5),
+      FlSpot(16, 78.6),
+      FlSpot(17, 79.7),
+      FlSpot(18, 80.7),
+      FlSpot(19, 81.7),
+      FlSpot(20, 82.7),
+      FlSpot(21, 83.7),
+      FlSpot(22, 84.6),
+      FlSpot(23, 85.5),
+      FlSpot(24, 86.4)
+    ],
+    // P3 percentile
+    [
+      FlSpot(12, 69.2),
+      FlSpot(13, 70.3),
+      FlSpot(14, 71.3),
+      FlSpot(15, 72.4),
+      FlSpot(16, 73.3),
+      FlSpot(17, 74.3),
+      FlSpot(18, 75.2),
+      FlSpot(19, 76.2),
+      FlSpot(20, 77.0),
+      FlSpot(21, 77.9),
+      FlSpot(22, 78.7),
+      FlSpot(23, 79.6),
+      FlSpot(24, 80.3)
+    ],
+    // P97 percentile
+    [
+      FlSpot(12, 78.9),
+      FlSpot(13, 80.2),
+      FlSpot(14, 81.4),
+      FlSpot(15, 82.7),
+      FlSpot(16, 83.9),
+      FlSpot(17, 85.0),
+      FlSpot(18, 86.2),
+      FlSpot(19, 87.3),
+      FlSpot(20, 88.4),
+      FlSpot(21, 89.4),
+      FlSpot(22, 90.5),
+      FlSpot(23, 91.5),
+      FlSpot(24, 92.5)
     ]
   ];
 
@@ -906,6 +1394,108 @@ class GrowStandard {
     ]
   ];
 
+  static List<List<FlSpot>> boyHeight0to12MonthData = [
+    // P50 percentile
+    [
+      FlSpot(0, 49.9),
+      FlSpot(1, 54.7),
+      FlSpot(2, 58.4),
+      FlSpot(3, 61.4),
+      FlSpot(4, 63.9),
+      FlSpot(5, 65.9),
+      FlSpot(6, 67.6),
+      FlSpot(7, 69.2),
+      FlSpot(8, 70.6),
+      FlSpot(9, 72.0),
+      FlSpot(10, 73.3),
+      FlSpot(11, 74.5),
+      FlSpot(12, 75.7)
+    ],
+    // P3 percentile
+    [
+      FlSpot(0, 46.3),
+      FlSpot(1, 51.1),
+      FlSpot(2, 54.7),
+      FlSpot(3, 57.6),
+      FlSpot(4, 60.0),
+      FlSpot(5, 61.9),
+      FlSpot(6, 63.6),
+      FlSpot(7, 65.1),
+      FlSpot(8, 66.5),
+      FlSpot(9, 67.7),
+      FlSpot(10, 69.0),
+      FlSpot(11, 70.2),
+      FlSpot(12, 71.3)
+    ],
+    // P97 percentile
+    [
+      FlSpot(0, 53.4),
+      FlSpot(1, 58.4),
+      FlSpot(2, 62.2),
+      FlSpot(3, 65.3),
+      FlSpot(4, 67.8),
+      FlSpot(5, 69.9),
+      FlSpot(6, 71.6),
+      FlSpot(7, 73.2),
+      FlSpot(8, 74.7),
+      FlSpot(9, 76.2),
+      FlSpot(10, 77.6),
+      FlSpot(11, 78.9),
+      FlSpot(12, 80.2)
+    ]
+  ];
+
+  static List<List<FlSpot>> boyHeight12to24MonthData = [
+    // P50 percentile
+    [
+      FlSpot(12, 75.7),
+      FlSpot(13, 76.9),
+      FlSpot(14, 78.0),
+      FlSpot(15, 79.1),
+      FlSpot(16, 80.2),
+      FlSpot(17, 81.2),
+      FlSpot(18, 82.3),
+      FlSpot(19, 83.2),
+      FlSpot(20, 84.2),
+      FlSpot(21, 85.1),
+      FlSpot(22, 86.0),
+      FlSpot(23, 86.9),
+      FlSpot(24, 87.8)
+    ],
+    // P3 percentile
+    [
+      FlSpot(12, 71.3),
+      FlSpot(13, 72.4),
+      FlSpot(14, 73.4),
+      FlSpot(15, 74.4),
+      FlSpot(16, 75.4),
+      FlSpot(17, 76.3),
+      FlSpot(18, 77.2),
+      FlSpot(19, 78.1),
+      FlSpot(20, 78.9),
+      FlSpot(21, 79.7),
+      FlSpot(22, 80.5),
+      FlSpot(23, 81.3),
+      FlSpot(24, 82.1)
+    ],
+    // P97 percentile
+    [
+      FlSpot(12, 80.2),
+      FlSpot(13, 81.5),
+      FlSpot(14, 82.7),
+      FlSpot(15, 83.9),
+      FlSpot(16, 85.1),
+      FlSpot(17, 86.2),
+      FlSpot(18, 87.3),
+      FlSpot(19, 88.4),
+      FlSpot(20, 89.5),
+      FlSpot(21, 90.5),
+      FlSpot(22, 91.6),
+      FlSpot(23, 92.6),
+      FlSpot(24, 93.6)
+    ]
+  ];
+
   static List<List<FlSpot>> boyHeight24to60MonthData = [
     // P50 percentile
     [
@@ -1082,6 +1672,107 @@ class GrowStandard {
     ]
   ];
 
+  static List<List<FlSpot>> girlBMI0to12MonthData = [
+    // P50 percentile
+    [
+      FlSpot(0, 13.3),
+      FlSpot(1, 14.6),
+      FlSpot(2, 15.8),
+      FlSpot(3, 16.4),
+      FlSpot(4, 16.7),
+      FlSpot(5, 16.8),
+      FlSpot(6, 16.9),
+      FlSpot(7, 16.9),
+      FlSpot(8, 16.8),
+      FlSpot(9, 16.7),
+      FlSpot(10, 16.6),
+      FlSpot(11, 16.5),
+      FlSpot(12, 16.4)
+    ],
+    // P3 percentile
+    [
+      FlSpot(0, 11.2),
+      FlSpot(1, 12.1),
+      FlSpot(2, 13.2),
+      FlSpot(3, 13.7),
+      FlSpot(4, 14.0),
+      FlSpot(5, 14.2),
+      FlSpot(6, 14.3),
+      FlSpot(7, 14.3),
+      FlSpot(8, 14.3),
+      FlSpot(9, 14.2),
+      FlSpot(10, 14.1),
+      FlSpot(11, 14.0),
+      FlSpot(12, 13.9)
+    ],
+    // P97 percentile
+    [
+      FlSpot(0, 15.9),
+      FlSpot(1, 17.3),
+      FlSpot(2, 18.8),
+      FlSpot(3, 19.4),
+      FlSpot(4, 19.8),
+      FlSpot(5, 20.0),
+      FlSpot(6, 20.1),
+      FlSpot(7, 20.1),
+      FlSpot(8, 20.0),
+      FlSpot(9, 19.9),
+      FlSpot(10, 19.7),
+      FlSpot(11, 19.6),
+      FlSpot(12, 19.4)
+    ]
+  ];
+
+  static List<List<FlSpot>> girlBMI12to24MonthData = [
+    // P50 percentile
+    [
+      FlSpot(12, 16.4),
+      FlSpot(13, 16.2),
+      FlSpot(14, 16.1),
+      FlSpot(15, 16.0),
+      FlSpot(16, 15.9),
+      FlSpot(17, 15.8),
+      FlSpot(18, 15.7),
+      FlSpot(19, 15.7),
+      FlSpot(20, 15.6),
+      FlSpot(21, 15.5),
+      FlSpot(22, 15.5),
+      FlSpot(23, 15.4),
+      FlSpot(24, 15.4)
+    ],
+    // P3 percentile
+    [
+      FlSpot(12, 13.9),
+      FlSpot(13, 13.8),
+      FlSpot(14, 13.7),
+      FlSpot(15, 13.7),
+      FlSpot(16, 13.6),
+      FlSpot(17, 13.5),
+      FlSpot(18, 13.4),
+      FlSpot(19, 13.4),
+      FlSpot(20, 13.3),
+      FlSpot(21, 13.3),
+      FlSpot(22, 13.3),
+      FlSpot(23, 13.2),
+      FlSpot(24, 13.2)
+    ],
+    // P97 percentile
+    [
+      FlSpot(12, 19.4),
+      FlSpot(13, 19.2),
+      FlSpot(14, 19.1),
+      FlSpot(15, 19.0),
+      FlSpot(16, 18.8),
+      FlSpot(17, 18.7),
+      FlSpot(18, 18.6),
+      FlSpot(19, 18.5),
+      FlSpot(20, 18.5),
+      FlSpot(21, 18.4),
+      FlSpot(22, 18.3),
+      FlSpot(23, 18.3),
+      FlSpot(24, 18.2)
+    ]
+  ];
   static List<List<FlSpot>> girlBMI0to24MonthData = [
     // P50 percentile
     [
@@ -1343,6 +2034,109 @@ class GrowStandard {
       FlSpot(11, 19.6),
       FlSpot(12, 19.7),
       FlSpot(13, 19.8)
+    ]
+  ];
+
+  static List<List<FlSpot>> boyBMI0to12MonthData = [
+    // P50 percentile
+    [
+      FlSpot(0, 13.4),
+      FlSpot(1, 14.9),
+      FlSpot(2, 16.3),
+      FlSpot(3, 16.9),
+      FlSpot(4, 17.2),
+      FlSpot(5, 17.3),
+      FlSpot(6, 17.3),
+      FlSpot(7, 17.3),
+      FlSpot(8, 17.3),
+      FlSpot(9, 17.2),
+      FlSpot(10, 17.0),
+      FlSpot(11, 16.9),
+      FlSpot(12, 16.8)
+    ],
+    // P3 percentile
+    [
+      FlSpot(0, 11.3),
+      FlSpot(1, 12.6),
+      FlSpot(2, 13.8),
+      FlSpot(3, 14.4),
+      FlSpot(4, 14.7),
+      FlSpot(5, 14.8),
+      FlSpot(6, 14.9),
+      FlSpot(7, 14.9),
+      FlSpot(8, 14.9),
+      FlSpot(9, 14.8),
+      FlSpot(10, 14.7),
+      FlSpot(11, 14.6),
+      FlSpot(12, 14.5)
+    ],
+    // P97 percentile
+    [
+      FlSpot(0, 16.1),
+      FlSpot(1, 17.6),
+      FlSpot(2, 19.2),
+      FlSpot(3, 19.8),
+      FlSpot(4, 20.1),
+      FlSpot(5, 20.2),
+      FlSpot(6, 20.3),
+      FlSpot(7, 20.3),
+      FlSpot(8, 20.2),
+      FlSpot(9, 20.1),
+      FlSpot(10, 19.9),
+      FlSpot(11, 19.8),
+      FlSpot(12, 19.6)
+  ]
+  ];
+
+  static List<List<FlSpot>> boyBMI12to24MonthData = [
+    // P50 percentile
+    [
+      FlSpot(12, 16.8),
+      FlSpot(13, 16.7),
+      FlSpot(14, 16.6),
+      FlSpot(15, 16.4),
+      FlSpot(16, 16.3),
+      FlSpot(17, 16.2),
+      FlSpot(18, 16.1),
+      FlSpot(19, 16.1),
+      FlSpot(20, 16.0),
+      FlSpot(21, 15.9),
+      FlSpot(22, 15.8),
+      FlSpot(23, 15.8),
+      FlSpot(24, 15.7)
+    ],
+    // P3 percentile
+    [
+
+      FlSpot(12, 14.5),
+      FlSpot(13, 14.4),
+      FlSpot(14, 14.3),
+      FlSpot(15, 14.2),
+      FlSpot(16, 14.2),
+      FlSpot(17, 14.1),
+      FlSpot(18, 14.0),
+      FlSpot(19, 13.9),
+      FlSpot(20, 13.9),
+      FlSpot(21, 13.8),
+      FlSpot(22, 13.8),
+      FlSpot(23, 13.7),
+      FlSpot(24, 13.7)
+    ],
+    // P97 percentile
+    [
+
+      FlSpot(13, 19.5),
+      FlSpot(14, 19.3),
+      FlSpot(15, 19.2),
+      FlSpot(16, 19.1),
+      FlSpot(17, 18.9),
+      FlSpot(18, 18.8),
+      FlSpot(19, 18.7),
+      FlSpot(20, 18.6),
+      FlSpot(21, 18.6),
+      FlSpot(22, 18.5),
+      FlSpot(23, 18.4),
+      FlSpot(24, 18.3)
     ]
   ];
   static List<List<FlSpot>> boyBMI0to24MonthData = [
