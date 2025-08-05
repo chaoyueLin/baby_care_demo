@@ -1,35 +1,47 @@
 const String tableCare = 'babyCare';
 const String columnCareId = '_id';
 const String columnDate = 'date';
-const String columnMilk = 'milk';
-const String columnWater = 'water';
-const String columnDefecate = 'defecate';
+const String columnType = 'type';
+const String columnMush = 'mush';
+
+enum FeedType { milk, formula, water }
+
+extension FeedTypeExtension on FeedType {
+  int get value => index;
+
+  static FeedType fromInt(int value) {
+    return FeedType.values[value];
+  }
+}
 
 class BabyCare {
   int? id;
-  int? date;
-  int? milk;
-  int? water;
-  int? defecate;
+  int? date; // 时间戳（毫秒）
+  FeedType type;
+  String mush;
 
-  BabyCare({required this.id, required this.date, required this.milk, required this.water, required this.defecate});
+  BabyCare({
+    this.id,
+    required this.date,
+    required this.type,
+    required this.mush,
+  });
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
-      columnDate:date,
-      columnMilk: milk,
-      columnWater: water,
-      columnDefecate: defecate
+    return {
+      columnCareId: id,
+      columnDate: date,
+      columnType: type.value,
+      columnMush: mush,
     };
-    map[columnCareId] = id;
-    return map;
   }
 
-  BabyCare.fromMap(Map<dynamic, dynamic> map) {
-    id = map[columnCareId];
-    date=map[columnDate];
-    milk = map[columnMilk];
-    water = map[columnWater];
-    defecate = map[columnDefecate];
+  factory BabyCare.fromMap(Map<dynamic, dynamic> map) {
+    return BabyCare(
+      id: map[columnCareId],
+      date: map[columnDate],
+      type: FeedTypeExtension.fromInt(map[columnType]),
+      mush: map[columnMush],
+    );
   }
 }

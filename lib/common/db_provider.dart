@@ -6,35 +6,40 @@ import 'package:path/path.dart';
 import '../models/baby.dart';
 import '../models/baby_care.dart';
 
+const String tablePerson = 'baby';
+const String columnPersonId = '_id';
+const String columnName = 'name';
+const String columnSex = 'sex';
+const String columnBirthdate = 'birthdate';
+const String columnShow = 'show';
+
+const String tableCare = 'babyCare';
+const String columnCareId = '_id';
+const String columnDate = 'date';
+const String columnType = 'type';
+const String columnMush = 'mush';
 
 class DBProvider {
-  // Singleton pattern for SQLite
   static final DBProvider _singleton = DBProvider._internal();
 
-  factory DBProvider() {
-    return _singleton;
-  }
+  factory DBProvider() => _singleton;
 
   DBProvider._internal();
 
   static Database? _db;
 
   Future<Database> get db async {
-    if (_db != null) {
-      return _db!;
-    }
+    if (_db != null) return _db!;
     _db = await _initDB();
     return _db!;
   }
 
-  // Initialize the database with both tables
   Future<Database> _initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, 'babyApp.db');
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
-  // Create both tables in the database
   Future _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $tablePerson (
@@ -50,92 +55,53 @@ class DBProvider {
       CREATE TABLE $tableCare (
         $columnCareId INTEGER PRIMARY KEY,
         $columnDate INTEGER,
-        $columnMilk INTEGER,
-        $columnWater INTEGER,
-        $columnDefecate INTEGER
+        $columnType INTEGER,
+        $columnMush TEXT
       )
     ''');
   }
 
-  // CRUD methods for tablePerson
-
-  // Insert a Baby record into tablePerson
+  // Baby methods
   Future<Baby> insertPerson(Baby person) async {
     final dbClient = await db;
     person.id = await dbClient.insert(tablePerson, person.toMap());
     return person;
   }
 
-  // Query all Baby records from tablePerson
   Future<List<Baby>?> queryAllPersons() async {
     final dbClient = await db;
-    List<Map<String, dynamic>> maps = await dbClient.query(tablePerson, columns: [
-      columnPersonId,
-      columnName,
-      columnSex,
-      columnBirthdate,
-      columnShow
-    ]);
-
-    if (maps.isEmpty) {
-      return null;
-    }
-
+    List<Map<String, dynamic>> maps = await dbClient.query(tablePerson);
+    if (maps.isEmpty) return null;
     return maps.map((map) => Baby.fromMap(map)).toList();
   }
-
 
   Future<List<Baby>?> getVisiblePersons() async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(
       tablePerson,
-      columns: [
-        columnPersonId,
-        columnName,
-        columnSex,
-        columnBirthdate,
-        columnShow
-      ],
       where: '$columnShow = ?',
-      whereArgs: [1]
+      whereArgs: [1],
     );
-
-    if (maps.isEmpty) {
-      return null;
-    }
-
+    if (maps.isEmpty) return null;
     return maps.map((map) => Baby.fromMap(map)).toList();
   }
 
-
-  // Query a Baby record by ID from tablePerson
   Future<Baby?> getPersonById(int id) async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(
       tablePerson,
-      columns: [
-        columnPersonId,
-        columnName,
-        columnSex,
-        columnBirthdate,
-        columnShow
-      ],
       where: '$columnPersonId = ?',
       whereArgs: [id],
     );
-    if (maps.isNotEmpty) {
-      return Baby.fromMap(maps.first);
-    }
+    if (maps.isNotEmpty) return Baby.fromMap(maps.first);
     return null;
   }
 
-  // Delete a Baby record by ID from tablePerson
   Future<int> deletePerson(int id) async {
     final dbClient = await db;
     return await dbClient.delete(tablePerson, where: '$columnPersonId = ?', whereArgs: [id]);
   }
 
-  // Update a Baby record in tablePerson
   Future<int> updatePerson(Baby person) async {
     final dbClient = await db;
     return await dbClient.update(
@@ -146,61 +112,36 @@ class DBProvider {
     );
   }
 
-  // CRUD methods for tableCare
-
-  // Insert a BabyCare record into tableCare
+  // BabyCare methods
   Future<BabyCare> insertCare(BabyCare care) async {
     final dbClient = await db;
     care.id = await dbClient.insert(tableCare, care.toMap());
     return care;
   }
 
-  // Query all BabyCare records from tableCare
   Future<List<BabyCare>?> queryAllCare() async {
     final dbClient = await db;
-    List<Map<String, dynamic>> maps = await dbClient.query(tableCare, columns: [
-      columnCareId,
-      columnDate,
-      columnMilk,
-      columnWater,
-      columnDefecate
-    ]);
-
-    if (maps.isEmpty) {
-      return null;
-    }
-
+    List<Map<String, dynamic>> maps = await dbClient.query(tableCare);
+    if (maps.isEmpty) return null;
     return maps.map((map) => BabyCare.fromMap(map)).toList();
   }
 
-  // Query a BabyCare record by ID from tableCare
   Future<BabyCare?> getCareById(int id) async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(
       tableCare,
-      columns: [
-        columnCareId,
-        columnDate,
-        columnMilk,
-        columnWater,
-        columnDefecate
-      ],
       where: '$columnCareId = ?',
       whereArgs: [id],
     );
-    if (maps.isNotEmpty) {
-      return BabyCare.fromMap(maps.first);
-    }
+    if (maps.isNotEmpty) return BabyCare.fromMap(maps.first);
     return null;
   }
 
-  // Delete a BabyCare record by ID from tableCare
   Future<int> deleteCare(int id) async {
     final dbClient = await db;
     return await dbClient.delete(tableCare, where: '$columnCareId = ?', whereArgs: [id]);
   }
 
-  // Update a BabyCare record in tableCare
   Future<int> updateCare(BabyCare care) async {
     final dbClient = await db;
     return await dbClient.update(
@@ -209,5 +150,15 @@ class DBProvider {
       where: '$columnCareId = ?',
       whereArgs: [care.id],
     );
+  }
+
+  Future<List<BabyCare>> getCareByDate(int date) async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(
+      tableCare,
+      where: '$columnDate = ?',
+      whereArgs: [date],
+    );
+    return maps.map((map) => BabyCare.fromMap(map)).toList();
   }
 }
