@@ -6,6 +6,16 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
 
+enum FeedType { breastMilk, formula, water }
+
+class FeedRecord {
+  final DateTime time;
+  final int ml;
+  final FeedType type;
+
+  FeedRecord({required this.time, required this.ml, required this.type});
+}
+
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -21,18 +31,20 @@ class HomePageContent extends StatefulWidget {
 class _HomePageContentState extends State<HomePageContent> {
   late PageController _pageController;
   final int initialPage = 10000; // 设置初始页面索引
-  final DateTime today = DateTime.now(); // 当前日期
-  DateTime currentDate = DateTime.now(); // 当前日期
+  final DateTime today = DateTime.now();
+  DateTime currentDate = DateTime.now();
+  int _currentPageIndex = 10000;
+
+  List<FeedRecord> feedRecords = [];
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: initialPage);
   }
 
-
-
   DateTime _calculateDate(int pageIndex) {
-    int offset = pageIndex - initialPage; // 根据页面索引计算日期偏移
+    int offset = pageIndex - initialPage;
     return today.add(Duration(days: offset));
   }
 
@@ -42,15 +54,42 @@ class _HomePageContentState extends State<HomePageContent> {
     super.dispose();
   }
 
-  void _showTimePicker() {
+  void _showMlSelector(FeedType type) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('选择毫升数'),
+          content: Container(
+            width: double.maxFinite,
+            height: 300,
+            child: ListView.builder(
+              itemCount: 25,
+              itemBuilder: (context, index) {
+                int ml = (index + 1) * 10;
+                return ListTile(
+                  title: Text('$ml ml'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showTimePicker(type, ml);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showTimePicker(FeedType type, int ml) {
     DatePicker.showTimePicker(
       context,
-      showSecondsColumn: false, // 只显示小时和分钟
-      currentTime: currentDate, // 默认当前时间
+      showSecondsColumn: false,
+      currentTime: currentDate,
       onConfirm: (time) {
         setState(() {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(DateUtil.dateToString(time,format: 'yyyy-MM-dd HH:mm:ss'))));
+          feedRecords.add(FeedRecord(time: time, ml: ml, type: type));
         });
       },
     );
@@ -61,39 +100,95 @@ class _HomePageContentState extends State<HomePageContent> {
     return Scaffold(
       body: Column(
         children: [
-          // 顶部的日期视图部分
           Expanded(
-            flex: 6, // 占据 6/10 的屏幕高度
+            flex: 6,
             child: PageView.builder(
               controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPageIndex = index;
+                  currentDate = _calculateDate(index);
+                });
+              },
               itemBuilder: (context, index) {
-                currentDate = _calculateDate(index);
+                final pageDate = _calculateDate(index);
                 return Column(
                   children: [
-                    // 日期标题
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        DateUtil.dateToString(currentDate),
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
+                        DateUtil.dateToString(pageDate),
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    // 日期对应的 ListView
                     Expanded(
                       child: ListView.builder(
                         itemCount: 24,
                         itemBuilder: (context, listIndex) {
-                          return Container(
-                            height: 50,
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            color: listIndex.isEven
-                                ? Colors.blue[100]
-                                : Colors.blue[200],
-                            child: Center(
-                              child: Text(
-                                'Item ${listIndex + 1}',
-                                style: TextStyle(fontSize: 16),
+                          final hourRecords = feedRecords.where((record) =>
+                          record.time.year == pageDate.year &&
+                              record.time.month == pageDate.month &&
+                              record.time.day == pageDate.day &&
+                              record.time.hour == listIndex
+                          ).toList();
+
+                          final iconWidgets = hourRecords.map((record) {
+                            String path;
+                            switch (record.type) {
+                              case FeedType.breastMilk:
+                                path = 'assets/icons/mother_milk.png';
+                                break;
+                              case FeedType.formula:
+                                path = 'assets/icons/formula_milk.png';
+                                break;
+                              case FeedType.water:
+                                path = 'assets/icons/water.png';
+                                break;
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: Image.asset(path, height: 24, width: 24),
+                            );
+                          }).toList();
+
+                          return GestureDetector(
+                            onTap: () {
+                              int breastMilkTotal = hourRecords
+                                  .where((r) => r.type == FeedType.breastMilk)
+                                  .fold(0, (sum, r) => sum + r.ml);
+                              int formulaTotal = hourRecords
+                                  .where((r) => r.type == FeedType.formula)
+                                  .fold(0, (sum, r) => sum + r.ml);
+                              int waterTotal = hourRecords
+                                  .where((r) => r.type == FeedType.water)
+                                  .fold(0, (sum, r) => sum + r.ml);
+
+                              String content = '${listIndex}:00 - ${listIndex + 1}:00';
+                              if (breastMilkTotal > 0) content += ' 母乳: ${breastMilkTotal}ml,';
+                              if (formulaTotal > 0) content += ' 奶粉: ${formulaTotal}ml,';
+                              if (waterTotal > 0) content += ' 水: ${waterTotal}ml,';
+                              if (content.endsWith(',')) content = content.substring(0, content.length - 1);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(content))
+                              );
+                            },
+                            child: Container(
+                              height: 50,
+                              color: Colors.green[100],
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                    child: Text('${listIndex.toString().padLeft(2, '0')}:00', style: TextStyle(fontSize: 16)),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: iconWidgets,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -105,9 +200,8 @@ class _HomePageContentState extends State<HomePageContent> {
               },
             ),
           ),
-          // 底部固定的 tab 按钮部分
           Container(
-            height: 100, // 固定高度
+            height: 100,
             color: Colors.grey[200],
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -115,32 +209,25 @@ class _HomePageContentState extends State<HomePageContent> {
                 CustomTabButton(
                   label: S.of(context)?.breastMilk ?? "breastMilk",
                   iconPath: 'assets/icons/mother_milk.png',
-                  onTap: () {
-                    _showTimePicker();
-                  },
+                  onTap: () => _showMlSelector(FeedType.breastMilk),
                 ),
                 CustomTabButton(
                   label: S.of(context)?.formula ?? "formula",
                   iconPath: 'assets/icons/formula_milk.png',
-                  onTap: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text('奶粉按钮被点击')));
-                  },
+                  onTap: () => _showMlSelector(FeedType.formula),
                 ),
                 CustomTabButton(
                   label: S.of(context)?.water ?? "water",
                   iconPath: 'assets/icons/water.png',
-                  onTap: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text('水按钮被点击')));
-                  },
+                  onTap: () => _showMlSelector(FeedType.water),
                 ),
                 CustomTabButton(
                   label: S.of(context)?.poop ?? "poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text('便便按钮被点击')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('便便按钮被点击')),
+                    );
                   },
                 ),
               ],
