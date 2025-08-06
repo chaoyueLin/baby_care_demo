@@ -3,18 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
+import '../models/baby_care.dart';
+import '../common/db_provider.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
-
-enum FeedType { breastMilk, formula, water }
-
-class FeedRecord {
-  final DateTime time;
-  final int ml;
-  final FeedType type;
-
-  FeedRecord({required this.time, required this.ml, required this.type});
-}
 
 class HomePage extends StatelessWidget {
   @override
@@ -30,22 +22,31 @@ class HomePageContent extends StatefulWidget {
 
 class _HomePageContentState extends State<HomePageContent> {
   late PageController _pageController;
-  final int initialPage = 10000; // 设置初始页面索引
+  final int initialPage = 10000;
   final DateTime today = DateTime.now();
   DateTime currentDate = DateTime.now();
   int _currentPageIndex = 10000;
 
-  List<FeedRecord> feedRecords = [];
+  List<BabyCare> feedRecords = [];
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: initialPage);
+    loadDataForDate(currentDate);
   }
 
   DateTime _calculateDate(int pageIndex) {
     int offset = pageIndex - initialPage;
     return today.add(Duration(days: offset));
+  }
+
+  Future<void> loadDataForDate(DateTime date) async {
+    int targetDate = DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
+    List<BabyCare> list = await DBProvider().getCareByDate(targetDate);
+    setState(() {
+      feedRecords = list;
+    });
   }
 
   @override
@@ -87,13 +88,32 @@ class _HomePageContentState extends State<HomePageContent> {
       context,
       showSecondsColumn: false,
       currentTime: currentDate,
-      onConfirm: (time) {
+      onConfirm: (time) async {
+        DateTime fullDateTime = DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day,
+          time.hour,
+          time.minute,
+        );
+
+        int timestamp = fullDateTime.millisecondsSinceEpoch;
+
+        BabyCare care = BabyCare(
+          date: timestamp,
+          type: type,
+          mush: ml.toString(),
+        );
+
+        BabyCare inserted = await DBProvider().insertCare(care);
+
         setState(() {
-          feedRecords.add(FeedRecord(time: time, ml: ml, type: type));
+          feedRecords.add(inserted);
         });
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +129,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   _currentPageIndex = index;
                   currentDate = _calculateDate(index);
                 });
+                loadDataForDate(currentDate);
               },
               itemBuilder: (context, index) {
                 final pageDate = _calculateDate(index);
@@ -125,17 +146,18 @@ class _HomePageContentState extends State<HomePageContent> {
                       child: ListView.builder(
                         itemCount: 24,
                         itemBuilder: (context, listIndex) {
-                          final hourRecords = feedRecords.where((record) =>
-                          record.time.year == pageDate.year &&
-                              record.time.month == pageDate.month &&
-                              record.time.day == pageDate.day &&
-                              record.time.hour == listIndex
-                          ).toList();
+                          final hourRecords = feedRecords.where((record) {
+                            DateTime time = DateTime.fromMillisecondsSinceEpoch(record.date!);
+                            return time.year == pageDate.year &&
+                                time.month == pageDate.month &&
+                                time.day == pageDate.day &&
+                                time.hour == listIndex;
+                          }).toList();
 
                           final iconWidgets = hourRecords.map((record) {
                             String path;
                             switch (record.type) {
-                              case FeedType.breastMilk:
+                              case FeedType.milk:
                                 path = 'assets/icons/mother_milk.png';
                                 break;
                               case FeedType.formula:
@@ -153,18 +175,18 @@ class _HomePageContentState extends State<HomePageContent> {
 
                           return GestureDetector(
                             onTap: () {
-                              int breastMilkTotal = hourRecords
-                                  .where((r) => r.type == FeedType.breastMilk)
-                                  .fold(0, (sum, r) => sum + r.ml);
+                              int milkTotal = hourRecords
+                                  .where((r) => r.type == FeedType.milk)
+                                  .fold(0, (sum, r) => sum + int.parse(r.mush));
                               int formulaTotal = hourRecords
                                   .where((r) => r.type == FeedType.formula)
-                                  .fold(0, (sum, r) => sum + r.ml);
+                                  .fold(0, (sum, r) => sum + int.parse(r.mush));
                               int waterTotal = hourRecords
                                   .where((r) => r.type == FeedType.water)
-                                  .fold(0, (sum, r) => sum + r.ml);
+                                  .fold(0, (sum, r) => sum + int.parse(r.mush));
 
                               String content = '${listIndex}:00 - ${listIndex + 1}:00';
-                              if (breastMilkTotal > 0) content += ' 母乳: ${breastMilkTotal}ml,';
+                              if (milkTotal > 0) content += ' 母乳: ${milkTotal}ml,';
                               if (formulaTotal > 0) content += ' 奶粉: ${formulaTotal}ml,';
                               if (waterTotal > 0) content += ' 水: ${waterTotal}ml,';
                               if (content.endsWith(',')) content = content.substring(0, content.length - 1);
@@ -209,7 +231,7 @@ class _HomePageContentState extends State<HomePageContent> {
                 CustomTabButton(
                   label: S.of(context)?.breastMilk ?? "breastMilk",
                   iconPath: 'assets/icons/mother_milk.png',
-                  onTap: () => _showMlSelector(FeedType.breastMilk),
+                  onTap: () => _showMlSelector(FeedType.milk),
                 ),
                 CustomTabButton(
                   label: S.of(context)?.formula ?? "formula",
