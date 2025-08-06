@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
 
-import '../models/baby_care.dart';
 import '../common/db_provider.dart';
+import '../models/baby_care.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
 
@@ -22,23 +21,27 @@ class HomePageContent extends StatefulWidget {
 
 class _HomePageContentState extends State<HomePageContent> {
   late PageController _pageController;
-  final int initialPage = 10000;
+
   final DateTime today = DateTime.now();
+  final DateTime startDate = DateTime(2023, 1, 1); // 可以根据需求调整起始日期
+  late final int totalDays;
+  late final int initialPageIndex;
+
   DateTime currentDate = DateTime.now();
-  int _currentPageIndex = 10000;
 
   List<BabyCare> feedRecords = [];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: initialPage);
+    totalDays = today.difference(startDate).inDays;
+    initialPageIndex = totalDays; // 今天的索引
+    _pageController = PageController(initialPage: initialPageIndex);
     loadDataForDate(currentDate);
   }
 
-  DateTime _calculateDate(int pageIndex) {
-    int offset = pageIndex - initialPage;
-    return today.add(Duration(days: offset));
+  DateTime _calculateDate(int index) {
+    return startDate.add(Duration(days: index));
   }
 
   Future<void> loadDataForDate(DateTime date) async {
@@ -49,10 +52,12 @@ class _HomePageContentState extends State<HomePageContent> {
     });
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void _onPageChanged(int index) {
+    DateTime newDate = _calculateDate(index);
+    setState(() {
+      currentDate = newDate;
+    });
+    loadDataForDate(currentDate);
   }
 
   void _showMlSelector(FeedType type) {
@@ -61,7 +66,7 @@ class _HomePageContentState extends State<HomePageContent> {
       builder: (context) {
         return AlertDialog(
           title: Text('选择毫升数'),
-          content: Container(
+          content: SizedBox(
             width: double.maxFinite,
             height: 300,
             child: ListView.builder(
@@ -114,6 +119,11 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,34 +134,30 @@ class _HomePageContentState extends State<HomePageContent> {
             flex: 6,
             child: PageView.builder(
               controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPageIndex = index;
-                  currentDate = _calculateDate(index);
-                });
-                loadDataForDate(currentDate);
-              },
+              itemCount: totalDays + 1,
+              onPageChanged: _onPageChanged,
               itemBuilder: (context, index) {
                 final pageDate = _calculateDate(index);
+
                 return Column(
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         DateUtil.dateToString(pageDate),
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
                       child: ListView.builder(
                         itemCount: 24,
-                        itemBuilder: (context, listIndex) {
+                        itemBuilder: (context, hourIndex) {
                           final hourRecords = feedRecords.where((record) {
-                            DateTime time = DateTime.fromMillisecondsSinceEpoch(record.date!);
-                            return time.year == pageDate.year &&
-                                time.month == pageDate.month &&
-                                time.day == pageDate.day &&
-                                time.hour == listIndex;
+                            DateTime recordTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
+                            return recordTime.year == pageDate.year &&
+                                recordTime.month == pageDate.month &&
+                                recordTime.day == pageDate.day &&
+                                recordTime.hour == hourIndex;
                           }).toList();
 
                           final iconWidgets = hourRecords.map((record) {
@@ -185,14 +191,14 @@ class _HomePageContentState extends State<HomePageContent> {
                                   .where((r) => r.type == FeedType.water)
                                   .fold(0, (sum, r) => sum + int.parse(r.mush));
 
-                              String content = '${listIndex}:00 - ${listIndex + 1}:00';
+                              String content = '$hourIndex:00 - ${hourIndex + 1}:00';
                               if (milkTotal > 0) content += ' 母乳: ${milkTotal}ml,';
                               if (formulaTotal > 0) content += ' 奶粉: ${formulaTotal}ml,';
                               if (waterTotal > 0) content += ' 水: ${waterTotal}ml,';
                               if (content.endsWith(',')) content = content.substring(0, content.length - 1);
 
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(content))
+                                SnackBar(content: Text(content)),
                               );
                             },
                             child: Container(
@@ -202,7 +208,8 @@ class _HomePageContentState extends State<HomePageContent> {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                    child: Text('${listIndex.toString().padLeft(2, '0')}:00', style: TextStyle(fontSize: 16)),
+                                    child: Text(hourIndex.toString().padLeft(2, '0') + ':00',
+                                        style: const TextStyle(fontSize: 16)),
                                   ),
                                   Expanded(
                                     child: Row(
@@ -248,7 +255,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('便便按钮被点击')),
+                      const SnackBar(content: Text('便便按钮被点击')),
                     );
                   },
                 ),
