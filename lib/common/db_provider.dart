@@ -152,13 +152,14 @@ class DBProvider {
     );
   }
 
-  Future<List<BabyCare>> getCareByDate(int date) async {
+  Future<List<BabyCare>> getCareByRange(int startMillis, int endMillis) async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(
       tableCare,
-      where: '$columnDate = ?',
-      whereArgs: [date],
+      where: '$columnDate >= ? AND $columnDate < ?',
+      whereArgs: [startMillis, endMillis],
     );
     return maps.map((map) => BabyCare.fromMap(map)).toList();
   }
+
 }

@@ -4,7 +4,7 @@ const String columnDate = 'date';
 const String columnType = 'type';
 const String columnMush = 'mush';
 
-enum FeedType { milk, formula, water }
+enum FeedType { milk, formula, water,poop }
 
 extension FeedTypeExtension on FeedType {
   int get value => index;
@@ -43,5 +43,14 @@ class BabyCare {
       type: FeedTypeExtension.fromInt(map[columnType]),
       mush: map[columnMush],
     );
+  }
+
+  /// 是否为便便记录
+  bool get isPoop => type == FeedType.poop;
+
+  /// 便便记录的图片路径（如果是poop类型）
+  List<String> get poopImages {
+    if (!isPoop || mush.trim().isEmpty) return [];
+    return mush.split(',').where((path) => path.isNotEmpty).toList();
   }
 }

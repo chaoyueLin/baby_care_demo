@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
-
+import 'package:image_pickers/image_pickers.dart';
+import 'dart:io';
 import '../common/db_provider.dart';
 import '../models/baby_care.dart';
 import '../utils/date_util.dart';
@@ -45,10 +46,11 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   Future<void> loadDataForDate(DateTime date) async {
-    int targetDate = DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
-    List<BabyCare> list = await DBProvider().getCareByDate(targetDate);
+    int start = DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
+    int end = start + Duration(days: 1).inMilliseconds;
+    List<BabyCare> data = await DBProvider().getCareByRange(start, end);
     setState(() {
-      feedRecords = list;
+      feedRecords = data;
     });
   }
 
@@ -77,7 +79,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   title: Text('$ml ml'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    _showTimePicker(type, ml);
+                    _showTimePicker(type, ml.toString());
                   },
                 );
               },
@@ -88,7 +90,7 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-  void _showTimePicker(FeedType type, int ml) {
+  void _showTimePicker(FeedType type, String ml) {
     DatePicker.showTimePicker(
       context,
       showSecondsColumn: false,
@@ -107,7 +109,7 @@ class _HomePageContentState extends State<HomePageContent> {
         BabyCare care = BabyCare(
           date: timestamp,
           type: type,
-          mush: ml.toString(),
+          mush: ml,
         );
 
         BabyCare inserted = await DBProvider().insertCare(care);
@@ -116,6 +118,53 @@ class _HomePageContentState extends State<HomePageContent> {
           feedRecords.add(inserted);
         });
       },
+    );
+  }
+
+  Future<void> _addPoopRecord() async {
+    final selectedImages = await ImagePickers.pickerPaths(
+      galleryMode: GalleryMode.image,
+      selectCount: 3,
+      showGif: false,
+      showCamera: true,
+      compressSize: 500,
+      uiConfig: UIConfig(uiThemeColor: Colors.lightGreen),
+      cropConfig: CropConfig(enableCrop: false),
+    );
+
+    if (selectedImages.isEmpty) return;
+
+    final imagePaths = selectedImages
+        .map((e) => e.path ?? '')
+        .where((p) => p.isNotEmpty)
+        .toList();
+    final mush = imagePaths.join(',');
+    _showTimePicker(FeedType.poop, mush);
+  }
+
+  void _showPoopImages(List<String> imagePaths) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("便便记录"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: imagePaths
+                .map((path) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Image.file(File(path),
+                          width: 300, height: 200, fit: BoxFit.cover),
+                    ))
+                .toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("关闭"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -145,7 +194,8 @@ class _HomePageContentState extends State<HomePageContent> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         DateUtil.dateToString(pageDate),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
@@ -153,7 +203,9 @@ class _HomePageContentState extends State<HomePageContent> {
                         itemCount: 24,
                         itemBuilder: (context, hourIndex) {
                           final hourRecords = feedRecords.where((record) {
-                            DateTime recordTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
+                            DateTime recordTime =
+                                DateTime.fromMillisecondsSinceEpoch(
+                                    record.date!);
                             return recordTime.year == pageDate.year &&
                                 recordTime.month == pageDate.month &&
                                 recordTime.day == pageDate.day &&
@@ -172,34 +224,57 @@ class _HomePageContentState extends State<HomePageContent> {
                               case FeedType.water:
                                 path = 'assets/icons/water.png';
                                 break;
+                              case FeedType.poop:
+                                path = 'assets/icons/poop.png';
+                                break;
                             }
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4.0),
                               child: Image.asset(path, height: 24, width: 24),
                             );
                           }).toList();
 
                           return GestureDetector(
                             onTap: () {
-                              int milkTotal = hourRecords
-                                  .where((r) => r.type == FeedType.milk)
-                                  .fold(0, (sum, r) => sum + int.parse(r.mush));
-                              int formulaTotal = hourRecords
-                                  .where((r) => r.type == FeedType.formula)
-                                  .fold(0, (sum, r) => sum + int.parse(r.mush));
-                              int waterTotal = hourRecords
-                                  .where((r) => r.type == FeedType.water)
-                                  .fold(0, (sum, r) => sum + int.parse(r.mush));
+                              List<String> allPoopImagePaths = hourRecords
+                                  .where((r) => r.type == FeedType.poop)
+                                  .expand((r) => r.mush
+                                      .split(',')
+                                      .where((p) => p.isNotEmpty))
+                                  .toList();
+                              if (allPoopImagePaths.isNotEmpty) {
+                                _showPoopImages(allPoopImagePaths);
+                              } else {
+                                int milkTotal = hourRecords
+                                    .where((r) => r.type == FeedType.milk)
+                                    .fold(
+                                        0, (sum, r) => sum + int.parse(r.mush));
+                                int formulaTotal = hourRecords
+                                    .where((r) => r.type == FeedType.formula)
+                                    .fold(
+                                        0, (sum, r) => sum + int.parse(r.mush));
+                                int waterTotal = hourRecords
+                                    .where((r) => r.type == FeedType.water)
+                                    .fold(
+                                        0, (sum, r) => sum + int.parse(r.mush));
 
-                              String content = '$hourIndex:00 - ${hourIndex + 1}:00';
-                              if (milkTotal > 0) content += ' 母乳: ${milkTotal}ml,';
-                              if (formulaTotal > 0) content += ' 奶粉: ${formulaTotal}ml,';
-                              if (waterTotal > 0) content += ' 水: ${waterTotal}ml,';
-                              if (content.endsWith(',')) content = content.substring(0, content.length - 1);
+                                String content =
+                                    '$hourIndex:00 - ${hourIndex + 1}:00';
+                                if (milkTotal > 0)
+                                  content += ' 母乳: ${milkTotal}ml,';
+                                if (formulaTotal > 0)
+                                  content += ' 奶粉: ${formulaTotal}ml,';
+                                if (waterTotal > 0)
+                                  content += ' 水: ${waterTotal}ml,';
+                                if (content.endsWith(','))
+                                  content =
+                                      content.substring(0, content.length - 1);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(content)),
-                              );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(content)),
+                                );
+                              }
                             },
                             child: Container(
                               height: 50,
@@ -207,13 +282,17 @@ class _HomePageContentState extends State<HomePageContent> {
                               child: Row(
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                    child: Text(hourIndex.toString().padLeft(2, '0') + ':00',
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12.0),
+                                    child: Text(
+                                        hourIndex.toString().padLeft(2, '0') +
+                                            ':00',
                                         style: const TextStyle(fontSize: 16)),
                                   ),
                                   Expanded(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: iconWidgets,
                                     ),
                                   ),
@@ -254,9 +333,7 @@ class _HomePageContentState extends State<HomePageContent> {
                   label: S.of(context)?.poop ?? "poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('便便按钮被点击')),
-                    );
+                    _addPoopRecord();
                   },
                 ),
               ],
