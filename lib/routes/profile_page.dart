@@ -3,6 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:baby_care_demo/models/grow_standard.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 
+import '../common/db_provider.dart';
+import '../models/baby.dart';
 import '../widget/custom_tab_button.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -22,37 +24,93 @@ class _ProfilePageState extends State<ProfilePage> {
   String selectedType = TYPE_WEIGHT;
   String selectedRange = RANGE_13W;
   List<List<FlSpot>> selectedData = [];
+  int? _currentBabyId; // 当前显示的宝宝ID
+  int sex = 0;
 
   @override
   void initState() {
     super.initState();
-    updateSelectedData();
+    _loadCurrentBabyAndData();
+  }
+
+  /// 获取当前 babyId 并加载数据
+  Future<void> _loadCurrentBabyAndData() async {
+    List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
+    if (visibleBabies != null && visibleBabies.isNotEmpty) {
+      Baby? baby = visibleBabies.firstWhere(
+        (b) => b.show == 1,
+        orElse: () => visibleBabies.first,
+      );
+      _currentBabyId = baby.id;
+      sex = baby.sex;
+      updateSelectedData();
+    }
+  }
+
+  bool isBoy() {
+    return sex == 1;
   }
 
   void updateSelectedData() {
     if (selectedType == TYPE_WEIGHT) {
       if (selectedRange == RANGE_13W) {
-        selectedData = GrowStandard.girlWeight0to13WeekData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyWeight0to13WeekData;
+        } else {
+          selectedData = GrowStandard.girlWeight0to13WeekData;
+        }
       } else if (selectedRange == RANGE_12M) {
-        selectedData = GrowStandard.girlWeight0to12MonthData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyWeight0to12MonthData;
+        } else {
+          selectedData = GrowStandard.girlWeight0to12MonthData;
+        }
       } else {
-        selectedData = GrowStandard.girlWeight12to24MonthData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyWeight12to24MonthData;
+        } else {
+          selectedData = GrowStandard.girlWeight12to24MonthData;
+        }
       }
     } else if (selectedType == TYPE_HEIGHT) {
       if (selectedRange == RANGE_13W) {
-        selectedData = GrowStandard.girlHeight0to13WeekData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyHeight0to13WeekData;
+        } else {
+          selectedData = GrowStandard.girlHeight0to13WeekData;
+        }
       } else if (selectedRange == RANGE_12M) {
-        selectedData = GrowStandard.girlHeight0to12MonthData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyHeight0to12MonthData;
+        } else {
+          selectedData = GrowStandard.girlHeight0to12MonthData;
+        }
       } else {
-        selectedData = GrowStandard.girlHeight12to24MonthData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyHeight12to24MonthData;
+        } else {
+          selectedData = GrowStandard.girlHeight12to24MonthData;
+        }
       }
     } else if (selectedType == TYPE_BMI) {
       if (selectedRange == RANGE_13W) {
-        selectedData = GrowStandard.girlBMI0to13WeekData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyBMI0to13WeekData;
+        } else {
+          selectedData = GrowStandard.girlBMI0to13WeekData;
+        }
       } else if (selectedRange == RANGE_12M) {
-        selectedData = GrowStandard.girlBMI0to12MonthData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyBMI0to12MonthData;
+        } else {
+          selectedData = GrowStandard.girlBMI0to12MonthData;
+        }
       } else {
-        selectedData = GrowStandard.girlBMI12to24MonthData;
+        if (isBoy()) {
+          selectedData = GrowStandard.boyBMI12to24MonthData;
+        } else {
+          selectedData = GrowStandard.girlBMI12to24MonthData;
+        }
       }
     }
   }
@@ -138,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 CustomTabButton(
-                  label: S.of(context)?.water?? "water",
+                  label: S.of(context)?.water ?? "water",
                   iconPath: 'assets/icons/water.png',
                   onTap: () {
                     setState(() {
@@ -148,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 CustomTabButton(
-                  label: S.of(context)?.poop??"poop",
+                  label: S.of(context)?.poop ?? "poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
                     setState(() {
@@ -207,7 +265,8 @@ class _ProfilePageState extends State<ProfilePage> {
           Expanded(
             flex: 6,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
               child: LineChart(
                 LineChartData(
                   lineTouchData: LineTouchData(enabled: false),
@@ -224,8 +283,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                     ),
-                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
@@ -253,7 +314,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   maxY: maxY,
                   lineBarsData: List.generate(
                     selectedData.length,
-                        (index) => _lineChartBarData(
+                    (index) => _lineChartBarData(
                       selectedData[index],
                       lineColors[index % lineColors.length],
                     ),

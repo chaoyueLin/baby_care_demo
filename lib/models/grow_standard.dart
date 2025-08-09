@@ -2124,7 +2124,7 @@ class GrowStandard {
     ],
     // P97 percentile
     [
-
+      FlSpot(12, 19.6),
       FlSpot(13, 19.5),
       FlSpot(14, 19.3),
       FlSpot(15, 19.2),
