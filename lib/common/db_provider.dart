@@ -5,6 +5,8 @@ import 'package:path/path.dart';
 
 import '../models/baby.dart';
 import '../models/baby_care.dart';
+import '../models/baby_grow.dart';
+import 'db_constants.dart';
 
 class DBProvider {
   static final DBProvider _singleton = DBProvider._internal();
@@ -24,7 +26,12 @@ class DBProvider {
   Future<Database> _initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, 'babyApp.db');
-    return await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future _onCreate(Database db, int version) async {
@@ -48,13 +55,21 @@ class DBProvider {
         FOREIGN KEY($columnBabyId) REFERENCES $tablePerson($columnPersonId) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE $tableGrow (
+        $columnGrowId INTEGER PRIMARY KEY,
+        $columnBabyId INTEGER,
+        $columnDate INTEGER,
+        $columnType INTEGER,
+        $columnMush TEXT,
+        FOREIGN KEY($columnBabyId) REFERENCES $tablePerson($columnPersonId) ON DELETE CASCADE
+      )
+    ''');
   }
 
-  /// 数据库升级逻辑（添加 baby_id 字段）
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute('ALTER TABLE $tableCare ADD COLUMN $columnBabyId INTEGER DEFAULT 0');
-    }
+    // 如果需要升级数据库版本，在这里写升级逻辑
   }
 
   // ------------------- Baby methods -------------------
@@ -148,12 +163,21 @@ class DBProvider {
     );
   }
 
-  // db_provider.dart
+  Future<List<BabyCare>> getCareByBabyId(int babyId) async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(
+      tableCare,
+      where: '$columnBabyId = ?',
+      whereArgs: [babyId],
+    );
+    return maps.map((map) => BabyCare.fromMap(map)).toList();
+  }
+
   Future<List<BabyCare>> getCareByRange(int start, int end, int babyId) async {
     final dbClient = await db;
     final res = await dbClient.query(
-      "babyCare",
-      where: "date >= ? AND date < ? AND babyId = ?",
+      tableCare,
+      where: "date >= ? AND date < ? AND $columnBabyId = ?",
       whereArgs: [start, end, babyId],
       orderBy: "date ASC",
     );
@@ -164,15 +188,53 @@ class DBProvider {
     return list;
   }
 
+  // ------------------- BabyGrow methods -------------------
+  Future<BabyGrow> insertGrow(BabyGrow grow) async {
+    final dbClient = await db;
+    grow.id = await dbClient.insert(tableGrow, grow.toMap());
+    return grow;
+  }
 
-  /// 按宝宝 ID 查询护理记录
-  Future<List<BabyCare>> getCareByBabyId(int babyId) async {
+  Future<List<BabyGrow>?> queryAllGrow() async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(tableGrow);
+    if (maps.isEmpty) return null;
+    return maps.map((map) => BabyGrow.fromMap(map)).toList();
+  }
+
+  Future<BabyGrow?> getGrowById(int id) async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(
-      tableCare,
+      tableGrow,
+      where: '$columnGrowId = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) return BabyGrow.fromMap(maps.first);
+    return null;
+  }
+
+  Future<int> deleteGrow(int id) async {
+    final dbClient = await db;
+    return await dbClient.delete(tableGrow, where: '$columnGrowId = ?', whereArgs: [id]);
+  }
+
+  Future<int> updateGrow(BabyGrow grow) async {
+    final dbClient = await db;
+    return await dbClient.update(
+      tableGrow,
+      grow.toMap(),
+      where: '$columnGrowId = ?',
+      whereArgs: [grow.id],
+    );
+  }
+
+  Future<List<BabyGrow>> getGrowByBabyId(int babyId) async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> maps = await dbClient.query(
+      tableGrow,
       where: '$columnBabyId = ?',
       whereArgs: [babyId],
     );
-    return maps.map((map) => BabyCare.fromMap(map)).toList();
+    return maps.map((map) => BabyGrow.fromMap(map)).toList();
   }
 }

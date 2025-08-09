@@ -1,9 +1,6 @@
-const String tableCare = 'babyCare';
-const String columnCareId = '_id';
-const String columnBabyId = 'baby_id';
-const String columnDate = 'date';
-const String columnType = 'type';
-const String columnMush = 'mush';
+
+
+import '../common/db_constants.dart';
 
 enum FeedType { milk, formula, water, poop }
 

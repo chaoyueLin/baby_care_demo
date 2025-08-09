@@ -1,9 +1,6 @@
-const String tablePerson = 'baby';
-const String columnPersonId = '_id';
-const String columnName = 'name';
-const String columnSex = 'sex';
-const String columnBirthdate = 'birthdate';
-const String columnShow = 'show';
+
+
+import '../common/db_constants.dart';
 
 class Baby {
   int? id;
