@@ -12,7 +12,13 @@ class Baby {
   DateTime birthdate; // 保持 DateTime 类型
   int show;
 
-  Baby({this.id, required this.name, required this.sex, required this.birthdate, required this.show});
+  Baby({
+    this.id,
+    required this.name,
+    required this.sex,
+    required this.birthdate,
+    required this.show,
+  });
 
   // 转换为 Map（数据库存储）
   Map<String, dynamic> toMap() {
@@ -20,8 +26,8 @@ class Baby {
       columnPersonId: id,
       columnName: name,
       columnSex: sex,
-      columnBirthdate: birthdate.toIso8601String(),  // 存储为字符串
-      columnShow: show
+      columnBirthdate: birthdate.toIso8601String(), // 存储为字符串
+      columnShow: show,
     };
   }
 
@@ -31,9 +37,8 @@ class Baby {
       id: map[columnPersonId],
       name: map[columnName],
       sex: map[columnSex],
-      birthdate: DateTime.parse(map[columnBirthdate]),  // 解析字符串为 DateTime
+      birthdate: DateTime.parse(map[columnBirthdate]),
       show: map[columnShow],
     );
   }
 }
-

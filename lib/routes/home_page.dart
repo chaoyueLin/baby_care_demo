@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:image_pickers/image_pickers.dart';
 import 'dart:io';
 import '../common/db_provider.dart';
+import '../models/baby.dart';
 import '../models/baby_care.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
@@ -31,15 +32,29 @@ class _HomePageContentState extends State<HomePageContent> {
   DateTime currentDate = DateTime.now();
 
   List<BabyCare> feedRecords = [];
-
+  int? _currentBabyId; // 当前显示的宝宝ID
   @override
   void initState() {
     super.initState();
     totalDays = today.difference(startDate).inDays;
     initialPageIndex = totalDays; // 今天的索引
     _pageController = PageController(initialPage: initialPageIndex);
-    loadDataForDate(currentDate);
+    _loadCurrentBabyAndData();
   }
+
+  /// 获取当前 babyId 并加载数据
+  Future<void> _loadCurrentBabyAndData() async {
+    List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
+    if (visibleBabies != null && visibleBabies.isNotEmpty) {
+      Baby? baby = visibleBabies.firstWhere(
+            (b) => b.show == 1,
+        orElse: () => visibleBabies.first,
+      );
+      _currentBabyId = baby.id;
+      await loadDataForDate(currentDate);
+    }
+  }
+
 
   DateTime _calculateDate(int index) {
     return startDate.add(Duration(days: index));
@@ -48,7 +63,7 @@ class _HomePageContentState extends State<HomePageContent> {
   Future<void> loadDataForDate(DateTime date) async {
     int start = DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
     int end = start + Duration(days: 1).inMilliseconds;
-    List<BabyCare> data = await DBProvider().getCareByRange(start, end);
+    List<BabyCare> data = await DBProvider().getCareByRange(start, end,_currentBabyId??0);
     setState(() {
       feedRecords = data;
     });
@@ -107,6 +122,7 @@ class _HomePageContentState extends State<HomePageContent> {
         int timestamp = fullDateTime.millisecondsSinceEpoch;
 
         BabyCare care = BabyCare(
+          babyId: _currentBabyId??0,
           date: timestamp,
           type: type,
           mush: ml,

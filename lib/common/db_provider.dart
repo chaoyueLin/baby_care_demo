@@ -6,19 +6,6 @@ import 'package:path/path.dart';
 import '../models/baby.dart';
 import '../models/baby_care.dart';
 
-const String tablePerson = 'baby';
-const String columnPersonId = '_id';
-const String columnName = 'name';
-const String columnSex = 'sex';
-const String columnBirthdate = 'birthdate';
-const String columnShow = 'show';
-
-const String tableCare = 'babyCare';
-const String columnCareId = '_id';
-const String columnDate = 'date';
-const String columnType = 'type';
-const String columnMush = 'mush';
-
 class DBProvider {
   static final DBProvider _singleton = DBProvider._internal();
 
@@ -37,7 +24,7 @@ class DBProvider {
   Future<Database> _initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, 'babyApp.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
   }
 
   Future _onCreate(Database db, int version) async {
@@ -54,14 +41,23 @@ class DBProvider {
     await db.execute('''
       CREATE TABLE $tableCare (
         $columnCareId INTEGER PRIMARY KEY,
+        $columnBabyId INTEGER,
         $columnDate INTEGER,
         $columnType INTEGER,
-        $columnMush TEXT
+        $columnMush TEXT,
+        FOREIGN KEY($columnBabyId) REFERENCES $tablePerson($columnPersonId) ON DELETE CASCADE
       )
     ''');
   }
 
-  // Baby methods
+  /// 数据库升级逻辑（添加 baby_id 字段）
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE $tableCare ADD COLUMN $columnBabyId INTEGER DEFAULT 0');
+    }
+  }
+
+  // ------------------- Baby methods -------------------
   Future<Baby> insertPerson(Baby person) async {
     final dbClient = await db;
     person.id = await dbClient.insert(tablePerson, person.toMap());
@@ -112,7 +108,7 @@ class DBProvider {
     );
   }
 
-  // BabyCare methods
+  // ------------------- BabyCare methods -------------------
   Future<BabyCare> insertCare(BabyCare care) async {
     final dbClient = await db;
     care.id = await dbClient.insert(tableCare, care.toMap());
@@ -152,14 +148,31 @@ class DBProvider {
     );
   }
 
-  Future<List<BabyCare>> getCareByRange(int startMillis, int endMillis) async {
+  // db_provider.dart
+  Future<List<BabyCare>> getCareByRange(int start, int end, int babyId) async {
+    final dbClient = await db;
+    final res = await dbClient.query(
+      "babyCare",
+      where: "date >= ? AND date < ? AND babyId = ?",
+      whereArgs: [start, end, babyId],
+      orderBy: "date ASC",
+    );
+
+    List<BabyCare> list = res.isNotEmpty
+        ? res.map((c) => BabyCare.fromMap(c)).toList()
+        : [];
+    return list;
+  }
+
+
+  /// 按宝宝 ID 查询护理记录
+  Future<List<BabyCare>> getCareByBabyId(int babyId) async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(
       tableCare,
-      where: '$columnDate >= ? AND $columnDate < ?',
-      whereArgs: [startMillis, endMillis],
+      where: '$columnBabyId = ?',
+      whereArgs: [babyId],
     );
     return maps.map((map) => BabyCare.fromMap(map)).toList();
   }
-
 }
