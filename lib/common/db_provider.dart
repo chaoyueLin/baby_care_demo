@@ -237,4 +237,26 @@ class DBProvider {
     );
     return maps.map((map) => BabyGrow.fromMap(map)).toList();
   }
+
+  Future<List<BabyGrow>> getBabyGrows({
+    required int babyId,
+    required GrowType type,
+    required int startMs,
+    required int endMs,
+  }) async {
+    final dbClient = await db;
+    final res = await dbClient.query(
+      tableGrow,
+      where: "date >= ? AND date <= ? AND $columnBabyId = ? AND $columnType = ?",
+      whereArgs: [startMs, endMs, babyId, type.index],
+      orderBy: "date ASC",
+    );
+
+    List<BabyGrow> list = res.isNotEmpty
+        ? res.map((c) => BabyGrow.fromMap(c)).toList()
+        : [];
+    return list;
+  }
+
+
 }
