@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:baby_care_demo/models/grow_standard.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../common/db_provider.dart';
 import '../models/baby.dart';
+import '../models/baby_grow.dart';
 import '../widget/custom_tab_button.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -24,8 +26,11 @@ class _ProfilePageState extends State<ProfilePage> {
   String selectedType = TYPE_WEIGHT;
   String selectedRange = RANGE_13W;
   List<List<FlSpot>> selectedData = [];
-  int? _currentBabyId; // 当前显示的宝宝ID
-  int sex = 0;
+
+  Baby? currentBaby ;
+  // 用于输入弹窗的控制器
+  final TextEditingController _valueController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -33,22 +38,28 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadCurrentBabyAndData();
   }
 
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
+
   /// 获取当前 babyId 并加载数据
   Future<void> _loadCurrentBabyAndData() async {
     List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
     if (visibleBabies != null && visibleBabies.isNotEmpty) {
       Baby? baby = visibleBabies.firstWhere(
-        (b) => b.show == 1,
+            (b) => b.show == 1,
         orElse: () => visibleBabies.first,
       );
-      _currentBabyId = baby.id;
-      sex = baby.sex;
+      currentBaby=baby;
+
       updateSelectedData();
     }
   }
 
   bool isBoy() {
-    return sex == 1;
+    return currentBaby?.sex == 1;
   }
 
   void updateSelectedData() {
@@ -112,6 +123,175 @@ class _ProfilePageState extends State<ProfilePage> {
           selectedData = GrowStandard.girlBMI12to24MonthData;
         }
       }
+    }
+  }
+
+  /// 显示添加数据弹窗
+  void _showAddDataDialog() {
+    _valueController.clear();
+    _selectedDate = DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(_getDialogTitle()),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 数值输入框
+                  TextField(
+                    controller: _valueController,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: _getInputLabel(),
+                      hintText: _getInputHint(),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // 日期选择
+                  Container(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showDatePicker(setDialogState);
+                      },
+                      child: Text(
+                        '选择日期: ${_selectedDate.year}年${_selectedDate.month}月${_selectedDate.day}日',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _saveGrowData();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// 显示日期选择器
+  void _showDatePicker(StateSetter setDialogState) {
+    DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      minTime: currentBaby?.birthdate,
+      maxTime: DateTime.now(),
+      currentTime: _selectedDate,
+      onConfirm: (date) {
+        setDialogState(() {
+          _selectedDate = date;
+        });
+      },
+      locale: LocaleType.zh, // 设置为中文
+    );
+  }
+
+  /// 保存成长数据
+  Future<void> _saveGrowData() async {
+    if ( _valueController.text.trim().isEmpty) {
+      return;
+    }
+
+    double? value = double.tryParse(_valueController.text.trim());
+    if (value == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('请输入有效的数值')),
+      );
+      return;
+    }
+
+    GrowType growType;
+    if (selectedType == TYPE_WEIGHT) {
+      growType = GrowType.weight;
+    } else if (selectedType == TYPE_HEIGHT) {
+      growType = GrowType.height;
+    } else {
+      // BMI 类型暂时不支持直接输入，可能需要通过身高体重计算
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('BMI 数据需要通过身高和体重计算获得')),
+      );
+      return;
+    }
+
+    BabyGrow growData = BabyGrow(
+      babyId: currentBaby?.id??0,
+      date: _selectedDate.millisecondsSinceEpoch,
+      type: growType,
+      mush: value.toString(),
+    );
+
+    try {
+      await DBProvider().insertGrow(growData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('数据保存成功')),
+      );
+      // 可以在这里刷新图表数据
+      setState(() {
+        updateSelectedData();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('保存失败: $e')),
+      );
+    }
+  }
+
+  /// 获取弹窗标题
+  String _getDialogTitle() {
+    switch (selectedType) {
+      case TYPE_WEIGHT:
+        return '添加体重数据';
+      case TYPE_HEIGHT:
+        return '添加身高数据';
+      case TYPE_BMI:
+        return '添加BMI数据';
+      default:
+        return '添加数据';
+    }
+  }
+
+  /// 获取输入框标签
+  String _getInputLabel() {
+    switch (selectedType) {
+      case TYPE_WEIGHT:
+        return '体重';
+      case TYPE_HEIGHT:
+        return '身高';
+      case TYPE_BMI:
+        return 'BMI';
+      default:
+        return '数值';
+    }
+  }
+
+  /// 获取输入框提示
+  String _getInputHint() {
+    switch (selectedType) {
+      case TYPE_WEIGHT:
+        return '请输入体重 (kg)';
+      case TYPE_HEIGHT:
+        return '请输入身高 (cm)';
+      case TYPE_BMI:
+        return '请输入BMI';
+      default:
+        return '请输入数值';
     }
   }
 
@@ -223,42 +403,65 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.center,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Radio<String>(
-                  value: RANGE_13W,
-                  groupValue: selectedRange,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRange = value!;
-                      updateSelectedData();
-                    });
-                  },
+                // 左侧：时间范围选择器
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Radio<String>(
+                        value: RANGE_13W,
+                        groupValue: selectedRange,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRange = value!;
+                            updateSelectedData();
+                          });
+                        },
+                      ),
+                      const Text('0-13周'),
+                      const SizedBox(width: 8),
+                      Radio<String>(
+                        value: RANGE_12M,
+                        groupValue: selectedRange,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRange = value!;
+                            updateSelectedData();
+                          });
+                        },
+                      ),
+                      const Text('0-12个月'),
+                      const SizedBox(width: 8),
+                      Radio<String>(
+                        value: RANGE_24M,
+                        groupValue: selectedRange,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRange = value!;
+                            updateSelectedData();
+                          });
+                        },
+                      ),
+                      const Text('12-24个月'),
+                    ],
+                  ),
                 ),
-                const Text('0-13周'),
-                const SizedBox(width: 16),
-                Radio<String>(
-                  value: RANGE_12M,
-                  groupValue: selectedRange,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRange = value!;
-                      updateSelectedData();
-                    });
-                  },
-                ),
-                const Text('0-12个月'),
-                Radio<String>(
-                  value: RANGE_24M,
-                  groupValue: selectedRange,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRange = value!;
-                      updateSelectedData();
-                    });
-                  },
-                ),
-                const Text('12-24个月'),
+                // 右侧：添加数据按钮（BMI类型时隐藏）
+                if (selectedType != TYPE_BMI)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                      onPressed: _showAddDataDialog,
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -266,7 +469,7 @@ class _ProfilePageState extends State<ProfilePage> {
             flex: 6,
             child: Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+              const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
               child: LineChart(
                 LineChartData(
                   lineTouchData: LineTouchData(enabled: false),
@@ -284,9 +487,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     rightTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     topTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
@@ -314,7 +517,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   maxY: maxY,
                   lineBarsData: List.generate(
                     selectedData.length,
-                    (index) => _lineChartBarData(
+                        (index) => _lineChartBarData(
                       selectedData[index],
                       lineColors[index % lineColors.length],
                     ),
