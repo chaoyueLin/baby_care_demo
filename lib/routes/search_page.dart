@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../common/db_provider.dart';
 import '../models/baby.dart';
-import 'daily_feeding_chart.dart'; // <- 根据实际路径调整（例如: widgets/daily_feeding_chart_all_in_one.dart）
+import 'daily_feeding_chart.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -43,13 +43,6 @@ class _HomePageState extends State<SearchPage> {
     setState(() {});
   }
 
-  Future<void> _switchToBaby(Baby baby) async {
-    setState(() {
-      currentBaby = baby;
-      _loadingBaby = false;
-    });
-    await _refreshAll();
-  }
 
   @override
   Widget build(BuildContext context) {

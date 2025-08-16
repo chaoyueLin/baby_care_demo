@@ -1,24 +1,30 @@
-import 'package:baby_care_demo/routes/login_page.dart';
-import 'package:baby_care_demo/routes/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'common/db_provider.dart';
 import 'models/baby.dart';
+import 'routes/login_page.dart';
+import 'routes/main_page.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  bool isLoggedIn = false;
-  List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
-  if (visibleBabies != null) {
-    isLoggedIn = true;
+Future<void> main() async {
+  // 保留 Splash 屏幕
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  } else {
-    isLoggedIn = false;
+  // 异步初始化
+  bool isLoggedIn = await _checkLoginStatus();
 
-  }
+  // 移除 Splash 屏幕
+  FlutterNativeSplash.remove();
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
+}
+
+/// 检查是否已登录
+Future<bool> _checkLoginStatus() async {
+  List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
+  return visibleBabies != null && visibleBabies.isNotEmpty;
 }
 
 class MyApp extends StatelessWidget {
@@ -50,22 +56,17 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        buttonTheme: const ButtonThemeData(
-          buttonColor: Colors.lightGreen,
-          textTheme: ButtonTextTheme.primary,
-        ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Colors.lightGreen,
         ),
       ),
-      locale: const Locale('en'),
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
       initialRoute: isLoggedIn ? '/main' : '/login',
       routes: {
-        '/login': (context) => LoginPage(),
-        '/main': (context) => MainPage(),
+        '/login': (context) =>  LoginPage(),
+        '/main': (context) =>  MainPage(),
       },
     );
   }
