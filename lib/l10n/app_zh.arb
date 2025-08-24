@@ -34,5 +34,12 @@
         "example": "150"
       }
     }
-  }
+  },
+  "settingsTitle": "设置",
+  "darkMode": "深色模式",
+  "followSystem": "跟随系统",
+  "darkModeOn": "深色模式已开启",
+  "darkModeOff": "深色模式已关闭",
+  "weight": "体重",
+  "height": "身高"
 }

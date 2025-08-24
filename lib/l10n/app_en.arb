@@ -34,5 +34,12 @@
         "example": "150"
       }
     }
-  }
+  },
+  "settingsTitle": "Settings",
+  "darkMode": "Dark Mode",
+  "followSystem": "Follow System",
+  "darkModeOn": "Dark mode is ON",
+  "darkModeOff": "Dark mode is OFF",
+  "weight": "weight",
+  "height": "height"
 }

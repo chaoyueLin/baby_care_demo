@@ -425,7 +425,7 @@ class _ProfilePageState extends State<ProfilePage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 CustomTabButton(
-                  label: S.of(context)?.formula ?? 'Weight',
+                  label: S.of(context)?.weight ?? 'Weight',
                   iconPath: 'assets/icons/formula_milk.png',
                   onTap: () async {
                     setState(() => selectedType = TYPE_WEIGHT);
@@ -433,7 +433,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 CustomTabButton(
-                  label: S.of(context)?.water ?? 'Height',
+                  label: S.of(context)?.height ?? 'Height',
                   iconPath: 'assets/icons/water.png',
                   onTap: () async {
                     setState(() => selectedType = TYPE_HEIGHT);
@@ -441,7 +441,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 CustomTabButton(
-                  label: S.of(context)?.poop ?? 'BMI',
+                  label:  'BMI',
                   iconPath: 'assets/icons/poop.png',
                   onTap: () async {
                     setState(() => selectedType = TYPE_BMI);

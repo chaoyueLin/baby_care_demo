@@ -1,71 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:image_pickers/image_pickers.dart';
-import 'dart:io';
+import 'package:provider/provider.dart';
+import '../utils/theme_mode_notifier.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
 
-class NotificationsPage extends StatefulWidget {
-  @override
-  _NotificationsPageState createState() => _NotificationsPageState();
-}
-
-class _NotificationsPageState extends State<NotificationsPage> {
-  List<File> _images = []; // 存储选择的图片列表
-
-  // 异步函数用于选择多张图片
-  Future<void> selectImages() async {
-    // 使用 ImagePickers.pickerPaths 来选择多张图片
-    List<Media> selectedImages = await ImagePickers.pickerPaths(
-      galleryMode: GalleryMode.image,
-      // 选择图库中的图片
-      selectCount: 2,
-      // 限制选择数量为2
-      showGif: false,
-      // 不显示GIF
-      showCamera: true,
-      // 显示相机按钮
-      compressSize: 500,
-      // 图片压缩到500KB以内
-      uiConfig: UIConfig(uiThemeColor: Colors.lightGreen),
-      // 自定义UI主题颜色
-      cropConfig: CropConfig(enableCrop: false, width: 2, height: 1), // 不启用裁剪
-    );
-
-    // 如果用户选择了图片
-    if (selectedImages.isNotEmpty) {
-      setState(() {
-        // 将选中的图片路径转换为 File 对象并存储
-        _images =
-            selectedImages.map((media) => File(media.path ?? "")).toList();
-      });
-    }
-  }
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final notifier = context.watch<ThemeModeNotifier>();
+    final s = S.of(context);
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 如果没有选择图片，显示提示文本
-            _images.isEmpty
-                ? Text('未选择图片', style: TextStyle(fontSize: 18))
-                : Column(
-              children: _images.map((image) {
-                // 显示选中的每张图片
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Image.file(image,
-                      height: 500, width: 500, fit: BoxFit.cover),
-                );
-              }).toList(),
+      body: ListView(
+        children: [
+          const SizedBox(height: 8),
+          SwitchListTile(
+            title: Text(s?.darkMode ?? 'Dark Mode'),
+            subtitle: Text(
+              notifier.themeMode == ThemeMode.system
+                  ? (s?.followSystem ?? 'Follow system')
+                  : notifier.isDark
+                  ? (s?.darkModeOn ?? 'Dark mode is ON')
+                  : (s?.darkModeOff ?? 'Dark mode is OFF'),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: selectImages, // 点击按钮选择多张图片
-              child: Text('从图库选择图片'),
-            ),
-          ],
-        ),
+            value: notifier.isDark,
+            onChanged: (bool v) {
+              notifier.setMode(v ? ThemeMode.dark : ThemeMode.light);
+            },
+          ),
+          ListTile(
+            title: Text(s?.followSystem ?? 'Follow system'),
+            trailing: notifier.themeMode == ThemeMode.system
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () => notifier.setMode(ThemeMode.system),
+          ),
+        ],
       ),
     );
   }

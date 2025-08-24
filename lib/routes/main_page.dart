@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'home_page.dart';
 import 'search_page.dart';
 import 'notifications_page.dart';
@@ -19,8 +18,8 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     HomePage(),
     SearchPage(),
-    NotificationsPage(),
     ProfilePage(),
+    SettingsPage(),
   ];
 
 
@@ -66,8 +65,8 @@ class _MainPageState extends State<MainPage> {
               ),
               _buildDrawerItem(Icons.home, "Home", 0),
               _buildDrawerItem(Icons.search, "Search", 1),
-              _buildDrawerItem(Icons.notifications, "Notifications", 2),
-              _buildDrawerItem(Icons.person, "Profile", 3),
+              _buildDrawerItem(Icons.person, "Profile", 2),
+              _buildDrawerItem(Icons.notifications, "Notifications", 3),
             ],
           ),
         ),
