@@ -17,8 +17,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final List<Color> lineColors = const [Colors.blue, Colors.red, Colors.green];
-
   static const String TYPE_WEIGHT = 'weight';
   static const String TYPE_HEIGHT = 'height';
   static const String TYPE_BMI = 'bmi';
@@ -123,13 +121,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// 依据宝宝生日计算横坐标
-  /// RANGE_13W 使用周(0~13)，其他范围使用月(0~24)，并对 12-24 月保留 12~24 段
   double _calcXByBirth(DateTime birth, DateTime when) {
     final diffDays = when.difference(birth).inDays.toDouble();
     if (selectedRange == RANGE_13W) {
       return diffDays / 7.0; // 周
     } else {
-      // 使用平均月长，避免复杂历法计算
       return diffDays / 30.4375; // 月
     }
   }
@@ -158,8 +154,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (type == null) return; // BMI 使用计算，不直接录入
 
     try {
-      // 你需要在 DBProvider 中实现该方法
-      // 返回指定 baby、类型、时间范围内的记录，按时间升序
       final List<BabyGrow> list = await DBProvider().getBabyGrows(
         babyId: currentBaby!.id ?? 0,
         type: type,
@@ -169,12 +163,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
       final spots = <FlSpot>[];
       for (final g in list) {
-        final t = DateTime.fromMillisecondsSinceEpoch(g.date??0);
+        final t = DateTime.fromMillisecondsSinceEpoch(g.date ?? 0);
         final x = _calcXByBirth(birth, t);
-        // 12-24 月范围内，x 需要位于 [12,24]
-        final xAdj = (selectedRange == RANGE_24M)
-            ? x.clamp(12.0, 24.0)
-            : x;
+        final xAdj = (selectedRange == RANGE_24M) ? x.clamp(12.0, 24.0) : x;
         final y = double.tryParse(g.mush ?? '') ?? 0.0;
         if (y > 0) spots.add(FlSpot(xAdj, y));
       }
@@ -182,8 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
       spots.sort((a, b) => a.x.compareTo(b.x));
       babySeries = spots;
     } catch (e) {
-      // 如果方法名不同，可改为你现有的查询接口
-      // 例如：final list = await DBProvider().queryGrowByBabyAndType(...);
       debugPrint('load baby series error: $e');
       babySeries = [];
     }
@@ -205,12 +194,19 @@ class _ProfilePageState extends State<ProfilePage> {
     _valueController.clear();
     _selectedDate = DateTime.now();
 
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              // 使用主题色与 textTheme
+              backgroundColor: cs.surface,
+              titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
+              contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
               title: Text(_getDialogTitle()),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -223,6 +219,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       hintText: _getInputHint(),
                       border: const OutlineInputBorder(),
                     ),
+                    style: tt.bodyMedium?.copyWith(color: cs.onSurface),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -239,14 +236,14 @@ class _ProfilePageState extends State<ProfilePage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text('取消', style: tt.labelLarge?.copyWith(color: cs.primary)),
                 ),
                 TextButton(
                   onPressed: () async {
                     await _saveGrowData();
                     if (context.mounted) Navigator.of(context).pop();
                   },
-                  child: const Text('保存'),
+                  child: Text('保存', style: tt.labelLarge?.copyWith(color: cs.primary)),
                 ),
               ],
             );
@@ -278,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (currentBaby == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先添加或选择一个宝宝')),
+        SnackBar(content: Text('请先添加或选择一个宝宝')),
       );
       return;
     }
@@ -287,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (value == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入有效的数值')),
+        SnackBar(content: Text('请输入有效的数值')),
       );
       return;
     }
@@ -296,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (growType == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('BMI 数据需要通过身高和体重计算获得')),
+        SnackBar(content: Text('BMI 数据需要通过身高和体重计算获得')),
       );
       return;
     }
@@ -305,16 +302,15 @@ class _ProfilePageState extends State<ProfilePage> {
       babyId: currentBaby!.id ?? 0,
       date: _selectedDate.millisecondsSinceEpoch,
       type: growType,
-      mush: value.toString(), // "120" 这种无单位字符串
+      mush: value.toString(),
     );
 
     try {
       await DBProvider().insertGrow(growData);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('数据保存成功')),
+        SnackBar(content: Text('数据保存成功')),
       );
-      // 重新拉取宝宝曲线
       await _refreshAll();
     } catch (e) {
       if (!mounted) return;
@@ -365,6 +361,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    // 动态生成线上颜色（使用 colorScheme 的 primary/secondary/tertiary；若没有 tertiary 则退到 secondary）
+    final tertiary = cs.tertiary ?? cs.secondary;
+    final lineColors = [cs.primary, cs.secondary, tertiary];
+
     // 坐标轴范围
     double maxX = 0, minX = 0, minY = 0, maxY = 0, intervalX = 1, intervalY = 1;
 
@@ -416,11 +419,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
+      backgroundColor: cs.background,
       body: Column(
         children: [
+          // 顶部 Tab 区域：背景使用 surfaceVariant
           Container(
             height: 100,
-            color: Colors.grey[200],
+            color: cs.surfaceVariant,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -441,7 +446,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                 ),
                 CustomTabButton(
-                  label:  'BMI',
+                  label: 'BMI',
                   iconPath: 'assets/icons/poop.png',
                   onTap: () async {
                     setState(() => selectedType = TYPE_BMI);
@@ -451,13 +456,14 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
           ),
+          // 范围选择 + 添加按钮
           Container(
             height: 60,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.center,
+            color: cs.surface, // 区域背景
             child: Row(
               children: [
-                // 左侧：时间范围选择器
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -469,8 +475,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           setState(() => selectedRange = value!);
                           await _refreshAll();
                         },
+                        fillColor: MaterialStateProperty.all(cs.primary),
                       ),
-                      const Text('0-13周'),
+                      Text('0-13周', style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
                       const SizedBox(width: 8),
                       Radio<String>(
                         value: RANGE_12M,
@@ -479,8 +486,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           setState(() => selectedRange = value!);
                           await _refreshAll();
                         },
+                        fillColor: MaterialStateProperty.all(cs.primary),
                       ),
-                      const Text('0-12个月'),
+                      Text('0-12个月', style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
                       const SizedBox(width: 8),
                       Radio<String>(
                         value: RANGE_24M,
@@ -489,22 +497,23 @@ class _ProfilePageState extends State<ProfilePage> {
                           setState(() => selectedRange = value!);
                           await _refreshAll();
                         },
+                        fillColor: MaterialStateProperty.all(cs.primary),
                       ),
-                      const Text('12-24个月'),
+                      Text('12-24个月', style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
                     ],
                   ),
                 ),
-                // 右侧：添加数据按钮（BMI类型时隐藏）
                 if (selectedType != TYPE_BMI)
+                // 圆形添加按钮：使用主题主色
                   Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: cs.primary,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                      icon: Icon(Icons.add, color: cs.onPrimary, size: 20),
                       onPressed: _showAddDataDialog,
                       padding: EdgeInsets.zero,
                     ),
@@ -512,6 +521,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
           ),
+          // 折线图
           Expanded(
             flex: 6,
             child: Padding(
@@ -526,7 +536,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         reservedSize: 40,
                         getTitlesWidget: (value, meta) => Padding(
                           padding: const EdgeInsets.only(right: 2.0),
-                          child: Text(value.toStringAsFixed(1)),
+                          child: Text(
+                            value.toStringAsFixed(1),
+                            style: tt.bodySmall?.copyWith(color: cs.onBackground),
+                          ),
                         ),
                       ),
                     ),
@@ -543,17 +556,25 @@ class _ProfilePageState extends State<ProfilePage> {
                         interval: 1,
                         getTitlesWidget: (value, meta) => Padding(
                           padding: const EdgeInsets.only(top: 0.0),
-                          child: Text(value.toInt().toString()),
+                          child: Text(
+                            value.toInt().toString(),
+                            style: tt.bodySmall?.copyWith(color: cs.onBackground),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(show: true),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border.all(color: cs.outline),
+                  ),
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: true,
                     horizontalInterval: intervalY,
                     verticalInterval: intervalX,
+                    getDrawingHorizontalLine: (value) => FlLine(color: cs.outline, strokeWidth: 0.5),
+                    getDrawingVerticalLine: (value) => FlLine(color: cs.outline, strokeWidth: 0.5),
                   ),
                   minX: minX,
                   maxX: maxX,
@@ -570,10 +591,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         width: 3,
                       ),
                     ),
-                    // 最后叠加宝宝曲线（黄色）
+                    // 最后叠加宝宝曲线（使用 secondaryContainer/secondary 来保证在暗色也可见）
                     _lineChartBarData(
                       babySeries,
-                      Colors.yellow,
+                      cs.secondaryContainer.computeLuminance() < 0.15 ? cs.secondary : cs.secondaryContainer,
                       showDots: true,
                       width: 3.5,
                     ),

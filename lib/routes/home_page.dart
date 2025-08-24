@@ -58,7 +58,7 @@ class _HomePageContentState extends State<HomePageContent> {
       Baby baby = visibleBabies.firstWhere((b) => b.show == 1, orElse: () => visibleBabies.first);
       _currentBabyId = baby.id;
       await _loadDataForDateIntoCache(currentDate);
-      setState(() {}); // 触发 UI 更新（初始页面可能需要显示刚加载的数据）
+      if (mounted) setState(() {});
     }
   }
 
@@ -96,7 +96,6 @@ class _HomePageContentState extends State<HomePageContent> {
 
     final key = _startOfDayMillis(newDate);
     if (!_recordsCache.containsKey(key)) {
-      // 异步加载并在完成后刷新 UI
       _loadDataForDateIntoCache(newDate).then((_) {
         if (mounted) setState(() {});
       });
@@ -105,11 +104,17 @@ class _HomePageContentState extends State<HomePageContent> {
 
   /// 选择 ml（10 ~ 250）并选择时间（时间选择器会使用 currentDate 的日期）
   void _showMlSelector(FeedType type) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('选择毫升数'),
+          titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
+          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
+          backgroundColor: cs.surface,
+          title: const Text('选择毫升数'),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
@@ -166,7 +171,7 @@ class _HomePageContentState extends State<HomePageContent> {
 
         // 如果当前页面就是插入记录的那天，则刷新 UI。
         if (key == _startOfDayMillis(currentDate)) {
-          setState(() {});
+          if (mounted) setState(() {});
         }
       },
     );
@@ -174,13 +179,15 @@ class _HomePageContentState extends State<HomePageContent> {
 
   /// 便便记录，允许选择最多 3 张图片，拼接路径并调用时间选择器
   Future<void> _addPoopRecord() async {
+    final cs = Theme.of(context).colorScheme;
+
     final selectedImages = await ImagePickers.pickerPaths(
       galleryMode: GalleryMode.image,
       selectCount: 3,
       showGif: false,
       showCamera: true,
       compressSize: 500,
-      uiConfig: UIConfig(uiThemeColor: Colors.lightGreen),
+      uiConfig: UIConfig(uiThemeColor:Colors.lightGreen), // 用主题主色
       cropConfig: CropConfig(enableCrop: false),
     );
 
@@ -193,24 +200,32 @@ class _HomePageContentState extends State<HomePageContent> {
     if (imagePaths.isEmpty) return;
 
     final mush = imagePaths.join(','); // 便便用 mush 存储图片路径的逗号连接字符串
-
-    // 使用 time picker 来选择时间（会最终调用插入函数）
     _showTimePicker(FeedType.poop, mush);
   }
 
-  /// 弹出便便图片预览（单独使用的预览），标题颜色为绿色
+  /// 弹出便便图片预览
   void _showPoopImages(List<String> imagePaths) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('便便记录', style: const TextStyle(color: Colors.green)),
+        backgroundColor: cs.surface,
+        titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
+        contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
+        title: Text('便便记录', style: tt.titleMedium?.copyWith(color: cs.primary)),
         content: SingleChildScrollView(
           child: Column(
             children: imagePaths
                 .map((path) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Image.file(File(path),
-                  width: 300, height: 200, fit: BoxFit.cover),
+              child: Image.file(
+                File(path),
+                width: 300,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
             ))
                 .toList(),
           ),
@@ -244,27 +259,22 @@ class _HomePageContentState extends State<HomePageContent> {
     }).toList();
   }
 
-  /// 点击小时行时显示 Dialog（标题颜色为绿色）
-  void _showHourDetailDialog(DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
+  /// 点击小时行时显示 Dialog
+  void _showHourDetailDialog(
+      DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     // 计算三种液体总量（若没有记录则为 0）
     int milkTotal = hourRecords
         .where((r) => r.type == FeedType.milk)
-        .fold(0, (sum, r) {
-      final v = int.tryParse(r.mush) ?? 0;
-      return sum + v;
-    });
+        .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
     int formulaTotal = hourRecords
         .where((r) => r.type == FeedType.formula)
-        .fold(0, (sum, r) {
-      final v = int.tryParse(r.mush) ?? 0;
-      return sum + v;
-    });
+        .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
     int waterTotal = hourRecords
         .where((r) => r.type == FeedType.water)
-        .fold(0, (sum, r) {
-      final v = int.tryParse(r.mush) ?? 0;
-      return sum + v;
-    });
+        .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
 
     // 聚合所有便便图片路径
     List<String> allPoopImagePaths = hourRecords
@@ -275,120 +285,120 @@ class _HomePageContentState extends State<HomePageContent> {
     showDialog(
       context: context,
       builder: (ctx) {
-        final double dialogWidth = MediaQuery.of(ctx).size.width * 0.8; // 屏幕宽度的 4/5
+        final double dialogWidth = MediaQuery.of(ctx).size.width * 0.8;
         return Dialog(
-          backgroundColor: Colors.white,
+          backgroundColor: cs.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: SizedBox(
             width: dialogWidth,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 标题：小时范围，保留绿色字体
-                    Text(
-                      '${hourIndex.toString().padLeft(2, '0')}:00 - ${(hourIndex + 1).toString().padLeft(2, '0')}:00',
-                      style: const TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 三种液体总量
-                    Text('母乳: ${milkTotal} ml', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 6),
-                    Text('奶粉: ${formulaTotal} ml', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 6),
-                    Text('水: ${waterTotal} ml', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 12),
-
-                    const Divider(),
-                    const SizedBox(height: 8),
-
-                    // 便便部分标题
-                    const Text('便便:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-
-                    // 便便图片或提示
-                    // 便便图片或提示
-                    if (allPoopImagePaths.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text('无便便记录'),
-                      )
-                    else
-                      Column(
-                        children: allPoopImagePaths.map((path) {
-                          return GestureDetector(
-                            onTap: () {
-                              // 点击缩略图打开单张大图预览（白色背景）
-                              showDialog(
-                                context: context,
-                                builder: (_) {
-                                  return Dialog(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          if (path.isNotEmpty)
-                                            ConstrainedBox(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width * 0.9,
-                                                maxHeight: MediaQuery.of(context).size.height * 0.7,
-                                              ),
-                                              child: Image.file(File(path), fit: BoxFit.contain),
-                                            ),
-                                          const SizedBox(height: 8),
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(),
-                                            child: const Text(
-                                              '关闭',
-                                              style: TextStyle(color: Colors.black),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child: Container(
-                              width: double.infinity, // 占满宽度
-                              height: 150,
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: path.isNotEmpty
-                                  ? ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.file(File(path), fit: BoxFit.cover),
-                              )
-                                  : const SizedBox.shrink(),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-
-
-                    const SizedBox(height: 12),
-                    // 关闭按钮，靠右
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text(
-                          '关闭',
-                          style: TextStyle(color: Colors.black),
+                child: DefaultTextStyle(
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurface),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 标题：小时范围（绿色→主题主色）
+                      Text(
+                        '${hourIndex.toString().padLeft(2, '0')}:00 - ${(hourIndex + 1).toString().padLeft(2, '0')}:00',
+                        style: tt.titleMedium?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+
+                      Text('母乳: ${milkTotal} ml', style: tt.bodyMedium),
+                      const SizedBox(height: 6),
+                      Text('奶粉: ${formulaTotal} ml', style: tt.bodyMedium),
+                      const SizedBox(height: 6),
+                      Text('水: ${waterTotal} ml', style: tt.bodyMedium),
+                      const SizedBox(height: 12),
+
+                      Divider(color: cs.outline),
+                      const SizedBox(height: 8),
+
+                      Text('便便:', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+
+                      if (allPoopImagePaths.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text('无便便记录'),
+                        )
+                      else
+                        Column(
+                          children: allPoopImagePaths.map((path) {
+                            return GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    return Dialog(
+                                      backgroundColor: cs.surface,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (path.isNotEmpty)
+                                              ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                  maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                                  maxHeight: MediaQuery.of(context).size.height * 0.7,
+                                                ),
+                                                child: Image.file(
+                                                  File(path),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            const SizedBox(height: 8),
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(),
+                                              child: const Text('关闭'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                height: 150,
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: cs.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: path.isNotEmpty
+                                    ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.file(
+                                    File(path),
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                                    : const SizedBox.shrink(),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('关闭'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -398,10 +408,13 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
+      backgroundColor: cs.background,
       body: Column(
         children: [
           Expanded(
@@ -422,7 +435,7 @@ class _HomePageContentState extends State<HomePageContent> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         DateUtil.dateToString(pageDate),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: tt.headlineSmall?.copyWith(color: cs.onBackground),
                       ),
                     ),
                     Expanded(
@@ -430,7 +443,7 @@ class _HomePageContentState extends State<HomePageContent> {
                         itemCount: 24,
                         separatorBuilder: (context, index) => Container(
                           height: 1,
-                          color: Colors.green, // 分隔条绿色
+                          color: cs.primary, // 仍旧绿色语义 → 用主题主色
                         ),
                         itemBuilder: (context, hourIndex) {
                           final hourRecords = _hourRecordsForPageDate(pageDate, hourIndex);
@@ -463,14 +476,14 @@ class _HomePageContentState extends State<HomePageContent> {
                             },
                             child: Container(
                               height: 50,
-                              color: Colors.white, // 每个小时的背景白色
+                              color: cs.surface, // 每个小时的背景 → surface
                               child: Row(
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                     child: Text(
                                       hourIndex.toString().padLeft(2, '0') + ':00',
-                                      style: const TextStyle(fontSize: 16),
+                                      style: tt.bodyMedium?.copyWith(color: cs.onSurface),
                                     ),
                                   ),
                                   Expanded(
@@ -486,7 +499,6 @@ class _HomePageContentState extends State<HomePageContent> {
                         },
                       ),
                     ),
-
                   ],
                 );
               },
@@ -494,7 +506,7 @@ class _HomePageContentState extends State<HomePageContent> {
           ),
           Container(
             height: 100,
-            color: Colors.grey[200],
+            color: cs.surfaceVariant, // 底部操作栏背景
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
