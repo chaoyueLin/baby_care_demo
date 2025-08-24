@@ -9,7 +9,7 @@ import '../models/baby_care.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
 
-class HomePage extends StatelessWidget {
+class CarePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HomePageContent();

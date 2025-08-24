@@ -9,14 +9,14 @@ import '../models/baby.dart';
 import '../models/baby_grow.dart';
 import '../widget/custom_tab_button.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class GrowPage extends StatefulWidget {
+  const GrowPage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<GrowPage> createState() => _GrowPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _GrowPageState extends State<GrowPage> {
   static const String TYPE_WEIGHT = 'weight';
   static const String TYPE_HEIGHT = 'height';
   static const String TYPE_BMI = 'bmi';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'home_page.dart';
-import 'search_page.dart';
-import 'notifications_page.dart';
-import 'profile_page.dart';
+import 'care_page.dart';
+import 'data_page.dart';
+import 'setting_page.dart';
+import 'grow_page.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 
 class MainPage extends StatefulWidget {
@@ -16,9 +16,9 @@ class _MainPageState extends State<MainPage> {
   DateTime? _lastPressedAt; // 记录上次按返回键的时间
 
   final List<Widget> _pages = [
-    HomePage(),
-    SearchPage(),
-    ProfilePage(),
+    CarePage(),
+    DataPage(),
+    GrowPage(),
     SettingsPage(),
   ];
 
@@ -63,10 +63,10 @@ class _MainPageState extends State<MainPage> {
                 decoration: BoxDecoration(color: Colors.lightGreen),
                 child: Text("App", style: TextStyle(color: Colors.white, fontSize: 24)),
               ),
-              _buildDrawerItem(Icons.home, "Home", 0),
-              _buildDrawerItem(Icons.search, "Search", 1),
-              _buildDrawerItem(Icons.person, "Profile", 2),
-              _buildDrawerItem(Icons.notifications, "Notifications", 3),
+              _buildDrawerItem(Icons.home, "Care", 0),
+              _buildDrawerItem(Icons.search, "Data", 1),
+              _buildDrawerItem(Icons.person, "Grow", 2),
+              _buildDrawerItem(Icons.notifications, "Setting", 3),
             ],
           ),
         ),

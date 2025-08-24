@@ -3,14 +3,14 @@ import '../common/db_provider.dart';
 import '../models/baby.dart';
 import 'daily_feeding_chart.dart';
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+class DataPage extends StatefulWidget {
+  const DataPage({Key? key}) : super(key: key);
 
   @override
-  State<SearchPage> createState() => _HomePageState();
+  State<DataPage> createState() => _DataPageState();
 }
 
-class _HomePageState extends State<SearchPage> {
+class _DataPageState extends State<DataPage> {
   Baby? currentBaby;
   bool _loadingBaby = true;
 
