@@ -30,7 +30,7 @@ class _DataPageState extends State<DataPage> {
       final visibleBabies = await DBProvider().getVisiblePersons();
       if (visibleBabies != null && visibleBabies.isNotEmpty) {
         final baby = visibleBabies.firstWhere(
-          (b) => b.show == 1,
+              (b) => b.show == 1,
           orElse: () => visibleBabies.first,
         );
         setState(() => currentBaby = baby);
@@ -127,11 +127,11 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
         _anchorDay.add(const Duration(days: 1)).millisecondsSinceEpoch;
     final startMs = switch (_range) {
       FeedRange.week =>
-        _anchorDay.subtract(const Duration(days: 6)).millisecondsSinceEpoch,
+      _anchorDay.subtract(const Duration(days: 6)).millisecondsSinceEpoch,
       FeedRange.month =>
-        _anchorDay.subtract(const Duration(days: 29)).millisecondsSinceEpoch,
+      _anchorDay.subtract(const Duration(days: 29)).millisecondsSinceEpoch,
       FeedRange.quarter =>
-        _anchorDay.subtract(const Duration(days: 89)).millisecondsSinceEpoch,
+      _anchorDay.subtract(const Duration(days: 89)).millisecondsSinceEpoch,
     };
     return dbp.getCareByRange(startMs, endExclusive, widget.babyId);
   }
@@ -148,6 +148,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // 时间范围选择
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -167,7 +168,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.month,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.month)),
-                const Text('最近一月'),
+                const Text('最近一个月'),
               ],
             ),
             const SizedBox(width: 8),
@@ -177,7 +178,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.quarter,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.quarter)),
-                const Text('最近三月'),
+                const Text('最近三个月'),
               ],
             ),
           ],
@@ -200,36 +201,48 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
             final days = _range == FeedRange.week
                 ? 7
                 : _range == FeedRange.month
-                    ? 30
-                    : 90;
+                ? 30
+                : 90;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // 图例
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildLegendItem(Colors.blue.shade400, '母乳'),
+                    const SizedBox(width: 12),
+                    _buildLegendItem(Colors.green.shade400, '奶粉'),
+                    const SizedBox(width: 12),
+                    _buildLegendItem(Colors.orange.shade400, '水'),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 SizedBox(
                   height: 300,
                   child: _range == FeedRange.quarter
                       ? _DailyStackedChartScrollable(
-                          records: list,
-                          endDayInclusive: _anchorDay,
-                          days: days,
-                          barWidth: widget.barWidth,
-                          onBarTapped: (dayStat) {
-                            setState(() {
-                              _selectedDay = dayStat;
-                            });
-                          },
-                        )
+                    records: list,
+                    endDayInclusive: _anchorDay,
+                    days: days,
+                    barWidth: widget.barWidth,
+                    onBarTapped: (dayStat) {
+                      setState(() {
+                        _selectedDay = dayStat;
+                      });
+                    },
+                  )
                       : _DailyStackedChart(
-                          records: list,
-                          endDayInclusive: _anchorDay,
-                          days: days,
-                          barWidth: widget.barWidth,
-                          onBarTapped: (dayStat) {
-                            setState(() {
-                              _selectedDay = dayStat;
-                            });
-                          },
-                        ),
+                    records: list,
+                    endDayInclusive: _anchorDay,
+                    days: days,
+                    barWidth: widget.barWidth,
+                    onBarTapped: (dayStat) {
+                      setState(() {
+                        _selectedDay = dayStat;
+                      });
+                    },
+                  ),
                 ),
                 if (_selectedDay != null)
                   Padding(
@@ -243,6 +256,23 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
             );
           },
         ),
+      ],
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }

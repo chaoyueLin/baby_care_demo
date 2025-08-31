@@ -112,6 +112,7 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeMode, // 关键：跟随状态切换
+      locale: const Locale('en'), // 默认英文
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,

@@ -40,6 +40,29 @@
   "followSystem": "跟随系统",
   "darkModeOn": "深色模式已开启",
   "darkModeOff": "深色模式已关闭",
+
   "weight": "体重",
-  "height": "身高"
+  "height": "身高",
+  "bmi": "BMI",
+  "addWeight": "添加体重数据",
+  "addHeight": "添加身高数据",
+  "addBMI": "添加BMI数据",
+  "addData": "添加数据",
+  "enterWeightKg": "请输入体重 (kg)",
+  "enterHeightCm": "请输入身高 (cm)",
+  "enterBMI": "请输入BMI",
+  "value": "数值",
+  "enterValue": "请输入数值",
+  "chooseDate": "选择日期",
+  "save": "保存",
+  "pleaseAddOrSelectBaby": "请先添加或选择一个宝宝",
+  "pleaseEnterValidNumber": "请输入有效的数值",
+  "bmiNeedHeightWeight": "BMI 数据需要通过身高和体重计算",
+
+  "range0to13Week": "0-13周",
+  "range0to12Month": "0-12个月",
+  "range12to24Month": "12-24个月",
+  "percent3": "3%",
+  "percent50": "50%",
+  "percent97": "97%"
 }

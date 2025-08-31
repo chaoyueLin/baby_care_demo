@@ -28,14 +28,11 @@ class _GrowPageState extends State<GrowPage> {
   String selectedType = TYPE_WEIGHT;
   String selectedRange = RANGE_13W;
 
-  // WHO/国家标准曲线数据
   List<List<FlSpot>> selectedData = [];
-  // 宝宝自己的测量曲线
   List<FlSpot> babySeries = [];
 
   Baby? currentBaby;
 
-  // 输入弹窗
   final TextEditingController _valueController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
 
@@ -51,7 +48,6 @@ class _GrowPageState extends State<GrowPage> {
     super.dispose();
   }
 
-  /// 获取当前 baby 并加载曲线数据
   Future<void> _loadCurrentBabyAndData() async {
     try {
       final visibleBabies = await DBProvider().getVisiblePersons();
@@ -66,7 +62,7 @@ class _GrowPageState extends State<GrowPage> {
     await _refreshAll();
   }
 
-  bool isBoy() => (currentBaby?.sex ?? 1) == 1; // 默认男宝
+  bool isBoy() => (currentBaby?.sex ?? 1) == 1;
 
   Future<void> _refreshAll() async {
     _updateSelectedData();
@@ -120,24 +116,21 @@ class _GrowPageState extends State<GrowPage> {
     }
   }
 
-  /// 依据宝宝生日计算横坐标
   double _calcXByBirth(DateTime birth, DateTime when) {
     final diffDays = when.difference(birth).inDays.toDouble();
     if (selectedRange == RANGE_13W) {
-      return diffDays / 7.0; // 周
+      return diffDays / 7.0;
     } else {
-      return diffDays / 30.4375; // 月
+      return diffDays / 30.4375;
     }
   }
 
-  /// 加载宝宝自己的测量数据并转换成 FlSpot
   Future<void> _loadBabySeries() async {
     babySeries = [];
     if (currentBaby == null) return;
 
     final birth = currentBaby!.birthdate ?? DateTime.fromMillisecondsSinceEpoch(0);
 
-    // 计算当前选择范围的起止时间
     DateTime start, end;
     if (selectedRange == RANGE_13W) {
       start = birth;
@@ -147,11 +140,11 @@ class _GrowPageState extends State<GrowPage> {
       end = birth.add(const Duration(days: 365));
     } else {
       start = birth.add(const Duration(days: 365));
-      end = birth.add(const Duration(days: (365 * 2))); // 近似 24 个月
+      end = birth.add(const Duration(days: (365 * 2)));
     }
 
     final type = _toGrowType(selectedType);
-    if (type == null) return; // BMI 使用计算，不直接录入
+    if (type == null) return;
 
     try {
       final List<BabyGrow> list = await DBProvider().getBabyGrows(
@@ -189,7 +182,6 @@ class _GrowPageState extends State<GrowPage> {
     }
   }
 
-  /// 添加数据弹窗
   void _showAddDataDialog() {
     _valueController.clear();
     _selectedDate = DateTime.now();
@@ -203,11 +195,10 @@ class _GrowPageState extends State<GrowPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              // 使用主题色与 textTheme
               backgroundColor: cs.surface,
               titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
               contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-              title: Text(_getDialogTitle()),
+              title: Text(_getDialogTitle() ?? ''),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -215,8 +206,8 @@ class _GrowPageState extends State<GrowPage> {
                     controller: _valueController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
-                      labelText: _getInputLabel(),
-                      hintText: _getInputHint(),
+                      labelText: _getInputLabel() ?? '',
+                      hintText: _getInputHint() ?? '',
                       border: const OutlineInputBorder(),
                     ),
                     style: tt.bodyMedium?.copyWith(color: cs.onSurface),
@@ -227,7 +218,7 @@ class _GrowPageState extends State<GrowPage> {
                     child: ElevatedButton(
                       onPressed: () => _showDatePicker(setDialogState),
                       child: Text(
-                        '选择日期: ${_selectedDate.year}年${_selectedDate.month}月${_selectedDate.day}日',
+                        '${S.of(context)?.chooseDate ?? '选择日期'}: ${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
                       ),
                     ),
                   ),
@@ -236,14 +227,14 @@ class _GrowPageState extends State<GrowPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('取消', style: tt.labelLarge?.copyWith(color: cs.primary)),
+                  child: Text(S.of(context)?.cancel ?? '取消', style: tt.labelLarge?.copyWith(color: cs.primary)),
                 ),
                 TextButton(
                   onPressed: () async {
                     await _saveGrowData();
                     if (context.mounted) Navigator.of(context).pop();
                   },
-                  child: Text('保存', style: tt.labelLarge?.copyWith(color: cs.primary)),
+                  child: Text(S.of(context)?.save ?? '保存', style: tt.labelLarge?.copyWith(color: cs.primary)),
                 ),
               ],
             );
@@ -253,7 +244,6 @@ class _GrowPageState extends State<GrowPage> {
     );
   }
 
-  /// 日期选择器
   void _showDatePicker(StateSetter setDialogState) {
     final min = currentBaby?.birthdate ?? DateTime(2000, 1, 1);
     final max = DateTime.now();
@@ -269,13 +259,12 @@ class _GrowPageState extends State<GrowPage> {
     );
   }
 
-  /// 保存成长数据 -> 插入 DB -> 刷新曲线
   Future<void> _saveGrowData() async {
     if (_valueController.text.trim().isEmpty) return;
     if (currentBaby == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('请先添加或选择一个宝宝')),
+        SnackBar(content: Text(S.of(context)?.pleaseAddOrSelectBaby ?? '请先添加或选择一个宝宝')),
       );
       return;
     }
@@ -284,7 +273,7 @@ class _GrowPageState extends State<GrowPage> {
     if (value == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('请输入有效的数值')),
+        SnackBar(content: Text(S.of(context)?.pleaseEnterValidNumber ?? '请输入有效的数值')),
       );
       return;
     }
@@ -293,7 +282,7 @@ class _GrowPageState extends State<GrowPage> {
     if (growType == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('BMI 数据需要通过身高和体重计算获得')),
+        SnackBar(content: Text(S.of(context)?.bmiNeedHeightWeight ?? 'BMI 数据需要通过身高和体重计算获得')),
       );
       return;
     }
@@ -320,42 +309,42 @@ class _GrowPageState extends State<GrowPage> {
     }
   }
 
-  String _getDialogTitle() {
+  String? _getDialogTitle() {
     switch (selectedType) {
       case TYPE_WEIGHT:
-        return '添加体重数据';
+        return S.of(context)?.addWeight ?? '添加体重数据';
       case TYPE_HEIGHT:
-        return '添加身高数据';
+        return S.of(context)?.addHeight ?? '添加身高数据';
       case TYPE_BMI:
-        return '添加 BMI 数据';
+        return S.of(context)?.addBMI ?? '添加BMI数据';
       default:
-        return '添加数据';
+        return S.of(context)?.addData ?? '添加数据';
     }
   }
 
-  String _getInputLabel() {
+  String? _getInputLabel() {
     switch (selectedType) {
       case TYPE_WEIGHT:
-        return '体重';
+        return S.of(context)?.weight ?? '体重';
       case TYPE_HEIGHT:
-        return '身高';
+        return S.of(context)?.height ?? '身高';
       case TYPE_BMI:
-        return 'BMI';
+        return S.of(context)?.bmi ?? 'BMI';
       default:
-        return '数值';
+        return S.of(context)?.value ?? '数值';
     }
   }
 
-  String _getInputHint() {
+  String? _getInputHint() {
     switch (selectedType) {
       case TYPE_WEIGHT:
-        return '请输入体重 (kg)';
+        return S.of(context)?.enterWeightKg ?? '请输入体重 (kg)';
       case TYPE_HEIGHT:
-        return '请输入身高 (cm)';
+        return S.of(context)?.enterHeightCm ?? '请输入身高 (cm)';
       case TYPE_BMI:
-        return '请输入 BMI';
+        return S.of(context)?.enterBMI ?? '请输入BMI';
       default:
-        return '请输入数值';
+        return S.of(context)?.enterValue ?? '请输入数值';
     }
   }
 
@@ -364,57 +353,33 @@ class _GrowPageState extends State<GrowPage> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    // 动态生成线上颜色（使用 colorScheme 的 primary/secondary/tertiary；若没有 tertiary 则退到 secondary）
     final tertiary = cs.tertiary ?? cs.secondary;
-    final lineColors = [cs.primary, cs.secondary, tertiary];
+    final lineColors = [Colors.lightGreen.shade200, Colors.lightGreen.shade300, Colors.lightGreen.shade400];
 
-    // 坐标轴范围
-    double maxX = 0, minX = 0, minY = 0, maxY = 0, intervalX = 1, intervalY = 1;
-
+    double maxX = 0, minX = 0, minY = 0, maxY = 0;
     if (selectedType == TYPE_WEIGHT) {
       if (selectedRange == RANGE_13W) {
-        maxX = 13;
-        minY = 2;
-        maxY = 8.5;
+        maxX = 13; minY = 2; maxY = 8.5;
       } else if (selectedRange == RANGE_12M) {
-        maxX = 12;
-        minY = 2;
-        maxY = 12;
+        maxX = 12; minY = 2; maxY = 12;
       } else {
-        minX = 12;
-        maxX = 24;
-        minY = 7;
-        maxY = 16;
+        minX = 12; maxX = 24; minY = 7; maxY = 16;
       }
     } else if (selectedType == TYPE_HEIGHT) {
       if (selectedRange == RANGE_13W) {
-        maxX = 13;
-        minY = 45;
-        maxY = 66;
+        maxX = 13; minY = 45; maxY = 66;
       } else if (selectedRange == RANGE_12M) {
-        maxX = 12;
-        minY = 46;
-        maxY = 81;
+        maxX = 12; minY = 46; maxY = 81;
       } else {
-        minX = 12;
-        maxX = 24;
-        minY = 68;
-        maxY = 94;
+        minX = 12; maxX = 24; minY = 68; maxY = 94;
       }
     } else if (selectedType == TYPE_BMI) {
       if (selectedRange == RANGE_13W) {
-        maxX = 13;
-        minY = 10;
-        maxY = 20;
+        maxX = 13; minY = 10; maxY = 20;
       } else if (selectedRange == RANGE_12M) {
-        maxX = 12;
-        minY = 11;
-        maxY = 20.5;
+        maxX = 12; minY = 11; maxY = 20.5;
       } else {
-        minX = 12;
-        maxX = 24;
-        minY = 13;
-        maxY = 20;
+        minX = 12; maxX = 24; minY = 13; maxY = 20;
       }
     }
 
@@ -422,7 +387,7 @@ class _GrowPageState extends State<GrowPage> {
       backgroundColor: cs.background,
       body: Column(
         children: [
-          // 顶部 Tab 区域：背景使用 surfaceVariant
+          // 顶部 Tab
           Container(
             height: 100,
             color: cs.surfaceVariant,
@@ -456,74 +421,21 @@ class _GrowPageState extends State<GrowPage> {
               ],
             ),
           ),
-          // 范围选择 + 添加按钮
+          // 范围选择居中
           Container(
             height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.center,
-            color: cs.surface, // 区域背景
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Radio<String>(
-                        value: RANGE_13W,
-                        groupValue: selectedRange,
-                        onChanged: (value) async {
-                          setState(() => selectedRange = value!);
-                          await _refreshAll();
-                        },
-                        fillColor: MaterialStateProperty.all(cs.primary),
-                      ),
-                      Text('0-13周', style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
-                      const SizedBox(width: 8),
-                      Radio<String>(
-                        value: RANGE_12M,
-                        groupValue: selectedRange,
-                        onChanged: (value) async {
-                          setState(() => selectedRange = value!);
-                          await _refreshAll();
-                        },
-                        fillColor: MaterialStateProperty.all(cs.primary),
-                      ),
-                      Text('0-12个月', style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
-                      const SizedBox(width: 8),
-                      Radio<String>(
-                        value: RANGE_24M,
-                        groupValue: selectedRange,
-                        onChanged: (value) async {
-                          setState(() => selectedRange = value!);
-                          await _refreshAll();
-                        },
-                        fillColor: MaterialStateProperty.all(cs.primary),
-                      ),
-                      Text('12-24个月', style: tt.bodyMedium?.copyWith(color: cs.onSurface)),
-                    ],
-                  ),
-                ),
-                if (selectedType != TYPE_BMI)
-                // 圆形添加按钮：使用主题主色
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.add, color: cs.onPrimary, size: 20),
-                      onPressed: _showAddDataDialog,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ),
+                _buildRangeRadio(RANGE_13W, S.of(context)?.range0to13Week ?? '0-13周'),
+                _buildRangeRadio(RANGE_12M, S.of(context)?.range0to12Month ?? '0-12个月'),
+                _buildRangeRadio(RANGE_24M, S.of(context)?.range12to24Month ?? '12-24个月'),
               ],
             ),
           ),
           // 折线图
           Expanded(
-            flex: 6,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
               child: LineChart(
@@ -534,45 +446,32 @@ class _GrowPageState extends State<GrowPage> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
-                        getTitlesWidget: (value, meta) => Padding(
-                          padding: const EdgeInsets.only(right: 2.0),
-                          child: Text(
-                            value.toStringAsFixed(1),
-                            style: tt.bodySmall?.copyWith(color: cs.onBackground),
-                          ),
+                        getTitlesWidget: (value, meta) => Text(
+                          value.toStringAsFixed(1),
+                          style: tt.bodySmall?.copyWith(color: cs.onBackground),
                         ),
                       ),
                     ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 32,
                         interval: 1,
-                        getTitlesWidget: (value, meta) => Padding(
-                          padding: const EdgeInsets.only(top: 0.0),
-                          child: Text(
-                            value.toInt().toString(),
-                            style: tt.bodySmall?.copyWith(color: cs.onBackground),
-                          ),
+                        getTitlesWidget: (value, meta) => Text(
+                          value.toInt().toString(),
+                          style: tt.bodySmall?.copyWith(color: cs.onBackground),
                         ),
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(color: cs.outline),
-                  ),
+                  borderData: FlBorderData(show: true, border: Border.all(color: cs.outline)),
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: true,
-                    horizontalInterval: intervalY,
-                    verticalInterval: intervalX,
+                    horizontalInterval: 1,
+                    verticalInterval: 1,
                     getDrawingHorizontalLine: (value) => FlLine(color: cs.outline, strokeWidth: 0.5),
                     getDrawingVerticalLine: (value) => FlLine(color: cs.outline, strokeWidth: 0.5),
                   ),
@@ -580,27 +479,68 @@ class _GrowPageState extends State<GrowPage> {
                   maxX: maxX,
                   minY: minY,
                   maxY: maxY,
-                  // 先画标准曲线
                   lineBarsData: [
+                    // 虚线
                     ...List.generate(
                       selectedData.length,
-                          (index) => _lineChartBarData(
-                        selectedData[index],
-                        lineColors[index % lineColors.length],
-                        showDots: false,
-                        width: 3,
+                          (index) => LineChartBarData(
+                        spots: selectedData[index],
+                        isCurved: true,
+                        color: lineColors[index % lineColors.length],
+                        barWidth: 2,
+                        isStrokeCapRound: true,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: FlDotData(show: false),
+                        dashArray: [6, 3],
                       ),
                     ),
-                    // 最后叠加宝宝曲线（使用 secondaryContainer/secondary 来保证在暗色也可见）
-                    _lineChartBarData(
-                      babySeries,
-                      cs.secondaryContainer.computeLuminance() < 0.15 ? cs.secondary : cs.secondaryContainer,
-                      showDots: true,
-                      width: 3.5,
+                    // 宝宝线
+                    LineChartBarData(
+                      spots: babySeries,
+                      isCurved: true,
+                      color: cs.primary,
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      belowBarData: BarAreaData(show: false),
+                      dotData: FlDotData(show: true),
                     ),
                   ],
                 ),
               ),
+            ),
+          ),
+          // 图例 + +号
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildLegend(lineColors[0], '3%'),
+                      const SizedBox(width: 8),
+                      _buildLegend(lineColors[1], '50%'),
+                      const SizedBox(width: 8),
+                      _buildLegend(lineColors[2], '97%'),
+                    ],
+                  ),
+                ),
+                // +号
+                if (selectedType != TYPE_BMI)
+                  GestureDetector(
+                    onTap: _showAddDataDialog,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Icon(Icons.add, color: cs.onPrimary, size: 20),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -608,20 +548,35 @@ class _GrowPageState extends State<GrowPage> {
     );
   }
 
-  LineChartBarData _lineChartBarData(
-      List<FlSpot> spots,
-      Color color, {
-        bool showDots = false,
-        double width = 3,
-      }) {
-    return LineChartBarData(
-      spots: spots,
-      isCurved: true,
-      color: color,
-      barWidth: width,
-      isStrokeCapRound: true,
-      belowBarData: BarAreaData(show: false),
-      dotData: FlDotData(show: showDots),
+  Widget _buildRangeRadio(String value, String label) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio<String>(
+          value: value,
+          groupValue: selectedRange,
+          onChanged: (val) async {
+            if (val != null) {
+              setState(() => selectedRange = val);
+              await _refreshAll();
+            }
+          },
+          fillColor: MaterialStateProperty.all(cs.primary),
+        ),
+        Text(label, style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+      ],
+    );
+  }
+
+  Widget _buildLegend(Color color, String text) {
+    return Row(
+      children: [
+        Container(width: 20, height: 2, color: color),
+        const SizedBox(width: 4),
+        Text(text, style: const TextStyle(fontSize: 12)),
+      ],
     );
   }
 }
