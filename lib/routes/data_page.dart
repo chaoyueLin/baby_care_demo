@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-
+import 'package:flutter_gen/gen_l10n/S.dart';
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import '../models/baby_care.dart';
@@ -146,6 +146,8 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Column(
       children: [
         // 时间范围选择
@@ -158,32 +160,32 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.week,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.week)),
-                const Text('最近一周'),
+                Text(S.of(context)?.recentWeek ?? 'recentWeek',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Row(
               children: [
                 Radio<FeedRange>(
                     value: FeedRange.month,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.month)),
-                const Text('最近一个月'),
+                 Text(S.of(context)?.recentMonth ?? 'recentMonth',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Row(
               children: [
                 Radio<FeedRange>(
                     value: FeedRange.quarter,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.quarter)),
-                const Text('最近三个月'),
+                 Text(S.of(context)?.recentQuarter ?? 'recentQuarter',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         FutureBuilder<List<BabyCare>>(
           future: _future,
           builder: (context, snap) {
@@ -210,11 +212,11 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildLegendItem(Colors.blue.shade400, '母乳'),
+                    _buildLegendItem(Colors.blue.shade400,  S.of(context)?.breastMilk ?? "breastMilk"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.green.shade400, '奶粉'),
+                    _buildLegendItem(Colors.green.shade400, S.of(context)?.formula ?? "formula"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.orange.shade400, '水'),
+                    _buildLegendItem(Colors.orange.shade400, S.of(context)?.babyFood ?? "babyFood"),
                   ],
                 ),
                 const SizedBox(height: 8),

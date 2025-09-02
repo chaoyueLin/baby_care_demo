@@ -60,9 +60,9 @@
   "percent50": "50%",
   "percent97": "97%",
 
-  "recentWeek": "Recent Week",
-  "recentMonth": "Recent Month",
-  "recentQuarter": "Recent Quarter",
+  "recentWeek": "Week",
+  "recentMonth": "Month",
+  "recentQuarter": "Quarter",
   "retry": "Retry",
   "dataLoadError": "Data load failed: {error}",
   "@dataLoadError": {

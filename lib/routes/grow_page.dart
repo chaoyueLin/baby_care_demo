@@ -428,9 +428,9 @@ class _GrowPageState extends State<GrowPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildRangeRadio(RANGE_13W, S.of(context)?.range0to13Week ?? '0-13周'),
-                _buildRangeRadio(RANGE_12M, S.of(context)?.range0to12Month ?? '0-12个月'),
-                _buildRangeRadio(RANGE_24M, S.of(context)?.range12to24Month ?? '12-24个月'),
+                _buildRangeRadio(RANGE_13W, S.of(context)?.range0to13Week ?? '0-13 Weeks'),
+                _buildRangeRadio(RANGE_12M, S.of(context)?.range0to12Month ?? '0-12 Months'),
+                _buildRangeRadio(RANGE_24M, S.of(context)?.range12to24Month ?? '12-24 Months'),
               ],
             ),
           ),
