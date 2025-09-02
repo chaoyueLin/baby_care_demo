@@ -250,7 +250,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      '日期: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\n母乳: ${_selectedDay!.milk.toInt()}ml, 奶粉: ${_selectedDay!.formula.toInt()}ml, 饮水: ${_selectedDay!.water.toInt()}ml, 💩: ${_selectedDay!.poopCount} 次',
+                      '日期: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\n母乳: ${_selectedDay!.milk.toInt()}ml, 奶粉: ${_selectedDay!.formula.toInt()}ml, 辅食: ${_selectedDay!.babyFood.toInt()}g, 💩: ${_selectedDay!.poopCount} 次',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -298,36 +298,49 @@ class _DailyStackedChartScrollable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final agg = _aggregateByDay(records, endDayInclusive, days);
-    final maxStackY = agg.maxStackY == 0 ? 100 : agg.maxStackY;
-    final maxY = _niceCeil(maxStackY * 1.15);
+    final maxMilkFormula = agg.maxMilkFormula == 0 ? 100 : agg.maxMilkFormula;
+    final maxBabyFood = agg.maxBabyFood == 0 ? 50 : agg.maxBabyFood;
+    final maxY = _niceCeil(
+        (maxMilkFormula > maxBabyFood ? maxMilkFormula : maxBabyFood) * 1.15);
 
-    // 生成柱状图数据
     final groups = List.generate(agg.series.length, (i) {
       final s = agg.series[i];
       final milk = s.milk;
       final formula = s.formula;
-      final water = s.water;
-      final total = milk + formula + water;
-      return BarChartGroupData(
-        x: i,
-        barRods: [
+      final babyFood = s.babyFood;
+
+      final rods = <BarChartRodData>[];
+
+      if (milk > 0 || formula > 0) {
+        rods.add(
           BarChartRodData(
-            toY: total,
+            toY: milk + formula,
             width: barWidth,
             rodStackItems: [
               if (milk > 0) BarChartRodStackItem(0, milk, Colors.blue.shade400),
               if (formula > 0)
                 BarChartRodStackItem(
                     milk, milk + formula, Colors.green.shade400),
-              if (water > 0)
-                BarChartRodStackItem(
-                    milk + formula, total, Colors.orange.shade400),
             ],
             borderSide:
-                BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
           ),
-        ],
-      );
+        );
+      }
+
+      if (babyFood > 0) {
+        rods.add(
+          BarChartRodData(
+            toY: babyFood,
+            width: barWidth,
+            color: Colors.orange.shade400,
+            borderSide:
+            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+          ),
+        );
+      }
+
+      return BarChartGroupData(x: i, barRods: rods, barsSpace: 6);
     });
 
     return SizedBox(
@@ -335,7 +348,6 @@ class _DailyStackedChartScrollable extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 左侧固定Y轴
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(5, (i) {
@@ -350,7 +362,6 @@ class _DailyStackedChartScrollable extends StatelessWidget {
             }),
           ),
           const SizedBox(width: 4),
-          // 左侧分割线
           const SizedBox(
             width: 1,
             height: 280,
@@ -359,19 +370,17 @@ class _DailyStackedChartScrollable extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 4),
-          // 横向滚动柱状图
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SizedBox(
-                width: groups.length * (barWidth + 8), // bar总宽度
+                width: groups.length * (barWidth * 2 + 12),
                 height: 300,
                 child: BarChart(
                   BarChartData(
                     maxY: maxY,
                     barGroups: groups,
                     gridData: FlGridData(show: false),
-                    // 不要内部网格线
                     titlesData: FlTitlesData(
                       leftTitles: const AxisTitles(
                           sideTitles: SideTitles(showTitles: false)),
@@ -393,10 +402,10 @@ class _DailyStackedChartScrollable extends StatelessWidget {
                             final step = totalBars <= 10
                                 ? 1
                                 : totalBars <= 20
-                                    ? 2
-                                    : totalBars <= 40
-                                        ? 4
-                                        : 7;
+                                ? 2
+                                : totalBars <= 40
+                                ? 4
+                                : 7;
                             if (idx % step == 0) {
                               return Text('${d.month}/${d.day}',
                                   style: Theme.of(context).textTheme.bodySmall);
@@ -410,14 +419,13 @@ class _DailyStackedChartScrollable extends StatelessWidget {
                       show: true,
                       border: Border(
                         bottom:
-                            BorderSide(color: Theme.of(context).dividerColor),
+                        BorderSide(color: Theme.of(context).dividerColor),
                       ),
                     ),
                     barTouchData: BarTouchData(
                       enabled: true,
                       touchTooltipData: BarTouchTooltipData(
-                        getTooltipItem: (_, __, ___, ____) =>
-                            null, // 禁止tooltip浮窗
+                        getTooltipItem: (_, __, ___, ____) => null,
                       ),
                       touchCallback: (event, response) {
                         if (response == null || response.spot == null) return;
@@ -436,11 +444,10 @@ class _DailyStackedChartScrollable extends StatelessWidget {
     );
   }
 
-  /// 聚合每日数据
   _AggDay _aggregateByDay(
       List<BabyCare> list, DateTime endDayInclusive, int days) {
     final end = DateTime(
-            endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
+        endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
         .add(const Duration(days: 1));
     final start = end.subtract(Duration(days: days));
     final series = <_DayStat>[];
@@ -454,7 +461,8 @@ class _DailyStackedChartScrollable extends StatelessWidget {
       cursor = cursor.add(const Duration(days: 1));
     }
 
-    double maxStackY = 0;
+    double maxMilkFormula = 0;
+    double maxBabyFood = 0;
 
     for (final r in list) {
       if (r.date == null) continue;
@@ -477,20 +485,27 @@ class _DailyStackedChartScrollable extends StatelessWidget {
           s.formula += amount;
           break;
         case FeedType.babyFood:
-          s.water += amount;
+          s.babyFood += amount;
           break;
         case FeedType.poop:
           break;
       }
-      final total = s.milk + s.formula + s.water;
-      if (total > maxStackY) maxStackY = total;
+      if (s.milk + s.formula > maxMilkFormula) {
+        maxMilkFormula = s.milk + s.formula;
+      }
+      if (s.babyFood > maxBabyFood) {
+        maxBabyFood = s.babyFood;
+      }
     }
 
-    return _AggDay(series: series, maxStackY: maxStackY);
+    return _AggDay(
+        series: series,
+        maxMilkFormula: maxMilkFormula,
+        maxBabyFood: maxBabyFood);
   }
 
   String _key(DateTime d) => '${d.year}-${d.month}-${d.day}';
- }
+}
 
 class _DailyStackedChart extends StatelessWidget {
   final List<BabyCare> records;
@@ -510,36 +525,52 @@ class _DailyStackedChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final agg = _aggregateByDay(records, endDayInclusive, days);
-    final maxStackY = agg.maxStackY == 0 ? 100 : agg.maxStackY;
-    final maxY = _niceCeil(maxStackY * 1.15);
+    final maxMilkFormula = agg.maxMilkFormula == 0 ? 100 : agg.maxMilkFormula;
+    final maxBabyFood = agg.maxBabyFood == 0 ? 50 : agg.maxBabyFood;
+    final maxY = _niceCeil(
+        (maxMilkFormula > maxBabyFood ? maxMilkFormula : maxBabyFood) * 1.15);
 
     final groups = List.generate(agg.series.length, (i) {
       final s = agg.series[i];
       final milk = s.milk;
       final formula = s.formula;
-      final water = s.water;
-      final total = milk + formula + water;
-      return BarChartGroupData(
-        x: i,
-        barRods: [
+      final babyFood = s.babyFood;
+
+      final rods = <BarChartRodData>[];
+
+      if (milk > 0 || formula > 0) {
+        rods.add(
           BarChartRodData(
-            toY: total,
+            toY: milk + formula,
             width: barWidth,
             rodStackItems: [
               if (milk > 0) BarChartRodStackItem(0, milk, Colors.blue.shade400),
               if (formula > 0)
                 BarChartRodStackItem(
                     milk, milk + formula, Colors.green.shade400),
-              if (water > 0)
-                BarChartRodStackItem(
-                    milk + formula, total, Colors.orange.shade400),
             ],
             borderSide:
-                BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
           ),
-        ],
-        showingTooltipIndicators: total > 0 || s.poopCount > 0 ? [0] : [],
-        barsSpace: 4,
+        );
+      }
+
+      if (babyFood > 0) {
+        rods.add(
+          BarChartRodData(
+            toY: babyFood,
+            width: barWidth,
+            color: Colors.orange.shade400,
+            borderSide:
+            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+          ),
+        );
+      }
+
+      return BarChartGroupData(
+        x: i,
+        barRods: rods,
+        barsSpace: 6,
       );
     });
 
@@ -570,17 +601,18 @@ class _DailyStackedChart extends StatelessWidget {
               reservedSize: 32,
               getTitlesWidget: (v, m) {
                 final idx = v.toInt();
-                if (idx < 0 || idx >= agg.series.length)
+                if (idx < 0 || idx >= agg.series.length) {
                   return const SizedBox.shrink();
+                }
                 final d = agg.series[idx].day;
                 final totalBars = agg.series.length;
                 final step = totalBars <= 10
                     ? 1
                     : totalBars <= 20
-                        ? 2
-                        : totalBars <= 40
-                            ? 4
-                            : 7;
+                    ? 2
+                    : totalBars <= 40
+                    ? 4
+                    : 7;
                 if (idx % step == 0) {
                   return Text('${d.month}/${d.day}',
                       style: Theme.of(context).textTheme.bodySmall);
@@ -590,9 +622,9 @@ class _DailyStackedChart extends StatelessWidget {
             ),
           ),
           rightTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(
           show: true,
@@ -604,7 +636,7 @@ class _DailyStackedChart extends StatelessWidget {
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
-            getTooltipItem: (_, __, ___, ____) => null, // 👈 这里禁掉浮窗
+            getTooltipItem: (_, __, ___, ____) => null,
           ),
           touchCallback: (event, response) {
             if (response == null || response.spot == null) return;
@@ -620,7 +652,7 @@ class _DailyStackedChart extends StatelessWidget {
   _AggDay _aggregateByDay(
       List<BabyCare> list, DateTime endDayInclusive, int days) {
     final end = DateTime(
-            endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
+        endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
         .add(const Duration(days: 1));
     final start = end.subtract(Duration(days: days));
     final series = <_DayStat>[];
@@ -634,7 +666,8 @@ class _DailyStackedChart extends StatelessWidget {
       cursor = cursor.add(const Duration(days: 1));
     }
 
-    double maxStackY = 0;
+    double maxMilkFormula = 0;
+    double maxBabyFood = 0;
 
     for (final r in list) {
       if (r.date == null) continue;
@@ -657,16 +690,23 @@ class _DailyStackedChart extends StatelessWidget {
           s.formula += amount;
           break;
         case FeedType.babyFood:
-          s.water += amount;
+          s.babyFood += amount;
           break;
         case FeedType.poop:
           break;
       }
-      final total = s.milk + s.formula + s.water;
-      if (total > maxStackY) maxStackY = total;
+      if (s.milk + s.formula > maxMilkFormula) {
+        maxMilkFormula = s.milk + s.formula;
+      }
+      if (s.babyFood > maxBabyFood) {
+        maxBabyFood = s.babyFood;
+      }
     }
 
-    return _AggDay(series: series, maxStackY: maxStackY);
+    return _AggDay(
+        series: series,
+        maxMilkFormula: maxMilkFormula,
+        maxBabyFood: maxBabyFood);
   }
 
   String _key(DateTime d) => '${d.year}-${d.month}-${d.day}';
@@ -676,7 +716,7 @@ class _DayStat {
   final DateTime day;
   double milk = 0;
   double formula = 0;
-  double water = 0;
+  double babyFood = 0; // g
   int poopCount = 0;
 
   _DayStat({required this.day});
@@ -684,10 +724,17 @@ class _DayStat {
 
 class _AggDay {
   final List<_DayStat> series;
-  final double maxStackY;
+  final double maxMilkFormula;
+  final double maxBabyFood;
 
-  _AggDay({required this.series, required this.maxStackY});
+  _AggDay(
+      {required this.series,
+        required this.maxMilkFormula,
+        required this.maxBabyFood});
 }
+
+
+
 
 double _niceCeil(double v) {
   if (v <= 100) return 100;
