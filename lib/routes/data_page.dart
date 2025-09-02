@@ -474,7 +474,7 @@ class _DailyStackedChartScrollable extends StatelessWidget {
         case FeedType.formula:
           s.formula += amount;
           break;
-        case FeedType.water:
+        case FeedType.babyFood:
           s.water += amount;
           break;
         case FeedType.poop:
@@ -654,7 +654,7 @@ class _DailyStackedChart extends StatelessWidget {
         case FeedType.formula:
           s.formula += amount;
           break;
-        case FeedType.water:
+        case FeedType.babyFood:
           s.water += amount;
           break;
         case FeedType.poop:

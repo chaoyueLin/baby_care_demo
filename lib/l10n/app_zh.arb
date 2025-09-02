@@ -14,25 +14,21 @@
   "tomorrow": "明天",
   "breastMilk": "母乳",
   "formula": "配方奶",
-  "water": "水",
+  "babyFood": "babyFood",
   "poop": "便便",
   "cancel": "取消",
   "selectedTime": "选择的时间：{time}",
   "@selectedTime": {
     "description": "选择时间后的提示",
     "placeholders": {
-      "time": {
-        "example": "下午3:00"
-      }
+      "time": {"example": "下午3:00"}
     }
   },
   "selectedVolume": "您选择了: {volume}ml",
   "@selectedVolume": {
     "description": "选择奶量后的提示",
     "placeholders": {
-      "volume": {
-        "example": "150"
-      }
+      "volume": {"example": "150"}
     }
   },
   "settingsTitle": "设置",
@@ -40,7 +36,6 @@
   "followSystem": "跟随系统",
   "darkModeOn": "深色模式已开启",
   "darkModeOff": "深色模式已关闭",
-
   "weight": "体重",
   "height": "身高",
   "bmi": "BMI",
@@ -58,11 +53,40 @@
   "pleaseAddOrSelectBaby": "请先添加或选择一个宝宝",
   "pleaseEnterValidNumber": "请输入有效的数值",
   "bmiNeedHeightWeight": "BMI 数据需要通过身高和体重计算",
-
   "range0to13Week": "0-13周",
   "range0to12Month": "0-12个月",
   "range12to24Month": "12-24个月",
   "percent3": "3%",
   "percent50": "50%",
-  "percent97": "97%"
+  "percent97": "97%",
+  "recentWeek": "最近一周",
+  "recentMonth": "最近一个月",
+  "recentQuarter": "最近三个月",
+  "retry": "重试",
+  "dataLoadError": "数据加载失败：{error}",
+  "@dataLoadError": {
+    "description": "数据加载出错提示",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "date": "日期: {year}-{month}-{day}",
+  "@date": {
+    "description": "选中日期显示",
+    "placeholders": {
+      "year": {},
+      "month": {},
+      "day": {}
+    }
+  },
+  "stats": "母乳: {milk}ml, 奶粉: {formula}ml, 饮水: {water}ml, 便便: {poopCount} 次",
+  "@stats": {
+    "description": "选中日的喂养统计",
+    "placeholders": {
+      "milk": {},
+      "formula": {},
+      "water": {},
+      "poopCount": {}
+    }
+  }
 }

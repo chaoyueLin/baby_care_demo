@@ -8,60 +8,86 @@
   "exitPrompt": "Press again to exit",
   "sideMenuTitleStyle": "Title Style",
   "sideMenuSelectedStyle": "Selected Style",
-  "pageTitle": "PageView and Custom Components",
+  "pageTitle": "PageView and Custom Widgets",
   "today": "Today",
   "yesterday": "Yesterday",
   "tomorrow": "Tomorrow",
   "breastMilk": "Breast Milk",
   "formula": "Formula",
-  "water": "Water",
+  "babyFood": "BabyFood",
   "poop": "Poop",
   "cancel": "Cancel",
   "selectedTime": "Selected time: {time}",
   "@selectedTime": {
-    "description": "Message displayed when a time is selected",
+    "description": "Prompt after selecting time",
     "placeholders": {
-      "time": {
-        "example": "3:00 PM"
-      }
+      "time": {"example": "3:00 PM"}
     }
   },
   "selectedVolume": "You selected: {volume}ml",
   "@selectedVolume": {
-    "description": "Message displayed when a milk volume is selected",
+    "description": "Prompt after selecting milk volume",
     "placeholders": {
-      "volume": {
-        "example": "150"
-      }
+      "volume": {"example": "150"}
     }
   },
   "settingsTitle": "Settings",
   "darkMode": "Dark Mode",
   "followSystem": "Follow System",
-  "darkModeOn": "Dark mode is ON",
-  "darkModeOff": "Dark mode is OFF",
+  "darkModeOn": "Dark mode enabled",
+  "darkModeOff": "Dark mode disabled",
   "weight": "Weight",
   "height": "Height",
   "bmi": "BMI",
-  "addWeight": "Add weight data",
-  "addHeight": "Add height data",
-  "addBMI": "Add BMI data",
-  "addData": "Add data",
+  "addWeight": "Add Weight Data",
+  "addHeight": "Add Height Data",
+  "addBMI": "Add BMI Data",
+  "addData": "Add Data",
   "enterWeightKg": "Enter weight (kg)",
   "enterHeightCm": "Enter height (cm)",
   "enterBMI": "Enter BMI",
   "value": "Value",
-  "enterValue": "Enter value",
-  "chooseDate": "Choose date",
+  "enterValue": "Please enter value",
+  "chooseDate": "Choose Date",
   "save": "Save",
   "pleaseAddOrSelectBaby": "Please add or select a baby first",
   "pleaseEnterValidNumber": "Please enter a valid number",
-  "bmiNeedHeightWeight": "BMI data requires height and weight",
-
-  "range0to13Week": "0-13 weeks",
-  "range0to12Month": "0-12 months",
-  "range12to24Month": "12-24 months",
+  "bmiNeedHeightWeight": "BMI requires height and weight data",
+  "range0to13Week": "0-13 Weeks",
+  "range0to12Month": "0-12 Months",
+  "range12to24Month": "12-24 Months",
   "percent3": "3%",
   "percent50": "50%",
-  "percent97": "97%"
+  "percent97": "97%",
+
+  "recentWeek": "Recent Week",
+  "recentMonth": "Recent Month",
+  "recentQuarter": "Recent Quarter",
+  "retry": "Retry",
+  "dataLoadError": "Data load failed: {error}",
+  "@dataLoadError": {
+    "description": "Prompt when data loading failed",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "date": "Date: {year}-{month}-{day}",
+  "@date": {
+    "description": "Selected date display",
+    "placeholders": {
+      "year": {},
+      "month": {},
+      "day": {}
+    }
+  },
+  "stats": "Breast Milk: {milk}ml, Formula: {formula}ml, Water: {water}ml, poop: {poopCount} times",
+  "@stats": {
+    "description": "Feeding statistics for selected day",
+    "placeholders": {
+      "milk": {},
+      "formula": {},
+      "water": {},
+      "poopCount": {}
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as picker_theme;
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:image_pickers/image_pickers.dart';
 import 'dart:io';
@@ -12,16 +13,16 @@ import '../widget/custom_tab_button.dart';
 class CarePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return HomePageContent();
+    return CarePageContent();
   }
 }
 
-class HomePageContent extends StatefulWidget {
+class CarePageContent extends StatefulWidget {
   @override
-  _HomePageContentState createState() => _HomePageContentState();
+  _CarePageContentState createState() => _CarePageContentState();
 }
 
-class _HomePageContentState extends State<HomePageContent> {
+class _CarePageContentState extends State<CarePageContent> {
   late PageController _pageController;
 
   final DateTime today = DateTime.now();
@@ -111,10 +112,26 @@ class _HomePageContentState extends State<HomePageContent> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
           contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
           backgroundColor: cs.surface,
-          title: const Text('选择毫升数'),
+          title: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: cs.primary,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12.0),
+                topRight: Radius.circular(12.0),
+              ),
+            ),
+            child: const Text(
+              '选择毫升数',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          titlePadding: EdgeInsets.zero,
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
@@ -137,6 +154,71 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
+  /// 输入辅食重量（g）并选择时间
+  void _showBabyFoodInput() {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final TextEditingController controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
+          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
+          backgroundColor: cs.surface,
+          title: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: cs.primary,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12.0),
+                topRight: Radius.circular(12.0),
+              ),
+            ),
+            child: const Text(
+              '输入辅食重量',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          titlePadding: EdgeInsets.zero,
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: '重量 (g)',
+              hintText: '请输入辅食重量',
+              suffixText: 'g',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                final input = controller.text.trim();
+                if (input.isNotEmpty && int.tryParse(input) != null) {
+                  Navigator.of(context).pop();
+                  _showTimePicker(FeedType.babyFood, input);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('请输入有效的数字')),
+                  );
+                }
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// 时间选择器：选择时间后插入记录并更新缓存（注意：插入记录会以 currentDate 的日期为基准）
   void _showTimePicker(FeedType type, String mush) {
     // 使用 currentDate 作为日期基础（currentDate 已在切页时设置）
@@ -144,6 +226,12 @@ class _HomePageContentState extends State<HomePageContent> {
       context,
       showSecondsColumn: false,
       currentTime: currentDate,
+      theme: picker_theme.DatePickerTheme(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        itemStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        doneStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+        cancelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      ),
       onConfirm: (time) async {
         DateTime fullDateTime = DateTime(
           currentDate.year,
@@ -211,10 +299,26 @@ class _HomePageContentState extends State<HomePageContent> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         backgroundColor: cs.surface,
-        titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
+        titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
         contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-        title: Text('便便记录', style: tt.titleMedium?.copyWith(color: cs.primary)),
+        title: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12.0),
+              topRight: Radius.circular(12.0),
+            ),
+          ),
+          child: const Text(
+            '便便记录',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        titlePadding: EdgeInsets.zero,
         content: SingleChildScrollView(
           child: Column(
             children: imagePaths
@@ -272,8 +376,8 @@ class _HomePageContentState extends State<HomePageContent> {
     int formulaTotal = hourRecords
         .where((r) => r.type == FeedType.formula)
         .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
-    int waterTotal = hourRecords
-        .where((r) => r.type == FeedType.water)
+    int babyFoodTotal = hourRecords
+        .where((r) => r.type == FeedType.babyFood)
         .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
 
     // 聚合所有便便图片路径
@@ -313,7 +417,7 @@ class _HomePageContentState extends State<HomePageContent> {
                       const SizedBox(height: 6),
                       Text('奶粉: ${formulaTotal} ml', style: tt.bodyMedium),
                       const SizedBox(height: 6),
-                      Text('水: ${waterTotal} ml', style: tt.bodyMedium),
+                      Text('辅食: ${babyFoodTotal} g', style: tt.bodyMedium),
                       const SizedBox(height: 12),
 
                       Divider(color: cs.outline),
@@ -339,29 +443,49 @@ class _HomePageContentState extends State<HomePageContent> {
                                       backgroundColor: cs.surface,
                                       shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12)),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (path.isNotEmpty)
-                                              ConstrainedBox(
-                                                constraints: BoxConstraints(
-                                                  maxWidth: MediaQuery.of(context).size.width * 0.9,
-                                                  maxHeight: MediaQuery.of(context).size.height * 0.7,
-                                                ),
-                                                child: Image.file(
-                                                  File(path),
-                                                  fit: BoxFit.contain,
-                                                ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(16.0),
+                                            decoration: BoxDecoration(
+                                              color: cs.primary,
+                                              borderRadius: const BorderRadius.only(
+                                                topLeft: Radius.circular(12.0),
+                                                topRight: Radius.circular(12.0),
                                               ),
-                                            const SizedBox(height: 8),
-                                            TextButton(
-                                              onPressed: () => Navigator.of(context).pop(),
-                                              child: const Text('关闭'),
                                             ),
-                                          ],
-                                        ),
+                                            child: const Text(
+                                              '便便图片',
+                                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                if (path.isNotEmpty)
+                                                  ConstrainedBox(
+                                                    constraints: BoxConstraints(
+                                                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                                      maxHeight: MediaQuery.of(context).size.height * 0.7,
+                                                    ),
+                                                    child: Image.file(
+                                                      File(path),
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  ),
+                                                const SizedBox(height: 8),
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(context).pop(),
+                                                  child: const Text('关闭'),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     );
                                   },
@@ -457,7 +581,7 @@ class _HomePageContentState extends State<HomePageContent> {
                               case FeedType.formula:
                                 path = 'assets/icons/formula_milk.png';
                                 break;
-                              case FeedType.water:
+                              case FeedType.babyFood:
                                 path = 'assets/icons/water.png';
                                 break;
                               case FeedType.poop:
@@ -521,9 +645,9 @@ class _HomePageContentState extends State<HomePageContent> {
                   onTap: () => _showMlSelector(FeedType.formula),
                 ),
                 CustomTabButton(
-                  label: S.of(context)?.water ?? "water",
+                  label: S.of(context)?.babyFood ?? "babyFood",
                   iconPath: 'assets/icons/water.png',
-                  onTap: () => _showMlSelector(FeedType.water),
+                  onTap: () => _showBabyFoodInput(),
                 ),
                 CustomTabButton(
                   label: S.of(context)?.poop ?? "poop",
