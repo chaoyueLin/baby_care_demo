@@ -629,27 +629,27 @@ class _CarePageContentState extends State<CarePageContent> {
             ),
           ),
           Container(
-            height: 100,
+            height:70,
             color: cs.surfaceVariant, // 底部操作栏背景
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                CustomTabButton(
+                TouchFeedbackTabButton(
                   label: S.of(context)?.breastMilk ?? "breastMilk",
                   iconPath: 'assets/icons/mother_milk.png',
                   onTap: () => _showMlSelector(FeedType.milk),
                 ),
-                CustomTabButton(
+                TouchFeedbackTabButton(
                   label: S.of(context)?.formula ?? "formula",
                   iconPath: 'assets/icons/formula_milk.png',
                   onTap: () => _showMlSelector(FeedType.formula),
                 ),
-                CustomTabButton(
+                TouchFeedbackTabButton(
                   label: S.of(context)?.babyFood ?? "babyFood",
                   iconPath: 'assets/icons/water.png',
                   onTap: () => _showBabyFoodInput(),
                 ),
-                CustomTabButton(
+                TouchFeedbackTabButton(
                   label: S.of(context)?.poop ?? "poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {

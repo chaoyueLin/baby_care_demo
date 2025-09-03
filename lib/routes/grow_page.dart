@@ -389,30 +389,33 @@ class _GrowPageState extends State<GrowPage> {
         children: [
           // 顶部 Tab
           Container(
-            height: 100,
-            color: cs.surfaceVariant,
+            height: 80,
+
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                CustomTabButton(
+                ToggleTabButton(
                   label: S.of(context)?.weight ?? 'Weight',
                   iconPath: 'assets/icons/formula_milk.png',
+                  isSelected: selectedType == TYPE_WEIGHT,
                   onTap: () async {
                     setState(() => selectedType = TYPE_WEIGHT);
                     await _refreshAll();
                   },
                 ),
-                CustomTabButton(
+                ToggleTabButton(
                   label: S.of(context)?.height ?? 'Height',
                   iconPath: 'assets/icons/water.png',
+                  isSelected: selectedType == TYPE_HEIGHT,
                   onTap: () async {
                     setState(() => selectedType = TYPE_HEIGHT);
                     await _refreshAll();
                   },
                 ),
-                CustomTabButton(
+                ToggleTabButton(
                   label: 'BMI',
                   iconPath: 'assets/icons/poop.png',
+                  isSelected: selectedType == TYPE_BMI,
                   onTap: () async {
                     setState(() => selectedType = TYPE_BMI);
                     await _refreshAll();
