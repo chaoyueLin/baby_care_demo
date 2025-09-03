@@ -10,8 +10,9 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifier = context.watch<ThemeModeNotifier>();
     final s = S.of(context);
-
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: cs.surface,
       body: ListView(
         children: [
           const SizedBox(height: 8),

@@ -195,10 +195,26 @@ class _GrowPageState extends State<GrowPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: cs.surface,
-              titleTextStyle: tt.titleMedium?.copyWith(color: cs.onSurface),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
               contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-              title: Text(_getDialogTitle() ?? ''),
+              backgroundColor: cs.surface,
+              title: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12.0),
+                    topRight: Radius.circular(12.0),
+                  ),
+                ),
+                child:  Text(
+                  _getDialogTitle() ?? '',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              titlePadding: EdgeInsets.zero,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

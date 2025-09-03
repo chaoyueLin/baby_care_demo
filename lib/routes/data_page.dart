@@ -46,7 +46,9 @@ class _DataPageState extends State<DataPage> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: cs.surface,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: _buildBody(),

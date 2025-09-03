@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as picker_theme;
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:image_pickers/image_pickers.dart';
 import 'dart:io';
@@ -221,16 +221,24 @@ class _CarePageContentState extends State<CarePageContent> {
 
   /// 时间选择器：选择时间后插入记录并更新缓存（注意：插入记录会以 currentDate 的日期为基准）
   void _showTimePicker(FeedType type, String mush) {
+    // 根据当前主题模式设置日期选择器的主题
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     // 使用 currentDate 作为日期基础（currentDate 已在切页时设置）
     DatePicker.showTimePicker(
       context,
       showSecondsColumn: false,
       currentTime: currentDate,
-      theme: picker_theme.DatePickerTheme(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        itemStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        doneStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
-        cancelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      theme: dtp.DatePickerTheme(
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
+        headerColor: isDarkMode ? const Color(0xFF2D2D2D) : Colors.lightGreen,
+        doneStyle: TextStyle(
+          color: isDarkMode ? Colors.lightGreenAccent : Colors.white,
+          fontSize: 16,
+        ),
+        cancelStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : Colors.white,
+          fontSize: 16,
+        ),
       ),
       onConfirm: (time) async {
         DateTime fullDateTime = DateTime(
@@ -291,58 +299,6 @@ class _CarePageContentState extends State<CarePageContent> {
     _showTimePicker(FeedType.poop, mush);
   }
 
-  /// 弹出便便图片预览
-  void _showPoopImages(List<String> imagePaths) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: cs.surface,
-        titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
-        contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-        title: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: cs.primary,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12.0),
-              topRight: Radius.circular(12.0),
-            ),
-          ),
-          child: const Text(
-            '便便记录',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        titlePadding: EdgeInsets.zero,
-        content: SingleChildScrollView(
-          child: Column(
-            children: imagePaths
-                .map((path) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Image.file(
-                File(path),
-                width: 300,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
-            ))
-                .toList(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("关闭"),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   void dispose() {
