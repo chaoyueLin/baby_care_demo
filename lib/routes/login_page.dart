@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
 import '../common/db_provider.dart';
 import '../models/baby.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -47,13 +47,13 @@ class _LoginPageState extends State<LoginPage> {
     String name = _nameController.text.trim();
 
     if (name.isEmpty || _selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("请输入完整信息"),
-          backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2D2D2D)
-              : null,
-        ),
+      Fluttertoast.showToast(
+        msg:  "请输入完整信息",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
       return;
     }

@@ -3,7 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:baby_care_demo/models/grow_standard.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import '../models/baby_grow.dart';
@@ -279,8 +279,14 @@ class _GrowPageState extends State<GrowPage> {
     if (_valueController.text.trim().isEmpty) return;
     if (currentBaby == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context)?.pleaseAddOrSelectBaby ?? '请先添加或选择一个宝宝')),
+
+      Fluttertoast.showToast(
+        msg:  "请先添加或选择一个宝宝",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
       return;
     }
@@ -288,8 +294,13 @@ class _GrowPageState extends State<GrowPage> {
     final value = double.tryParse(_valueController.text.trim());
     if (value == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context)?.pleaseEnterValidNumber ?? '请输入有效的数值')),
+      Fluttertoast.showToast(
+        msg:  "请输入有效的数值",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
       return;
     }
@@ -297,8 +308,14 @@ class _GrowPageState extends State<GrowPage> {
     final growType = _toGrowType(selectedType);
     if (growType == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context)?.bmiNeedHeightWeight ?? 'BMI 数据需要通过身高和体重计算获得')),
+
+      Fluttertoast.showToast(
+        msg:  "BMI 数据需要通过身高和体重计算获得",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
       return;
     }
@@ -313,14 +330,25 @@ class _GrowPageState extends State<GrowPage> {
     try {
       await DBProvider().insertGrow(growData);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('数据保存成功')),
+      Fluttertoast.showToast(
+        msg:  "数据保存成功",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
       await _refreshAll();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('保存失败: $e')),
+
+      Fluttertoast.showToast(
+        msg:  "保存失败",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
     }
   }

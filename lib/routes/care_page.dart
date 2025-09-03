@@ -9,6 +9,7 @@ import '../models/baby.dart';
 import '../models/baby_care.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CarePage extends StatelessWidget {
   @override
@@ -206,8 +207,13 @@ class _CarePageContentState extends State<CarePageContent> {
                   Navigator.of(context).pop();
                   _showTimePicker(FeedType.babyFood, input);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('请输入有效的数字')),
+                  Fluttertoast.showToast(
+                    msg:  "请输入有效的数字",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    backgroundColor: Colors.black54,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
                   );
                 }
               },

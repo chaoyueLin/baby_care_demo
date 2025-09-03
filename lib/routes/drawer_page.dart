@@ -6,12 +6,12 @@ import 'setting_page.dart';
 import 'grow_page.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 
-class MainPage extends StatefulWidget {
+class DrawerPage extends StatefulWidget {
   @override
-  _MainPageState createState() => _MainPageState();
+  _DrawerPageState createState() => _DrawerPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _DrawerPageState extends State<DrawerPage> {
   int _currentIndex = 0;
   DateTime? _lastPressedAt; // 记录上次按返回键的时间
 
@@ -53,7 +53,7 @@ class _MainPageState extends State<MainPage> {
       onWillPop: _onWillPop, // 监听返回键
       child: Scaffold(
         appBar: AppBar(
-          title: Text("App")
+          title: Text("BabyCare")
         ),
         drawer: Drawer(
           child: ListView(
@@ -63,10 +63,10 @@ class _MainPageState extends State<MainPage> {
                 decoration: BoxDecoration(color: Colors.lightGreen),
                 child: Text("App", style: TextStyle(color: Colors.white, fontSize: 24)),
               ),
-              _buildDrawerItem(Icons.home, "Care", 0),
-              _buildDrawerItem(Icons.search, "Data", 1),
-              _buildDrawerItem(Icons.person, "Grow", 2),
-              _buildDrawerItem(Icons.notifications, "Setting", 3),
+              _buildDrawerItem(Icons.home, S.of(context)?.care ?? "care", 0),
+              _buildDrawerItem(Icons.search, S.of(context)?.recent ?? "recent", 1),
+              _buildDrawerItem(Icons.person, S.of(context)?.grow ?? "grow", 2),
+              _buildDrawerItem(Icons.notifications, S.of(context)?.setting ?? "setting", 3),
             ],
           ),
         ),

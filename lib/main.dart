@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'common/db_provider.dart';
 import 'models/baby.dart';
 import 'routes/login_page.dart';
-import 'routes/main_page.dart';
+import 'routes/drawer_page.dart';
 import 'utils/theme_mode_notifier.dart';   // 新增
 
 Future<void> main() async {
@@ -116,10 +116,10 @@ class MyApp extends StatelessWidget {
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      home: isLoggedIn ?  MainPage() :  LoginPage(),
+      home: isLoggedIn ?  DrawerPage() :  LoginPage(),
       routes: {
         '/login': (context) =>  LoginPage(),
-        '/main': (context) =>  MainPage(),
+        '/main': (context) =>  DrawerPage(),
       },
     );
   }
