@@ -3,6 +3,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' 
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_gen/gen_l10n/S.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -83,6 +84,12 @@ class _LoginPageState extends State<LoginPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(), // 点击空白处关闭键盘
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('登录'),
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
+          elevation: 2,
+        ),
         backgroundColor: theme.colorScheme.surface,
         body: Center(
           child: SingleChildScrollView(

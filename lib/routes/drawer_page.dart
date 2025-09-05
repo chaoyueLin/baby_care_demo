@@ -104,10 +104,6 @@ class _DrawerPageState extends State<DrawerPage> {
       default: pageTitle = "BabyCare";
     }
 
-    // 如果有选中的宝宝，显示宝宝名字
-    if (_babies.isNotEmpty && _selectedBabyIndex < _babies.length) {
-      return "${_babies[_selectedBabyIndex].name} - $pageTitle";
-    }
     return pageTitle;
   }
 
@@ -181,14 +177,7 @@ class _DrawerPageState extends State<DrawerPage> {
     return Container(
       height: 120,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.lightGreen,
-            Colors.lightGreen,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color:Colors.lightGreen ,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),

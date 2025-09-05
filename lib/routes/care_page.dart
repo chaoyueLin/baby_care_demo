@@ -24,17 +24,17 @@ class CarePageContent extends StatefulWidget {
 }
 
 class _CarePageContentState extends State<CarePageContent> {
-  late PageController _pageController;
+  late PageController? _pageController;
 
   final DateTime today = DateTime.now();
-  final DateTime startDate = DateTime(2024, 6, 4); // 可按需调整
+  Baby? _currentBaby; // 当前宝宝对象
+  late DateTime startDate; // 动态起始日期（宝宝生日）
   late final int totalDays;
   late final int initialPageIndex;
 
   /// currentDate 表示 PageView 当前选中的日期（仅日期部分有效）
   late DateTime currentDate;
 
-  int? _currentBabyId; // 当前显示的宝宝ID
 
   /// 数据缓存：以当天 00:00:00 的毫秒数作为 key，value 是那天的记录列表
   final Map<int, List<BabyCare>> _recordsCache = {};
@@ -42,14 +42,9 @@ class _CarePageContentState extends State<CarePageContent> {
   @override
   void initState() {
     super.initState();
-    totalDays = today.difference(startDate).inDays;
-    initialPageIndex = totalDays; // 今天的索引
-    _pageController = PageController(initialPage: initialPageIndex);
 
-    // 初始 currentDate 为初始页对应的日期（避免依赖 onPageChanged）
-    currentDate = _calculateDate(initialPageIndex);
-
-    // 加载当前 babyId 并预加载 initial date 的数据
+    // 注意：这里不再直接计算 totalDays/startDate
+    // 因为要等数据库返回 _currentBaby 才知道 birthday
     _loadCurrentBabyAndData();
   }
 
@@ -58,11 +53,25 @@ class _CarePageContentState extends State<CarePageContent> {
     List<Baby>? visibleBabies = await DBProvider().getVisiblePersons();
     if (visibleBabies != null && visibleBabies.isNotEmpty) {
       Baby baby = visibleBabies.firstWhere((b) => b.show == 1, orElse: () => visibleBabies.first);
-      _currentBabyId = baby.id;
+      _currentBaby = baby;
+
+      // 宝宝生日作为起始日
+      startDate = DateTime(baby.birthdate.year, baby.birthdate.month, baby.birthdate.day);
+
+      // 重新计算总天数 & 初始页索引
+      totalDays = today.difference(startDate).inDays + 1;
+      initialPageIndex = totalDays - 1;
+      _pageController = PageController(initialPage: initialPageIndex);
+
+      // 当前日期更新为今天
+      currentDate = _calculateDate(initialPageIndex);
+
+      // 预加载今天数据
       await _loadDataForDateIntoCache(currentDate);
       if (mounted) setState(() {});
     }
   }
+
 
   DateTime _calculateDate(int index) {
     return startDate.add(Duration(days: index));
@@ -76,10 +85,10 @@ class _CarePageContentState extends State<CarePageContent> {
 
   /// 从 DB 加载某天的数据并放入缓存（覆盖）
   Future<void> _loadDataForDateIntoCache(DateTime date) async {
-    if (_currentBabyId == null) return;
+
     int start = _startOfDayMillis(date);
     int end = start + Duration(days: 1).inMilliseconds;
-    List<BabyCare> data = await DBProvider().getCareByRange(start, end, _currentBabyId ?? 0);
+    List<BabyCare> data = await DBProvider().getCareByRange(start, end, _currentBaby?.id ?? 0);
     _recordsCache[start] = data;
   }
 
@@ -121,7 +130,7 @@ class _CarePageContentState extends State<CarePageContent> {
             width: double.infinity,
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: cs.primary,
+              color: Theme.of(context).primaryColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12.0),
                 topRight: Radius.circular(12.0),
@@ -173,7 +182,7 @@ class _CarePageContentState extends State<CarePageContent> {
             width: double.infinity,
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: cs.primary,
+              color: Theme.of(context).primaryColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12.0),
                 topRight: Radius.circular(12.0),
@@ -189,7 +198,6 @@ class _CarePageContentState extends State<CarePageContent> {
             controller: controller,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: '重量 (g)',
               hintText: '请输入辅食重量',
               suffixText: 'g',
             ),
@@ -258,7 +266,7 @@ class _CarePageContentState extends State<CarePageContent> {
         int timestamp = fullDateTime.millisecondsSinceEpoch;
 
         BabyCare care = BabyCare(
-          babyId: _currentBabyId ?? 0,
+          babyId: _currentBaby?.id ?? 0,
           date: timestamp,
           type: type,
           mush: mush,
@@ -308,7 +316,7 @@ class _CarePageContentState extends State<CarePageContent> {
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -499,6 +507,16 @@ class _CarePageContentState extends State<CarePageContent> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
+    // 如果宝宝信息还没加载好，先显示 loading
+    if (_currentBaby == null || _pageController == null) {
+      return Scaffold(
+        backgroundColor: cs.background,
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: cs.background,
       body: Column(
@@ -525,12 +543,8 @@ class _CarePageContentState extends State<CarePageContent> {
                       ),
                     ),
                     Expanded(
-                      child: ListView.separated(
+                      child: ListView.builder(
                         itemCount: 24,
-                        separatorBuilder: (context, index) => Container(
-                          height: 1,
-                          color: cs.primary, // 仍旧绿色语义 → 用主题主色
-                        ),
                         itemBuilder: (context, hourIndex) {
                           final hourRecords = _hourRecordsForPageDate(pageDate, hourIndex);
 
@@ -562,7 +576,9 @@ class _CarePageContentState extends State<CarePageContent> {
                             },
                             child: Container(
                               height: 50,
-                              color: cs.surface, // 每个小时的背景 → surface
+                              color: hourIndex.isEven
+                                  ?  cs.primaryContainer.withOpacity(0.3) // 交替颜色
+                                  : cs.surface, // 交替颜色
                               child: Row(
                                 children: [
                                   Padding(
@@ -585,6 +601,7 @@ class _CarePageContentState extends State<CarePageContent> {
                         },
                       ),
                     ),
+
                   ],
                 );
               },
