@@ -89,5 +89,28 @@
       "water": {},
       "poopCount": {}
     }
-  }
+  },
+  "settings": "Settings",
+  "about": "About",
+  "theme": "Theme",
+  "appInfo": "App Info",
+
+  "lightMode": "Light Mode",
+  "lightModeDescription": "Always use light theme",
+  "darkModeDescription": "Always use dark theme",
+  "followSystemDescription": "Use device theme settings",
+
+  "currentTheme": "Current Theme",
+  "lightModeActive": "Light mode is active",
+  "darkModeActive": "Dark mode is active",
+
+  "checkForUpdates": "Tap to check for updates",
+  "checkingUpdates": "Checking for updates...",
+  "updateError": "Unable to open app store",
+
+  "appName": "App Name",
+  "version": "Version",
+  "buildNumber": "Build Number",
+  "packageName": "Package Name",
+  "platform": "Platform"
 }

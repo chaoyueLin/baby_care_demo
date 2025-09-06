@@ -12,7 +12,7 @@ import 'care_page.dart';
 import 'data_page.dart';
 import 'setting_page.dart';
 import 'grow_page.dart';
-import 'login_page.dart';
+import 'add_baby_page.dart';
 
 class DrawerPage extends StatefulWidget {
   const DrawerPage({Key? key}) : super(key: key);

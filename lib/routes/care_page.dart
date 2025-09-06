@@ -72,7 +72,14 @@ class _CarePageContentState extends State<CarePageContent> {
     }
   }
 
-
+  dtp.LocaleType _mapLocaleToPickerLocale(Locale locale) {
+    switch (locale.languageCode) {
+      case 'zh': // 中文
+        return dtp.LocaleType.zh;
+      default:   // 默认英文
+        return dtp.LocaleType.en;
+    }
+  }
   DateTime _calculateDate(int index) {
     return startDate.add(Duration(days: index));
   }
@@ -137,7 +144,7 @@ class _CarePageContentState extends State<CarePageContent> {
               ),
             ),
             child: const Text(
-              '选择毫升数',
+              'Select Milliliters',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -189,7 +196,7 @@ class _CarePageContentState extends State<CarePageContent> {
               ),
             ),
             child: const Text(
-              '输入辅食重量',
+              'Enter Baby Food Weight',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -198,7 +205,7 @@ class _CarePageContentState extends State<CarePageContent> {
             controller: controller,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              hintText: '请输入辅食重量',
+              hintText: 'Please enter baby food weight',
               suffixText: 'g',
             ),
             autofocus: true,
@@ -206,7 +213,7 @@ class _CarePageContentState extends State<CarePageContent> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -216,7 +223,7 @@ class _CarePageContentState extends State<CarePageContent> {
                   _showTimePicker(FeedType.babyFood, input);
                 } else {
                   Fluttertoast.showToast(
-                    msg:  "请输入有效的数字",
+                    msg:  "Please enter a valid number",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
                     backgroundColor: Colors.black54,
@@ -225,7 +232,7 @@ class _CarePageContentState extends State<CarePageContent> {
                   );
                 }
               },
-              child: const Text('确定'),
+              child: const Text('Confirm'),
             ),
           ],
         );
@@ -240,6 +247,7 @@ class _CarePageContentState extends State<CarePageContent> {
     // 使用 currentDate 作为日期基础（currentDate 已在切页时设置）
     DatePicker.showTimePicker(
       context,
+      locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
       showSecondsColumn: false,
       currentTime: currentDate,
       theme: dtp.DatePickerTheme(
@@ -383,23 +391,23 @@ class _CarePageContentState extends State<CarePageContent> {
                       ),
                       const SizedBox(height: 12),
 
-                      Text('母乳: ${milkTotal} ml', style: tt.bodyMedium),
+                      Text('Breast Milk: ${milkTotal} ml', style: tt.bodyMedium),
                       const SizedBox(height: 6),
-                      Text('奶粉: ${formulaTotal} ml', style: tt.bodyMedium),
+                      Text('Formula: ${formulaTotal} ml', style: tt.bodyMedium),
                       const SizedBox(height: 6),
-                      Text('辅食: ${babyFoodTotal} g', style: tt.bodyMedium),
+                      Text('Baby Food: ${babyFoodTotal} g', style: tt.bodyMedium),
                       const SizedBox(height: 12),
 
                       Divider(color: cs.outline),
                       const SizedBox(height: 8),
 
-                      Text('便便:', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('Poop:', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
 
                       if (allPoopImagePaths.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text('无便便记录'),
+                          child: Text('No poop records'),
                         )
                       else
                         Column(
@@ -427,7 +435,7 @@ class _CarePageContentState extends State<CarePageContent> {
                                               ),
                                             ),
                                             child: const Text(
-                                              '便便图片',
+                                              'Poop Image',
                                               style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
                                             ),
                                           ),
@@ -450,7 +458,7 @@ class _CarePageContentState extends State<CarePageContent> {
                                                 const SizedBox(height: 8),
                                                 TextButton(
                                                   onPressed: () => Navigator.of(context).pop(),
-                                                  child: const Text('关闭'),
+                                                  child: const Text('Close'),
                                                 ),
                                               ],
                                             ),
@@ -488,7 +496,7 @@ class _CarePageContentState extends State<CarePageContent> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('关闭'),
+                          child: const Text('Close'),
                         ),
                       ),
                     ],

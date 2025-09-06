@@ -88,5 +88,28 @@
       "water": {},
       "poopCount": {}
     }
-  }
+  },
+  "settings": "设置",
+  "about": "关于",
+  "theme": "主题",
+  "appInfo": "应用信息",
+
+  "lightMode": "浅色模式",
+  "lightModeDescription": "始终使用浅色主题",
+  "darkModeDescription": "始终使用深色主题",
+  "followSystemDescription": "使用设备主题设置",
+
+  "currentTheme": "当前主题",
+  "lightModeActive": "浅色模式已激活",
+  "darkModeActive": "深色模式已激活",
+
+  "checkForUpdates": "点击检查更新",
+  "checkingUpdates": "正在检查更新...",
+  "updateError": "无法打开应用商店",
+
+  "appName": "应用名称",
+  "version": "版本",
+  "buildNumber": "构建号",
+  "packageName": "包名",
+  "platform": "平台"
 }

@@ -4,14 +4,15 @@ import '../common/db_provider.dart';
 import '../models/baby.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
-class LoginPage extends StatefulWidget {
+
+class AddBabyPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _AddBabyPageState createState() => _AddBabyPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _AddBabyPageState extends State<AddBabyPage> {
   final TextEditingController _nameController = TextEditingController();
-  String _selectedGender = "男"; // 默认选择男
+  String _selectedGender = "Male"; // 默认选择男
   DateTime? _selectedDate;
 
   Future<void> _selectDate() async {
@@ -20,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
 
     dtp.DatePicker.showDatePicker(
       context,
+      locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
       showTitleActions: true,
       minTime: DateTime(1900, 1, 1),
       maxTime: DateTime.now(),
@@ -49,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (name.isEmpty || _selectedDate == null) {
       Fluttertoast.showToast(
-        msg:  "请输入完整信息",
+        msg:  "Please enter complete information",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -59,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    int sexValue = _selectedGender == "男" ? 1 : 0; // 1 = 男, 0 = 女
+    int sexValue = _selectedGender == "Male" ? 1 : 0; // 1 = 男, 0 = 女
 
     // 创建 Baby 对象
     Baby newBaby = Baby(
@@ -76,6 +78,15 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.pushReplacementNamed(context, '/main');
   }
 
+  dtp.LocaleType _mapLocaleToPickerLocale(Locale locale) {
+    switch (locale.languageCode) {
+      case 'zh': // 中文
+        return dtp.LocaleType.zh;
+      default:   // 默认英文
+        return dtp.LocaleType.en;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -85,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () => FocusScope.of(context).unfocus(), // 点击空白处关闭键盘
       child: Scaffold(
         appBar: AppBar(
-          title: Text('登录'),
+          title: Text('Add Baby Information'),
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
           elevation: 2,
@@ -113,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                             textAlign: TextAlign.center, // 文字居中
                             style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                             decoration: InputDecoration(
-                              labelText: "名字",
+                              labelText: "Name",
                               labelStyle: TextStyle(
                                 color: isDarkMode
                                     ? Colors.lightGreenAccent
@@ -154,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                "性别",
+                                "Gender",
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 14,
                                 ),
@@ -165,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Radio<String>(
-                                    value: "男",
+                                    value: "Male",
                                     groupValue: _selectedGender,
                                     activeColor: isDarkMode
                                         ? Colors.lightGreenAccent
@@ -179,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                                     },
                                   ),
                                   Text(
-                                    "男",
+                                    "Male",
                                     style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
                                   ),
                                 ],
@@ -189,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Radio<String>(
-                                    value: "女",
+                                    value: "Female",
                                     groupValue: _selectedGender,
                                     activeColor: isDarkMode
                                         ? Colors.lightGreenAccent
@@ -203,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
                                     },
                                   ),
                                   Text(
-                                    "女",
+                                    "Female",
                                     style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
                                   ),
                                 ],
@@ -234,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             child: Text(
                               _selectedDate == null
-                                  ? "选择生日"
+                                  ? "Select Birthday"
                                   : "${_selectedDate!.year}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.day.toString().padLeft(2, '0')}",
                               style: const TextStyle(
                                 fontSize: 14,
@@ -268,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                         elevation: 4,
                       ),
                       child: const Text(
-                        "提交",
+                        "Submit",
                         style: TextStyle(
                           fontSize: 14,
                         ),

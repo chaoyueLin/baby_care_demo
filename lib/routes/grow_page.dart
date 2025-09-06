@@ -484,7 +484,7 @@ class _GrowPageState extends State<GrowPage> {
           // 折线图
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 6.0),
               child: LineChart(
                 LineChartData(
                   lineTouchData: const LineTouchData(enabled: false),
@@ -560,6 +560,7 @@ class _GrowPageState extends State<GrowPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: Row(
@@ -574,8 +575,12 @@ class _GrowPageState extends State<GrowPage> {
                   ),
                 ),
                 // +号
-                if (selectedType != TYPE_BMI)
-                  GestureDetector(
+                Visibility(
+                  visible: selectedType != TYPE_BMI,
+                  maintainSize: true,   // 保持大小
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: GestureDetector(
                     onTap: _showAddDataDialog,
                     child: Container(
                       width: 36,
@@ -587,6 +592,7 @@ class _GrowPageState extends State<GrowPage> {
                       child: Icon(Icons.add, color: cs.onPrimary, size: 20),
                     ),
                   ),
+                )
               ],
             ),
           ),

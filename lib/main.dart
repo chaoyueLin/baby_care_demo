@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'common/db_provider.dart';
 import 'models/baby.dart';
-import 'routes/login_page.dart';
+import 'routes/add_baby_page.dart';
 import 'routes/drawer_page.dart';
 import 'utils/theme_mode_notifier.dart';   // 新增
 
@@ -116,9 +116,9 @@ class MyApp extends StatelessWidget {
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      home: isLoggedIn ?  DrawerPage() :  LoginPage(),
+      home: isLoggedIn ?  DrawerPage() :  AddBabyPage(),
       routes: {
-        '/login': (context) =>  LoginPage(),
+        '/login': (context) =>  AddBabyPage(),
         '/main': (context) =>  DrawerPage(),
       },
     );
