@@ -183,12 +183,6 @@ class _DrawerPageState extends State<DrawerPage> {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            Icon(
-              Icons.child_care,
-              size: 40,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-            const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -201,7 +195,7 @@ class _DrawerPageState extends State<DrawerPage> {
                   ),
                 ),
                 Text(
-                  "宝宝成长记录",
+                  "Baby Growth Record",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                   ),
@@ -221,7 +215,7 @@ class _DrawerPageState extends State<DrawerPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "我的宝宝",
+            "My Babies",
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.onSurface,
@@ -253,14 +247,8 @@ class _DrawerPageState extends State<DrawerPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.child_care,
-            size: 32,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-          ),
-          const SizedBox(height: 8),
           Text(
-            "还没有添加宝宝",
+            "No babies added yet",
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
@@ -304,20 +292,15 @@ class _DrawerPageState extends State<DrawerPage> {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                backgroundImage: baby.name.isNotEmpty == true
-                    ? NetworkImage(baby.name)
-                    : null,
-                child: baby.name.isEmpty != false
-                    ? Icon(
+                child: Icon(
                   Icons.child_care,
                   size: 30,
                   color: Theme.of(context).colorScheme.primary,
                 )
-                    : null,
               ),
               const SizedBox(height: 8),
               Text(
-                baby.name ?? '未命名',
+                baby.name ?? 'Unnamed',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   color: isSelected
@@ -369,7 +352,7 @@ class _DrawerPageState extends State<DrawerPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                "添加宝宝",
+                "Add Baby",
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                   fontSize: 10,
@@ -392,10 +375,10 @@ class _DrawerPageState extends State<DrawerPage> {
 
     String title;
     switch (index) {
-      case 0: title = localizations?.care ?? "护理"; break;
-      case 1: title = localizations?.recent ?? "数据"; break;
-      case 2: title = localizations?.grow ?? "成长"; break;
-      case 3: title = localizations?.setting ?? "设置"; break;
+      case 0: title = localizations?.care ?? "Care"; break;
+      case 1: title = localizations?.recent ?? "Data"; break;
+      case 2: title = localizations?.grow ?? "Grow"; break;
+      case 3: title = localizations?.setting ?? "Settings"; break;
       default: title = "Unknown";
     }
 

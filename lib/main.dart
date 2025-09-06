@@ -7,7 +7,8 @@ import 'common/db_provider.dart';
 import 'models/baby.dart';
 import 'routes/add_baby_page.dart';
 import 'routes/drawer_page.dart';
-import 'utils/theme_mode_notifier.dart';   // 新增
+import 'utils/theme_mode_notifier.dart';
+import 'utils/baby_notifier.dart'; // 添加BabyNotifier导入
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -20,8 +21,16 @@ Future<void> main() async {
   FlutterNativeSplash.remove();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeModeNotifier(savedThemeMode),
+    // 使用MultiProvider来提供多个Notifier
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ThemeModeNotifier(savedThemeMode),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => BabyNotifier(),
+        ),
+      ],
       child: MyApp(isLoggedIn: isLoggedIn),
     ),
   );
@@ -116,10 +125,10 @@ class MyApp extends StatelessWidget {
       // 默认语言
       localizationsDelegates: S.localizationsDelegates,
       supportedLocales: S.supportedLocales,
-      home: isLoggedIn ?  DrawerPage() :  AddBabyPage(),
+      home: isLoggedIn ? const DrawerPage() :  AddBabyPage(),
       routes: {
         '/login': (context) =>  AddBabyPage(),
-        '/main': (context) =>  DrawerPage(),
+        '/main': (context) => const DrawerPage(),
       },
     );
   }
