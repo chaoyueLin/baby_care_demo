@@ -234,7 +234,7 @@ class _GrowPageState extends State<GrowPage> {
                     child: ElevatedButton(
                       onPressed: () => _showDatePicker(setDialogState),
                       child: Text(
-                        '${S.of(context)?.chooseDate ?? '选择日期'}: ${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
+                        '${S.of(context)?.chooseDate ?? 'Choose Date'}: ${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
                       ),
                     ),
                   ),
@@ -243,14 +243,14 @@ class _GrowPageState extends State<GrowPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(S.of(context)?.cancel ?? '取消', style: tt.labelLarge?.copyWith(color: cs.primary)),
+                  child: Text(S.of(context)?.cancel ?? 'Cancel', style: tt.labelLarge?.copyWith(color: cs.primary)),
                 ),
                 TextButton(
                   onPressed: () async {
                     await _saveGrowData();
                     if (context.mounted) Navigator.of(context).pop();
                   },
-                  child: Text(S.of(context)?.save ?? '保存', style: tt.labelLarge?.copyWith(color: cs.primary)),
+                  child: Text(S.of(context)?.save ?? 'Save', style: tt.labelLarge?.copyWith(color: cs.primary)),
                 ),
               ],
             );
@@ -281,7 +281,7 @@ class _GrowPageState extends State<GrowPage> {
       if (!mounted) return;
 
       Fluttertoast.showToast(
-        msg:  "请先添加或选择一个宝宝",
+        msg:  "Please add or select a baby first",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -295,7 +295,7 @@ class _GrowPageState extends State<GrowPage> {
     if (value == null) {
       if (!mounted) return;
       Fluttertoast.showToast(
-        msg:  "请输入有效的数值",
+        msg:  "Please enter a valid value",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -310,7 +310,7 @@ class _GrowPageState extends State<GrowPage> {
       if (!mounted) return;
 
       Fluttertoast.showToast(
-        msg:  "BMI 数据需要通过身高和体重计算获得",
+        msg:  "BMI data needs to be calculated from height and weight",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -331,7 +331,7 @@ class _GrowPageState extends State<GrowPage> {
       await DBProvider().insertGrow(growData);
       if (!mounted) return;
       Fluttertoast.showToast(
-        msg:  "数据保存成功",
+        msg:  "Data saved successfully",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -343,7 +343,7 @@ class _GrowPageState extends State<GrowPage> {
       if (!mounted) return;
 
       Fluttertoast.showToast(
-        msg:  "保存失败",
+        msg:  "Save failed",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -356,39 +356,39 @@ class _GrowPageState extends State<GrowPage> {
   String? _getDialogTitle() {
     switch (selectedType) {
       case TYPE_WEIGHT:
-        return S.of(context)?.addWeight ?? '添加体重数据';
+        return S.of(context)?.addWeight ?? 'Add Weight Data';
       case TYPE_HEIGHT:
-        return S.of(context)?.addHeight ?? '添加身高数据';
+        return S.of(context)?.addHeight ?? 'Add Height Data';
       case TYPE_BMI:
-        return S.of(context)?.addBMI ?? '添加BMI数据';
+        return S.of(context)?.addBMI ?? 'Add BMI Data';
       default:
-        return S.of(context)?.addData ?? '添加数据';
+        return S.of(context)?.addData ?? 'Add Data';
     }
   }
 
   String? _getInputLabel() {
     switch (selectedType) {
       case TYPE_WEIGHT:
-        return S.of(context)?.weight ?? '体重';
+        return S.of(context)?.weight ?? 'Weight';
       case TYPE_HEIGHT:
-        return S.of(context)?.height ?? '身高';
+        return S.of(context)?.height ?? 'Height';
       case TYPE_BMI:
         return S.of(context)?.bmi ?? 'BMI';
       default:
-        return S.of(context)?.value ?? '数值';
+        return S.of(context)?.value ?? 'Value';
     }
   }
 
   String? _getInputHint() {
     switch (selectedType) {
       case TYPE_WEIGHT:
-        return S.of(context)?.enterWeightKg ?? '请输入体重 (kg)';
+        return S.of(context)?.enterWeightKg ?? 'Please enter weight (kg)';
       case TYPE_HEIGHT:
-        return S.of(context)?.enterHeightCm ?? '请输入身高 (cm)';
+        return S.of(context)?.enterHeightCm ?? 'Please enter height (cm)';
       case TYPE_BMI:
-        return S.of(context)?.enterBMI ?? '请输入BMI';
+        return S.of(context)?.enterBMI ?? 'Please enter BMI';
       default:
-        return S.of(context)?.enterValue ?? '请输入数值';
+        return S.of(context)?.enterValue ?? 'Please enter value';
     }
   }
 

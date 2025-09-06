@@ -66,11 +66,11 @@ class _DataPageState extends State<DataPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('未找到宝宝数据'),
+            const Text('No baby data found'),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () => _loadCurrentBabyAndData(),
-              child: const Text('重试'),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -162,7 +162,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.week,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.week)),
-                Text(S.of(context)?.recentWeek ?? 'recentWeek',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(S.of(context)?.recentWeek ?? 'Recent Week',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
             const SizedBox(width: 6),
@@ -172,7 +172,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.month,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.month)),
-                 Text(S.of(context)?.recentMonth ?? 'recentMonth',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(S.of(context)?.recentMonth ?? 'Recent Month',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
             const SizedBox(width: 6),
@@ -182,7 +182,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.quarter,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.quarter)),
-                 Text(S.of(context)?.recentQuarter ?? 'recentQuarter',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(S.of(context)?.recentQuarter ?? 'Recent Quarter',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
           ],
@@ -199,7 +199,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
             if (snap.hasError) {
               return SizedBox(
                   height: 300,
-                  child: Center(child: Text('数据加载失败：${snap.error}')));
+                  child: Center(child: Text('Data loading failed: ${snap.error}')));
             }
             final list = snap.data ?? const <BabyCare>[];
             final days = _range == FeedRange.week
@@ -214,11 +214,11 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildLegendItem(Colors.blue.shade400,  S.of(context)?.breastMilk ?? "breastMilk"),
+                    _buildLegendItem(Colors.blue.shade400,  S.of(context)?.breastMilk ?? "Breast Milk"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.green.shade400, S.of(context)?.formula ?? "formula"),
+                    _buildLegendItem(Colors.green.shade400, S.of(context)?.formula ?? "Formula"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.orange.shade400, S.of(context)?.babyFood ?? "babyFood"),
+                    _buildLegendItem(Colors.orange.shade400, S.of(context)?.babyFood ?? "Baby Food"),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -252,7 +252,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      '日期: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\n母乳: ${_selectedDay!.milk.toInt()}ml, 奶粉: ${_selectedDay!.formula.toInt()}ml, 辅食: ${_selectedDay!.babyFood.toInt()}g, 💩: ${_selectedDay!.poopCount} 次',
+                      'Date: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\nBreast Milk: ${_selectedDay!.milk.toInt()}ml, Formula: ${_selectedDay!.formula.toInt()}ml, Baby Food: ${_selectedDay!.babyFood.toInt()}g, 💩: ${_selectedDay!.poopCount} times',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
