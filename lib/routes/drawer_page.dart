@@ -29,15 +29,15 @@ class _DrawerPageState extends State<DrawerPage> {
   bool _isLoading = true;
 
 
-  Key _carePageKey = UniqueKey();
 
   // Page configuration（注意：care 页用 KeyedSubtree 包一层动态 Key）
-  late final List<PageConfig> _pageConfigs = [
-    PageConfig(Icons.home, 'care', () => KeyedSubtree(key: _carePageKey, child: CarePage())),
-    PageConfig(Icons.analytics, 'recent', () => const DataPage()),
-    PageConfig(Icons.trending_up, 'grow', () => const GrowPage()),
+  late List<PageConfig> _pageConfigs = [
+    PageConfig(Icons.home, 'care', () => KeyedSubtree(key: UniqueKey(), child: CarePage())),
+    PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: DataPage())),
+    PageConfig(Icons.trending_up, 'grow', () => KeyedSubtree(key: UniqueKey(), child: GrowPage())),
     PageConfig(Icons.settings, 'setting', () => const SettingsPage()),
   ];
+
 
   List<Widget> get _pages => _pageConfigs.map((config) => config.pageBuilder()).toList();
 
@@ -67,7 +67,6 @@ class _DrawerPageState extends State<DrawerPage> {
       _isLoading = false;
 
 
-      _carePageKey = UniqueKey();
 
       if (mounted) setState(() {});
     } catch (e) {
@@ -156,7 +155,13 @@ class _DrawerPageState extends State<DrawerPage> {
       }
 
       // --- 强制 CarePage 重建：让它走 initState 按 show==1 重新拉取 ---
-      _carePageKey = UniqueKey();
+      _pageConfigs = [
+        PageConfig(Icons.home, 'care', () => KeyedSubtree(key: UniqueKey(), child: CarePage())),
+        PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: DataPage())),
+        PageConfig(Icons.trending_up, 'grow', () => KeyedSubtree(key: UniqueKey(), child: GrowPage())),
+        PageConfig(Icons.settings, 'setting', () => const SettingsPage()),
+      ];
+
 
       if (mounted) setState(() {});
       Navigator.pop(context); // 关闭 Drawer

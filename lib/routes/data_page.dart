@@ -125,18 +125,21 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
 
   Future<List<BabyCare>> _load() async {
     final dbp = DBProvider();
-    final endExclusive =
-        _anchorDay.add(const Duration(days: 1)).millisecondsSinceEpoch;
-    final startMs = switch (_range) {
-      FeedRange.week =>
-      _anchorDay.subtract(const Duration(days: 6)).millisecondsSinceEpoch,
-      FeedRange.month =>
-      _anchorDay.subtract(const Duration(days: 29)).millisecondsSinceEpoch,
-      FeedRange.quarter =>
-      _anchorDay.subtract(const Duration(days: 89)).millisecondsSinceEpoch,
+
+    final days = switch (_range) {
+      FeedRange.week => 7,
+      FeedRange.month => 30,
+      FeedRange.quarter => 90,
     };
+
+    final endExclusive = _anchorDay.add(const Duration(days: 1)).millisecondsSinceEpoch;
+    final startMs = _anchorDay
+        .subtract(Duration(days: days - 1))
+        .millisecondsSinceEpoch;
+
     return dbp.getCareByRange(startMs, endExclusive, widget.babyId);
   }
+
 
   void _setRange(FeedRange r) {
     setState(() {

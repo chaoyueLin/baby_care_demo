@@ -35,7 +35,6 @@ class _CarePageContentState extends State<CarePageContent> {
   /// currentDate 表示 PageView 当前选中的日期（仅日期部分有效）
   late DateTime currentDate;
 
-
   /// 数据缓存：以当天 00:00:00 的毫秒数作为 key，value 是那天的记录列表
   final Map<int, List<BabyCare>> _recordsCache = {};
 
@@ -58,8 +57,10 @@ class _CarePageContentState extends State<CarePageContent> {
       // 宝宝生日作为起始日
       startDate = DateTime(baby.birthdate.year, baby.birthdate.month, baby.birthdate.day);
 
-      // 重新计算总天数 & 初始页索引
+      // 修复：计算到今天的天数，不包含未来
       totalDays = today.difference(startDate).inDays + 1;
+
+      // 修复：初始页索引应该是今天
       initialPageIndex = totalDays - 1;
       _pageController = PageController(initialPage: initialPageIndex);
 
@@ -80,6 +81,7 @@ class _CarePageContentState extends State<CarePageContent> {
         return dtp.LocaleType.en;
     }
   }
+
   DateTime _calculateDate(int index) {
     return startDate.add(Duration(days: index));
   }
@@ -92,7 +94,6 @@ class _CarePageContentState extends State<CarePageContent> {
 
   /// 从 DB 加载某天的数据并放入缓存（覆盖）
   Future<void> _loadDataForDateIntoCache(DateTime date) async {
-
     int start = _startOfDayMillis(date);
     int end = start + Duration(days: 1).inMilliseconds;
     List<BabyCare> data = await DBProvider().getCareByRange(start, end, _currentBaby?.id ?? 0);
@@ -223,7 +224,7 @@ class _CarePageContentState extends State<CarePageContent> {
                   _showTimePicker(FeedType.babyFood, input);
                 } else {
                   Fluttertoast.showToast(
-                    msg:  "Please enter a valid number",
+                    msg: "Please enter a valid number",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
                     backgroundColor: Colors.black54,
@@ -240,16 +241,37 @@ class _CarePageContentState extends State<CarePageContent> {
     );
   }
 
-  /// 时间选择器：选择时间后插入记录并更新缓存（注意：插入记录会以 currentDate 的日期为基准）
+  /// 时间选择器：只选择时间，日期固定为 PageView 当前显示的日期
   void _showTimePicker(FeedType type, String mush) {
+    // 检查当前 PageView 显示的日期是否超过今天
+    if (currentDate.isAfter(DateTime(today.year, today.month, today.day))) {
+      Fluttertoast.showToast(
+        msg: "Cannot record data for future dates",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
     // 根据当前主题模式设置日期选择器的主题
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    // 使用 currentDate 作为日期基础（currentDate 已在切页时设置）
+
+    // 使用当前时间的时分秒，但日期部分无关紧要（因为只选择时间）
+    final DateTime currentTime = DateTime.now();
+    final DateTime initialTime = DateTime(
+      2024, 1, 1, // 日期部分不重要，只是为了构建 DateTime 对象
+      currentTime.hour,
+      currentTime.minute,
+    );
+
     DatePicker.showTimePicker(
       context,
       locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
       showSecondsColumn: false,
-      currentTime: currentDate,
+      currentTime: initialTime, // 默认显示当前时间（小时:分钟）
       theme: dtp.DatePickerTheme(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
         headerColor: isDarkMode ? const Color(0xFF2D2D2D) : Colors.lightGreen,
@@ -263,13 +285,27 @@ class _CarePageContentState extends State<CarePageContent> {
         ),
       ),
       onConfirm: (time) async {
+        // 组合日期：使用 PageView 当前日期 + 用户选择的时间
         DateTime fullDateTime = DateTime(
-          currentDate.year,
-          currentDate.month,
-          currentDate.day,
-          time.hour,
-          time.minute,
+          currentDate.year,  // PageView 当前日期的年
+          currentDate.month, // PageView 当前日期的月
+          currentDate.day,   // PageView 当前日期的日
+          time.hour,         // 用户选择的小时
+          time.minute,       // 用户选择的分钟
         );
+
+        // 最终检查：确保组合后的时间不超过今天当前时间
+        if (fullDateTime.isAfter(DateTime.now())) {
+          Fluttertoast.showToast(
+            msg: "Cannot record data for future time",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          return;
+        }
 
         int timestamp = fullDateTime.millisecondsSinceEpoch;
 
@@ -287,7 +323,7 @@ class _CarePageContentState extends State<CarePageContent> {
         final list = _recordsCache.putIfAbsent(key, () => []);
         list.add(inserted);
 
-        // 如果当前页面就是插入记录的那天，则刷新 UI。
+        // 如果当前页面就是插入记录的那天，则刷新 UI
         if (key == _startOfDayMillis(currentDate)) {
           if (mounted) setState(() {});
         }
@@ -305,7 +341,7 @@ class _CarePageContentState extends State<CarePageContent> {
       showGif: false,
       showCamera: true,
       compressSize: 500,
-      uiConfig: UIConfig(uiThemeColor:Colors.lightGreen), // 用主题主色
+      uiConfig: UIConfig(uiThemeColor: Colors.lightGreen), // 用主题主色
       cropConfig: CropConfig(enableCrop: false),
     );
 
@@ -320,7 +356,6 @@ class _CarePageContentState extends State<CarePageContent> {
     final mush = imagePaths.join(','); // 便便用 mush 存储图片路径的逗号连接字符串
     _showTimePicker(FeedType.poop, mush);
   }
-
 
   @override
   void dispose() {
@@ -533,7 +568,7 @@ class _CarePageContentState extends State<CarePageContent> {
             flex: 6,
             child: PageView.builder(
               controller: _pageController,
-              itemCount: totalDays + 1,
+              itemCount: totalDays, // 修复：去掉 +1，只到今天
               onPageChanged: _onPageChanged,
               itemBuilder: (context, index) {
                 final pageDate = _calculateDate(index);
@@ -585,7 +620,7 @@ class _CarePageContentState extends State<CarePageContent> {
                             child: Container(
                               height: 50,
                               color: hourIndex.isEven
-                                  ?  cs.primaryContainer.withOpacity(0.3) // 交替颜色
+                                  ? cs.primaryContainer.withOpacity(0.3) // 交替颜色
                                   : cs.surface, // 交替颜色
                               child: Row(
                                 children: [
@@ -609,14 +644,13 @@ class _CarePageContentState extends State<CarePageContent> {
                         },
                       ),
                     ),
-
                   ],
                 );
               },
             ),
           ),
           Container(
-            height:70,
+            height: 70,
             color: cs.surfaceVariant, // 底部操作栏背景
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
