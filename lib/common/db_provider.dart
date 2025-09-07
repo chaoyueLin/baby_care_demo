@@ -79,6 +79,13 @@ class DBProvider {
     return person;
   }
 
+  Future<void> clearAllShow() async {
+    final dbClient = await db;
+    await dbClient.update(tablePerson, {columnShow: 0});
+  }
+
+
+
   Future<List<Baby>?> queryAllPersons() async {
     final dbClient = await db;
     List<Map<String, dynamic>> maps = await dbClient.query(tablePerson);
@@ -257,6 +264,24 @@ class DBProvider {
         : [];
     return list;
   }
+
+  // DBProvider.dart 中新增
+  Future<void> setActiveBaby(int babyId) async {
+    final dbClient = await db;
+    await dbClient.transaction((txn) async {
+      // 先把所有宝宝 show 清零
+      await txn.update(tablePerson, {columnShow: 0});
+
+      // 再把指定 babyId 的宝宝设为 show=1
+      await txn.update(
+        tablePerson,
+        {columnShow: 1},
+        where: '$columnPersonId = ?',
+        whereArgs: [babyId],
+      );
+    });
+  }
+
 
 
 }

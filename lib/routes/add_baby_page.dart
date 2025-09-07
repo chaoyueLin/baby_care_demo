@@ -51,7 +51,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
 
     if (name.isEmpty || _selectedDate == null) {
       Fluttertoast.showToast(
-        msg:  "Please enter complete information",
+        msg: "Please enter complete information",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -63,19 +63,78 @@ class _AddBabyPageState extends State<AddBabyPage> {
 
     int sexValue = _selectedGender == "Male" ? 1 : 0; // 1 = 男, 0 = 女
 
-    // 创建 Baby 对象
-    Baby newBaby = Baby(
-        name: name,
-        sex: sexValue,
-        birthdate: _selectedDate!,
-        show: 1
-    );
+    // 检查数据库是否已有重复宝宝
+    List<Baby>? allBabies = await DBProvider().queryAllPersons();
+    bool duplicateExists = allBabies?.any((baby) =>
+    baby.name == name &&
+        baby.sex == sexValue &&
+        baby.birthdate.year == _selectedDate!.year &&
+        baby.birthdate.month == _selectedDate!.month &&
+        baby.birthdate.day == _selectedDate!.day) ?? false;
 
-    // 插入数据库
-    await DBProvider().insertPerson(newBaby);
+    if (duplicateExists) {
+      Fluttertoast.showToast(
+        msg: "This baby already exists",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
 
-    // 跳转到主页面
-    Navigator.pushReplacementNamed(context, '/main');
+    try {
+
+      if (allBabies != null && allBabies.isNotEmpty) {
+        for (Baby baby in allBabies) {
+          if (baby.id != null) {
+            await DBProvider().clearAllShow();
+          }
+        }
+      }
+
+      // 创建新宝宝，设置 show 为 1（成为活跃宝宝）
+      Baby newBaby = Baby(
+          name: name,
+          sex: sexValue,
+          birthdate: _selectedDate!,
+          show: 1
+      );
+
+      // 插入数据库
+      await DBProvider().insertPerson(newBaby);
+
+
+      if (Navigator.canPop(context)) {
+        // 如果是从 DrawerPage 导航过来的，返回并传递更新标志
+        Navigator.pop(context, true);
+      } else {
+        // 如果是应用启动时直接进入的，导航到主页
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+
+      // 成功提示
+      Fluttertoast.showToast(
+        msg: "Baby added successfully!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+    } catch (e) {
+      debugPrint('Error adding baby: $e');
+      Fluttertoast.showToast(
+        msg: "Failed to add baby",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 
   dtp.LocaleType _mapLocaleToPickerLocale(Locale locale) {

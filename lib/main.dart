@@ -127,7 +127,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: S.supportedLocales,
       home: isLoggedIn ? const DrawerPage() :  AddBabyPage(),
       routes: {
-        '/login': (context) =>  AddBabyPage(),
+        '/addBaby': (context) =>  AddBabyPage(),
         '/main': (context) => const DrawerPage(),
       },
     );

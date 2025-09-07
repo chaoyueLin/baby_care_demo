@@ -4,10 +4,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 
-// 引入你项目中的页面和工具类
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import '../utils/theme_mode_notifier.dart';
+import '../utils/baby_notifier.dart';
 import 'care_page.dart';
 import 'data_page.dart';
 import 'setting_page.dart';
@@ -28,9 +28,12 @@ class _DrawerPageState extends State<DrawerPage> {
   List<Baby> _babies = [];
   bool _isLoading = true;
 
-  // Page configuration
-  final List<PageConfig> _pageConfigs = [
-    PageConfig(Icons.home, 'care', () =>  CarePage()),
+
+  Key _carePageKey = UniqueKey();
+
+  // Page configuration（注意：care 页用 KeyedSubtree 包一层动态 Key）
+  late final List<PageConfig> _pageConfigs = [
+    PageConfig(Icons.home, 'care', () => KeyedSubtree(key: _carePageKey, child: CarePage())),
     PageConfig(Icons.analytics, 'recent', () => const DataPage()),
     PageConfig(Icons.trending_up, 'grow', () => const GrowPage()),
     PageConfig(Icons.settings, 'setting', () => const SettingsPage()),
@@ -46,19 +49,30 @@ class _DrawerPageState extends State<DrawerPage> {
 
   Future<void> _loadBabies() async {
     try {
-      final babies = await DBProvider().getVisiblePersons();
-      setState(() {
-        _babies = babies ?? [];
-        _isLoading = false;
-        // 如果有宝宝，默认选择第一个
-        if (_babies.isNotEmpty) {
-          _selectedBabyIndex = 0;
+      final babies = await DBProvider().queryAllPersons();
+      _babies = babies ?? [];
+
+
+      if (_babies.isNotEmpty) {
+        final idx = _babies.indexWhere((b) => (b.show ?? 0) == 1);
+        _selectedBabyIndex = idx >= 0 ? idx : 0;
+
+        // 同步到全局 BabyNotifier（可选，但推荐）
+        final current = _babies[_selectedBabyIndex];
+        if (mounted) {
+          context.read<BabyNotifier>().setBaby(current);
         }
-      });
+      }
+
+      _isLoading = false;
+
+
+      _carePageKey = UniqueKey();
+
+      if (mounted) setState(() {});
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      _isLoading = false;
+      if (mounted) setState(() {});
       debugPrint('Error loading babies: $e');
     }
   }
@@ -95,24 +109,24 @@ class _DrawerPageState extends State<DrawerPage> {
 
   String _getCurrentPageTitle() {
     final localizations = S.of(context);
-    String pageTitle;
     switch (_currentIndex) {
-      case 0: pageTitle = localizations?.care ?? "Care"; break;
-      case 1: pageTitle = localizations?.recent ?? "Data"; break;
-      case 2: pageTitle = localizations?.grow ?? "Grow"; break;
-      case 3: pageTitle = localizations?.setting ?? "Settings"; break;
-      default: pageTitle = "BabyCare";
+      case 0: return localizations?.care ?? "Care";
+      case 1: return localizations?.recent ?? "Data";
+      case 2: return localizations?.grow ?? "Grow";
+      case 3: return localizations?.setting ?? "Settings";
+      default: return "BabyCare";
     }
-
-    return pageTitle;
   }
 
-  void _navigateToLogin() async {
-    final result = await Navigator.pushNamed(context, '/login');
 
-    // 登录页面返回后，重新加载宝宝数据
-    if (result == true || mounted) {
-      await _loadBabies();
+// 修改 DrawerPage 中的导航方法
+  void _navigateToLogin() async {
+    // 导航到 AddBabyPage 并等待返回结果
+    final result = await Navigator.pushNamed(context, '/addBaby');
+
+    // 如果返回结果表示有数据更新，则刷新宝宝列表
+    if (result == true && mounted) {
+      await _loadBabies(); // 重新加载宝宝列表
     }
   }
 
@@ -121,6 +135,35 @@ class _DrawerPageState extends State<DrawerPage> {
       return _babies[_selectedBabyIndex];
     }
     return null;
+  }
+
+  Future<void> _switchToBaby(int index) async {
+    if (index < 0 || index >= _babies.length) return;
+    final baby = _babies[index];
+    if (baby.id == null) return;
+
+    try {
+      // --- 更新 DB：把该 baby 的 show 设为 1，其它设为 0 ---
+      // 建议在 DBProvider 中实现 setActiveBaby(int babyId)
+      // （若没有此方法，可参考下方“DBProvider 建议实现”）
+      await DBProvider().setActiveBaby(baby.id!);
+
+      // 本地状态与全局状态同步
+      _selectedBabyIndex = index;
+      if (mounted) {
+        // 同步到全局 BabyNotifier（可选，但有利于其他页面联动）
+        context.read<BabyNotifier>().setBaby(baby);
+      }
+
+      // --- 强制 CarePage 重建：让它走 initState 按 show==1 重新拉取 ---
+      _carePageKey = UniqueKey();
+
+      if (mounted) setState(() {});
+      Navigator.pop(context); // 关闭 Drawer
+    } catch (e) {
+      debugPrint('Switch baby failed: $e');
+      Fluttertoast.showToast(msg: 'Switch baby failed');
+    }
   }
 
   @override
@@ -176,9 +219,7 @@ class _DrawerPageState extends State<DrawerPage> {
   Widget _buildDrawerHeader() {
     return Container(
       height: 120,
-      decoration: const BoxDecoration(
-        color:Colors.lightGreen ,
-      ),
+      decoration: const BoxDecoration(color: Colors.lightGreen),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -197,7 +238,8 @@ class _DrawerPageState extends State<DrawerPage> {
                 Text(
                   "Baby Growth Record",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                    color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                   ),
                 ),
               ],
@@ -266,12 +308,8 @@ class _DrawerPageState extends State<DrawerPage> {
       width: 80,
       margin: const EdgeInsets.only(right: 12),
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedBabyIndex = index;
-          });
-          Navigator.pop(context);
-        },
+        // ❗ 点选宝宝：更新 DB 的 show，强制 CarePage 重建
+        onTap: () => _switchToBaby(index),
         child: Container(
           decoration: BoxDecoration(
             color: isSelected
@@ -291,18 +329,20 @@ class _DrawerPageState extends State<DrawerPage> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                backgroundColor:
+                Theme.of(context).colorScheme.primaryContainer,
                 child: Icon(
                   Icons.child_care,
                   size: 30,
                   color: Theme.of(context).colorScheme.primary,
-                )
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 baby.name ?? 'Unnamed',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight:
+                  isSelected ? FontWeight.w600 : FontWeight.normal,
                   color: isSelected
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.onSurface,
@@ -326,7 +366,8 @@ class _DrawerPageState extends State<DrawerPage> {
         onTap: _navigateToLogin,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+            color:
+            Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
@@ -375,11 +416,20 @@ class _DrawerPageState extends State<DrawerPage> {
 
     String title;
     switch (index) {
-      case 0: title = localizations?.care ?? "Care"; break;
-      case 1: title = localizations?.recent ?? "Data"; break;
-      case 2: title = localizations?.grow ?? "Grow"; break;
-      case 3: title = localizations?.setting ?? "Settings"; break;
-      default: title = "Unknown";
+      case 0:
+        title = localizations?.care ?? "Care";
+        break;
+      case 1:
+        title = localizations?.recent ?? "Data";
+        break;
+      case 2:
+        title = localizations?.grow ?? "Grow";
+        break;
+      case 3:
+        title = localizations?.setting ?? "Settings";
+        break;
+      default:
+        title = "Unknown";
     }
 
     return Container(
@@ -401,7 +451,8 @@ class _DrawerPageState extends State<DrawerPage> {
           ),
         ),
         selected: isSelected,
-        selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+        selectedTileColor:
+        Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -409,7 +460,6 @@ class _DrawerPageState extends State<DrawerPage> {
       ),
     );
   }
-
 
   void _navigateToPage(int index) {
     if (_currentIndex != index) {
@@ -419,11 +469,10 @@ class _DrawerPageState extends State<DrawerPage> {
   }
 }
 
-// Helper class for page configuration
 class PageConfig {
   final IconData icon;
-  final String key;
+  final String keyStr;
   final Widget Function() pageBuilder;
 
-  PageConfig(this.icon, this.key, this.pageBuilder);
+  PageConfig(this.icon, this.keyStr, this.pageBuilder);
 }

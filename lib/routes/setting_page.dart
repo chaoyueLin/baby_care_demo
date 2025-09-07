@@ -4,6 +4,7 @@ import '../utils/theme_mode_notifier.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../utils/ad_manager.dart';
 import 'dart:io' show Platform;
 
 class SettingsPage extends StatefulWidget {
@@ -19,11 +20,22 @@ class _SettingsPageState extends State<SettingsPage> {
   String _buildNumber = '';
   String _packageName = '';
   bool _isLoading = true;
+  bool _isPurchasing = false;
+
+  final AdManager _adManager = AdManager();
 
   @override
   void initState() {
     super.initState();
     _loadAppInfo();
+    _initAdManager();
+  }
+
+  Future<void> _initAdManager() async {
+    await _adManager.init();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadAppInfo() async {
@@ -44,6 +56,68 @@ class _SettingsPageState extends State<SettingsPage> {
         _packageName = 'com.gracebaby.babycare';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _handlePurchaseCoffee() async {
+    setState(() {
+      _isPurchasing = true;
+    });
+
+    try {
+      final success = await _adManager.buyCoffee();
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      S.of(context)?.purchaseSuccessful ??
+                          'Thank you! You are now a premium member!',
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+          setState(() {}); // 刷新界面以显示新状态
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                S.of(context)?.purchaseFailed ??
+                    'Purchase failed. Please try again.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              S.of(context)?.purchaseError ??
+                  'An error occurred during purchase.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPurchasing = false;
+        });
+      }
     }
   }
 
@@ -245,6 +319,87 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
 
+          // Premium Membership Section
+          _buildSectionHeader(context, s?.premium ?? 'Premium'),
+          Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: _adManager.isCoffeeBought
+                ? ListTile(
+              title: Row(
+                children: [
+                  Text(s?.premiumMember ?? 'Premium Member'),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.amber,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      s?.active ?? 'ACTIVE',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: Text(
+                s?.premiumMemberDescription ??
+                    'Thank you for supporting the developer! Enjoy ad-free experience.',
+              ),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+              ),
+              trailing: const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+              ),
+            )
+                : ListTile(
+              title: Text(s?.becomePremium ?? 'Become Premium Member'),
+              subtitle: Text(
+                s?.becomePremiumDescription ??
+                    'Support the developer with a coffee and enjoy ad-free experience',
+              ),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.local_cafe,
+                  color: cs.primary,
+                ),
+              ),
+              trailing: _isPurchasing
+                  ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+                  : Icon(
+                Icons.chevron_right,
+                color: cs.primary,
+              ),
+              onTap: _isPurchasing ? null : _handlePurchaseCoffee,
+            ),
+          ),
+
           // About Section
           _buildSectionHeader(context, s?.about ?? 'About'),
           Card(
@@ -314,6 +469,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 8),
                     _buildInfoRow(context, s?.platform ?? 'Platform',
                         Platform.isAndroid ? 'Android' : Platform.isIOS ? 'iOS' : 'Unknown'),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(
+                      context,
+                      s?.membershipStatus ?? 'Membership Status',
+                      _adManager.isCoffeeBought
+                          ? (s?.premium ?? 'Premium')
+                          : (s?.free ?? 'Free'),
+                    ),
                   ],
                 ),
               ),
