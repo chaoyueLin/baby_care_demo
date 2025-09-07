@@ -313,7 +313,7 @@ class _DrawerPageState extends State<DrawerPage> {
       width: 80,
       margin: const EdgeInsets.only(right: 12),
       child: GestureDetector(
-        // ❗ 点选宝宝：更新 DB 的 show，强制 CarePage 重建
+
         onTap: () => _switchToBaby(index),
         child: Container(
           decoration: BoxDecoration(

@@ -153,7 +153,7 @@ class _CarePageContentState extends State<CarePageContent> {
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: 25,
               itemBuilder: (context, index) {
                 int ml = (index + 1) * 10;
@@ -165,6 +165,8 @@ class _CarePageContentState extends State<CarePageContent> {
                   },
                 );
               },
+              separatorBuilder: (BuildContext context, int index) =>
+                  Divider(height: 1.0, color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)),
             ),
           ),
         );
@@ -281,6 +283,10 @@ class _CarePageContentState extends State<CarePageContent> {
         ),
         cancelStyle: TextStyle(
           color: isDarkMode ? Colors.white70 : Colors.white,
+          fontSize: 16,
+        ),
+        itemStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : const Color(0xFF2D2D2D),
           fontSize: 16,
         ),
       ),

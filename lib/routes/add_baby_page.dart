@@ -42,6 +42,10 @@ class _AddBabyPageState extends State<AddBabyPage> {
           color: isDarkMode ? Colors.white70 : Colors.white,
           fontSize: 16,
         ),
+        itemStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : const Color(0xFF2D2D2D),
+          fontSize: 16,
+        ),
       ),
     );
   }
