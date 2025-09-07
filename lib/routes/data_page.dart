@@ -57,6 +57,8 @@ class _DataPageState extends State<DataPage> {
   }
 
   Widget _buildBody() {
+    final s = S.of(context);
+
     if (_loadingBaby) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -66,11 +68,11 @@ class _DataPageState extends State<DataPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('No baby data found'),
+            Text(s?.noBabyDataFound ?? 'No baby data found'),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () => _loadCurrentBabyAndData(),
-              child: const Text('Retry'),
+              child: Text(s?.retry ?? 'Retry'),
             ),
           ],
         ),
@@ -151,6 +153,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Column(
@@ -165,7 +168,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.week,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.week)),
-                Text(S.of(context)?.recentWeek ?? 'Recent Week',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(s?.recentWeek ?? 'Recent Week',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
             const SizedBox(width: 6),
@@ -175,7 +178,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.month,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.month)),
-                Text(S.of(context)?.recentMonth ?? 'Recent Month',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(s?.recentMonth ?? 'Recent Month',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
             const SizedBox(width: 6),
@@ -185,7 +188,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.quarter,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.quarter)),
-                Text(S.of(context)?.recentQuarter ?? 'Recent Quarter',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(s?.recentQuarter ?? 'Recent Quarter',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
           ],
@@ -202,7 +205,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
             if (snap.hasError) {
               return SizedBox(
                   height: 300,
-                  child: Center(child: Text('Data loading failed: ${snap.error}')));
+                  child: Center(child: Text('${s?.dataLoadingFailed ?? 'Data loading failed'}: ${snap.error}')));
             }
             final list = snap.data ?? const <BabyCare>[];
             final days = _range == FeedRange.week
@@ -217,11 +220,11 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildLegendItem(Colors.blue.shade400,  S.of(context)?.breastMilk ?? "Breast Milk"),
+                    _buildLegendItem(Colors.blue.shade400,  s?.breastMilk ?? "Breast Milk"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.green.shade400, S.of(context)?.formula ?? "Formula"),
+                    _buildLegendItem(Colors.green.shade400, s?.formula ?? "Formula"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.orange.shade400, S.of(context)?.babyFood ?? "Baby Food"),
+                    _buildLegendItem(Colors.orange.shade400, s?.babyFood ?? "Baby Food"),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -255,7 +258,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      'Date: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\nBreast Milk: ${_selectedDay!.milk.toInt()}ml, Formula: ${_selectedDay!.formula.toInt()}ml, Baby Food: ${_selectedDay!.babyFood.toInt()}g, 💩: ${_selectedDay!.poopCount} times',
+                      '${s?.date ?? 'Date'}: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\n${s?.breastMilk ?? 'Breast Milk'}: ${_selectedDay!.milk.toInt()}ml, ${s?.formula ?? 'Formula'}: ${_selectedDay!.formula.toInt()}ml, ${s?.babyFood ?? 'Baby Food'}: ${_selectedDay!.babyFood.toInt()}g, ${s?.poopCount ?? 'Poop'}: ${_selectedDay!.poopCount} ${s?.times ?? 'times'}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),

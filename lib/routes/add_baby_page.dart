@@ -51,11 +51,12 @@ class _AddBabyPageState extends State<AddBabyPage> {
   }
 
   Future<void> _submit() async {
+    final s = S.of(context);
     String name = _nameController.text.trim();
 
     if (name.isEmpty || _selectedDate == null) {
       Fluttertoast.showToast(
-        msg: "Please enter complete information",
+        msg: s?.pleaseEnterCompleteInformation ?? 'Please enter complete information',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -78,7 +79,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
 
     if (duplicateExists) {
       Fluttertoast.showToast(
-        msg: "This baby already exists",
+        msg: s?.thisBabyAlreadyExists ?? 'This baby already exists',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -120,7 +121,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
 
       // 成功提示
       Fluttertoast.showToast(
-        msg: "Baby added successfully!",
+        msg: s?.babyAddedSuccessfully ?? 'Baby added successfully!',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -131,7 +132,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
     } catch (e) {
       debugPrint('Error adding baby: $e');
       Fluttertoast.showToast(
-        msg: "Failed to add baby",
+        msg: s?.failedToAddBaby ?? 'Failed to add baby',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black54,
@@ -152,6 +153,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -159,7 +161,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
       onTap: () => FocusScope.of(context).unfocus(), // 点击空白处关闭键盘
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Add Baby Information'),
+          title: Text(s?.addBabyInformation ?? 'Add Baby Information'),
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
           elevation: 2,
@@ -187,7 +189,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
                             textAlign: TextAlign.center, // 文字居中
                             style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                             decoration: InputDecoration(
-                              labelText: "Name",
+                              labelText: s?.name ?? "Name",
                               labelStyle: TextStyle(
                                 color: isDarkMode
                                     ? Colors.lightGreenAccent
@@ -228,7 +230,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                "Gender",
+                                s?.gender ?? "Gender",
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 14,
                                 ),
@@ -253,7 +255,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
                                     },
                                   ),
                                   Text(
-                                    "Male",
+                                    s?.male ?? "Male",
                                     style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
                                   ),
                                 ],
@@ -277,7 +279,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
                                     },
                                   ),
                                   Text(
-                                    "Female",
+                                    s?.female ?? "Female",
                                     style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
                                   ),
                                 ],
@@ -308,7 +310,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
                             ),
                             child: Text(
                               _selectedDate == null
-                                  ? "Select Birthday"
+                                  ? (s?.selectBirthday ?? "Select Birthday")
                                   : "${_selectedDate!.year}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.day.toString().padLeft(2, '0')}",
                               style: const TextStyle(
                                 fontSize: 14,
@@ -341,9 +343,9 @@ class _AddBabyPageState extends State<AddBabyPage> {
                         ),
                         elevation: 4,
                       ),
-                      child: const Text(
-                        "Submit",
-                        style: TextStyle(
+                      child: Text(
+                        s?.submit ?? "Submit",
+                        style: const TextStyle(
                           fontSize: 14,
                         ),
                       ),

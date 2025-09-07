@@ -123,6 +123,7 @@ class _CarePageContentState extends State<CarePageContent> {
 
   /// 选择 ml（10 ~ 250）并选择时间（时间选择器会使用 currentDate 的日期）
   void _showMlSelector(FeedType type) {
+    final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
@@ -144,9 +145,9 @@ class _CarePageContentState extends State<CarePageContent> {
                 topRight: Radius.circular(12.0),
               ),
             ),
-            child: const Text(
-              'Select Milliliters',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              s?.selectMilliliters ?? 'Select Milliliters',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           titlePadding: EdgeInsets.zero,
@@ -176,6 +177,7 @@ class _CarePageContentState extends State<CarePageContent> {
 
   /// 输入辅食重量（g）并选择时间
   void _showBabyFoodInput() {
+    final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final TextEditingController controller = TextEditingController();
@@ -198,17 +200,17 @@ class _CarePageContentState extends State<CarePageContent> {
                 topRight: Radius.circular(12.0),
               ),
             ),
-            child: const Text(
-              'Enter Baby Food Weight',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              s?.enterBabyFoodWeight ?? 'Enter Baby Food Weight',
+              style: const TextStyle(color: Colors.white),
             ),
           ),
           titlePadding: EdgeInsets.zero,
           content: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: 'Please enter baby food weight',
+            decoration: InputDecoration(
+              hintText: s?.pleaseEnterBabyFoodWeight ?? 'Please enter baby food weight',
               suffixText: 'g',
             ),
             autofocus: true,
@@ -216,7 +218,7 @@ class _CarePageContentState extends State<CarePageContent> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(s?.cancel ?? 'Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -226,7 +228,7 @@ class _CarePageContentState extends State<CarePageContent> {
                   _showTimePicker(FeedType.babyFood, input);
                 } else {
                   Fluttertoast.showToast(
-                    msg: "Please enter a valid number",
+                    msg: s?.pleaseEnterValidNumber ?? "Please enter a valid number",
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
                     backgroundColor: Colors.black54,
@@ -235,7 +237,7 @@ class _CarePageContentState extends State<CarePageContent> {
                   );
                 }
               },
-              child: const Text('Confirm'),
+              child: Text(s?.confirm ?? 'Confirm'),
             ),
           ],
         );
@@ -245,10 +247,12 @@ class _CarePageContentState extends State<CarePageContent> {
 
   /// 时间选择器：只选择时间，日期固定为 PageView 当前显示的日期
   void _showTimePicker(FeedType type, String mush) {
+    final s = S.of(context);
+
     // 检查当前 PageView 显示的日期是否超过今天
     if (currentDate.isAfter(DateTime(today.year, today.month, today.day))) {
       Fluttertoast.showToast(
-        msg: "Cannot record data for future dates",
+        msg: s?.cannotRecordDataForFutureDates ?? "Cannot record data for future dates",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
@@ -303,7 +307,7 @@ class _CarePageContentState extends State<CarePageContent> {
         // 最终检查：确保组合后的时间不超过今天当前时间
         if (fullDateTime.isAfter(DateTime.now())) {
           Fluttertoast.showToast(
-            msg: "Cannot record data for future time",
+            msg: s?.cannotRecordDataForFutureTime ?? "Cannot record data for future time",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.red,
@@ -385,6 +389,7 @@ class _CarePageContentState extends State<CarePageContent> {
   /// 点击小时行时显示 Dialog
   void _showHourDetailDialog(
       DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
+    final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
@@ -432,23 +437,23 @@ class _CarePageContentState extends State<CarePageContent> {
                       ),
                       const SizedBox(height: 12),
 
-                      Text('Breast Milk: ${milkTotal} ml', style: tt.bodyMedium),
+                      Text('${s?.breastMilk ?? 'Breast Milk'}: ${milkTotal} ml', style: tt.bodyMedium),
                       const SizedBox(height: 6),
-                      Text('Formula: ${formulaTotal} ml', style: tt.bodyMedium),
+                      Text('${s?.formula ?? 'Formula'}: ${formulaTotal} ml', style: tt.bodyMedium),
                       const SizedBox(height: 6),
-                      Text('Baby Food: ${babyFoodTotal} g', style: tt.bodyMedium),
+                      Text('${s?.babyFood ?? 'Baby Food'}: ${babyFoodTotal} g', style: tt.bodyMedium),
                       const SizedBox(height: 12),
 
                       Divider(color: cs.outline),
                       const SizedBox(height: 8),
 
-                      Text('Poop:', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('${s?.poop ?? 'Poop'}:', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
 
                       if (allPoopImagePaths.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text('No poop records'),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(s?.noPoopRecords ?? 'No poop records'),
                         )
                       else
                         Column(
@@ -475,9 +480,9 @@ class _CarePageContentState extends State<CarePageContent> {
                                                 topRight: Radius.circular(12.0),
                                               ),
                                             ),
-                                            child: const Text(
-                                              'Poop Image',
-                                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                                            child: Text(
+                                              s?.poopImage ?? 'Poop Image',
+                                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
                                             ),
                                           ),
                                           Padding(
@@ -499,7 +504,7 @@ class _CarePageContentState extends State<CarePageContent> {
                                                 const SizedBox(height: 8),
                                                 TextButton(
                                                   onPressed: () => Navigator.of(context).pop(),
-                                                  child: const Text('Close'),
+                                                  child: Text(s?.close ?? 'Close'),
                                                 ),
                                               ],
                                             ),
@@ -537,7 +542,7 @@ class _CarePageContentState extends State<CarePageContent> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('Close'),
+                          child: Text(s?.close ?? 'Close'),
                         ),
                       ),
                     ],
@@ -553,6 +558,7 @@ class _CarePageContentState extends State<CarePageContent> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
@@ -662,22 +668,22 @@ class _CarePageContentState extends State<CarePageContent> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 TouchFeedbackTabButton(
-                  label: S.of(context)?.breastMilk ?? "breastMilk",
+                  label: s?.breastMilk ?? "breastMilk",
                   iconPath: 'assets/icons/mother_milk.png',
                   onTap: () => _showMlSelector(FeedType.milk),
                 ),
                 TouchFeedbackTabButton(
-                  label: S.of(context)?.formula ?? "formula",
+                  label: s?.formula ?? "formula",
                   iconPath: 'assets/icons/formula_milk.png',
                   onTap: () => _showMlSelector(FeedType.formula),
                 ),
                 TouchFeedbackTabButton(
-                  label: S.of(context)?.babyFood ?? "babyFood",
+                  label: s?.babyFood ?? "babyFood",
                   iconPath: 'assets/icons/water.png',
                   onTap: () => _showBabyFoodInput(),
                 ),
                 TouchFeedbackTabButton(
-                  label: S.of(context)?.poop ?? "poop",
+                  label: s?.poop ?? "poop",
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
                     _addPoopRecord();
