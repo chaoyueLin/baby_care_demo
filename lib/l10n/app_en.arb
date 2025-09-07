@@ -71,7 +71,6 @@
       "error": {}
     }
   },
-  "date": "Date: {year}-{month}-{day}",
   "@date": {
     "description": "Selected date display",
     "placeholders": {

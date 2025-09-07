@@ -70,7 +70,6 @@
       "error": {}
     }
   },
-  "date": "日期: {year}-{month}-{day}",
   "@date": {
     "description": "选中日期显示",
     "placeholders": {

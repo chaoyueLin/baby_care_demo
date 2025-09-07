@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/S.dart';
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import '../models/baby_care.dart';
+import '../utils/date_util.dart';
 
 /// 时间范围选项
 enum FeedRange { week, month, quarter }
@@ -258,7 +259,7 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      '${s?.date ?? 'Date'}: ${_selectedDay!.day.year}-${_selectedDay!.day.month}-${_selectedDay!.day.day}\n${s?.breastMilk ?? 'Breast Milk'}: ${_selectedDay!.milk.toInt()}ml, ${s?.formula ?? 'Formula'}: ${_selectedDay!.formula.toInt()}ml, ${s?.babyFood ?? 'Baby Food'}: ${_selectedDay!.babyFood.toInt()}g, ${s?.poopCount ?? 'Poop'}: ${_selectedDay!.poopCount} ${s?.times ?? 'times'}',
+                      '${DateUtil.dateToString(_selectedDay!.day)}:\n${s?.breastMilk ?? 'Breast Milk'}: ${_selectedDay!.milk.toInt()}ml, ${s?.formula ?? 'Formula'}: ${_selectedDay!.formula.toInt()}ml, ${s?.babyFood ?? 'Baby Food'}: ${_selectedDay!.babyFood.toInt()}g, ${s?.poopCount ?? 'Poop'}: ${_selectedDay!.poopCount} ${s?.times ?? 'times'}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
