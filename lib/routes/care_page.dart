@@ -255,7 +255,7 @@ class _CarePageContentState extends State<CarePageContent> {
         msg: s?.cannotRecordDataForFutureDates ?? "Cannot record data for future dates",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.black54,
         textColor: Colors.white,
         fontSize: 16.0,
       );
@@ -310,7 +310,7 @@ class _CarePageContentState extends State<CarePageContent> {
             msg: s?.cannotRecordDataForFutureTime ?? "Cannot record data for future time",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.black54,
             textColor: Colors.white,
             fontSize: 16.0,
           );
@@ -393,7 +393,6 @@ class _CarePageContentState extends State<CarePageContent> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    // 计算三种液体总量（若没有记录则为 0）
     int milkTotal = hourRecords
         .where((r) => r.type == FeedType.milk)
         .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
@@ -404,7 +403,6 @@ class _CarePageContentState extends State<CarePageContent> {
         .where((r) => r.type == FeedType.babyFood)
         .fold(0, (sum, r) => sum + (int.tryParse(r.mush) ?? 0));
 
-    // 聚合所有便便图片路径
     List<String> allPoopImagePaths = hourRecords
         .where((r) => r.type == FeedType.poop)
         .expand((r) => r.mush.split(',').where((p) => p.isNotEmpty))
@@ -413,144 +411,177 @@ class _CarePageContentState extends State<CarePageContent> {
     showDialog(
       context: context,
       builder: (ctx) {
-        final double dialogWidth = MediaQuery.of(ctx).size.width * 0.8;
-        return Dialog(
-          backgroundColor: cs.surface,
+        return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: SizedBox(
-            width: dialogWidth,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: DefaultTextStyle(
-                  style: tt.bodyMedium!.copyWith(color: cs.onSurface),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 标题：小时范围（绿色→主题主色）
-                      Text(
-                        '${hourIndex.toString().padLeft(2, '0')}:00 - ${(hourIndex + 1).toString().padLeft(2, '0')}:00',
-                        style: tt.titleMedium?.copyWith(
-                          color: cs.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      Text('${s?.breastMilk ?? 'Breast Milk'}: ${milkTotal} ml', style: tt.bodyMedium),
-                      const SizedBox(height: 6),
-                      Text('${s?.formula ?? 'Formula'}: ${formulaTotal} ml', style: tt.bodyMedium),
-                      const SizedBox(height: 6),
-                      Text('${s?.babyFood ?? 'Baby Food'}: ${babyFoodTotal} g', style: tt.bodyMedium),
-                      const SizedBox(height: 12),
-
-                      Divider(color: cs.outline),
-                      const SizedBox(height: 8),
-
-                      Text('${s?.poop ?? 'Poop'}:', style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-
-                      if (allPoopImagePaths.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(s?.noPoopRecords ?? 'No poop records'),
-                        )
-                      else
-                        Column(
-                          children: allPoopImagePaths.map((path) {
-                            return GestureDetector(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) {
-                                    return Dialog(
-                                      backgroundColor: cs.surface,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12)),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.all(16.0),
-                                            decoration: BoxDecoration(
-                                              color: cs.primary,
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(12.0),
-                                                topRight: Radius.circular(12.0),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              s?.poopImage ?? 'Poop Image',
-                                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(12.0),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                if (path.isNotEmpty)
-                                                  ConstrainedBox(
-                                                    constraints: BoxConstraints(
-                                                      maxWidth: MediaQuery.of(context).size.width * 0.9,
-                                                      maxHeight: MediaQuery.of(context).size.height * 0.7,
-                                                    ),
-                                                    child: Image.file(
-                                                      File(path),
-                                                      fit: BoxFit.contain,
-                                                    ),
-                                                  ),
-                                                const SizedBox(height: 8),
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(),
-                                                  child: Text(s?.close ?? 'Close'),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                height: 150,
-                                margin: const EdgeInsets.only(bottom: 8),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: path.isNotEmpty
-                                    ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.file(
-                                    File(path),
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                                    : const SizedBox.shrink(),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: Text(s?.close ?? 'Close'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
+          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
+          backgroundColor: cs.surface,
+          title: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12.0),
+                topRight: Radius.circular(12.0),
               ),
             ),
+            child: Text(
+              '${hourIndex.toString().padLeft(2, '0')}:00 - '
+                  '${(hourIndex + 1).toString().padLeft(2, '0')}:00',
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
+          titlePadding: EdgeInsets.zero,
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${s?.breastMilk ?? 'Breast Milk'}: $milkTotal ml'),
+                const SizedBox(height: 6),
+                Text('${s?.formula ?? 'Formula'}: $formulaTotal ml'),
+                const SizedBox(height: 6),
+                Text('${s?.babyFood ?? 'Baby Food'}: $babyFoodTotal g'),
+                const SizedBox(height: 12),
+                Divider(color: cs.outline),
+                const SizedBox(height: 8),
+                Text('${s?.poop ?? 'Poop'}:',
+                    style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                if (allPoopImagePaths.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(s?.noPoopRecords ?? 'No poop records'),
+                  )
+                else
+                  Column(
+                    children: allPoopImagePaths.map((path) {
+                      return GestureDetector(
+                        onTap: () {
+                          // 点击查看大图
+                          showDialog(
+                            context: context,
+                            builder: (_) {
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                backgroundColor: cs.surface,
+                                title: Text(s?.poopImage ?? 'Poop Image'),
+                                content: path.isNotEmpty
+                                    ? Image.file(
+                                  File(path),
+                                  fit: BoxFit.contain,
+                                )
+                                    : const SizedBox.shrink(),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: Text(s?.close ?? 'Close'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 150,
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceVariant,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: path.isNotEmpty
+                              ? ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.file(
+                              File(path),
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                              : const SizedBox.shrink(),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(s?.close ?? 'Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+  void _confirmDeleteHourRecords(
+      DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
+    final s = S.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
+          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
+          backgroundColor: cs.surface,
+          title: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12.0),
+                topRight: Radius.circular(12.0),
+              ),
+            ),
+            child: Text(
+              s?.confirm ?? 'Confirm',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          titlePadding: EdgeInsets.zero,
+          content: Text(s?.deleteHourRecordsConfirm ?? "Delete all records for this hour?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(s?.cancel ?? 'Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+
+                // 1. 从数据库删除
+                for (var record in hourRecords) {
+                  await DBProvider().deleteCare(record.id!);
+                }
+
+                // 2. 从缓存删除
+                final key = _startOfDayMillis(pageDate);
+                _recordsCache[key]?.removeWhere((r) =>
+                DateTime.fromMillisecondsSinceEpoch(r.date!).hour ==
+                    hourIndex);
+
+                // 3. 刷新 UI
+                if (mounted) setState(() {});
+
+                Fluttertoast.showToast(
+                  msg: s?.deleteSuccess ?? "Deleted successfully",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                );
+              },
+              child: Text(s?.confirm ?? 'Confirm'),
+            ),
+          ],
         );
       },
     );
@@ -628,6 +659,11 @@ class _CarePageContentState extends State<CarePageContent> {
                           return GestureDetector(
                             onTap: () {
                               _showHourDetailDialog(pageDate, hourIndex, hourRecords);
+                            },
+                            onLongPress: () {
+                              if (hourRecords.isNotEmpty) {
+                                _confirmDeleteHourRecords(pageDate, hourIndex, hourRecords);
+                              }
                             },
                             child: Container(
                               height: 50,

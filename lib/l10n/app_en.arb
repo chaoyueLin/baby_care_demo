@@ -156,5 +156,7 @@
   "noBabyDataFound": "No baby data found",
   "dataLoadingFailed": "Data loading failed",
   "poopCount": "Poop",
-  "times": "times"
+  "times": "times",
+  "deleteHourRecordsConfirm": "Delete all records for this hour?",
+  "deleteSuccess": "Deleted successfully"
 }

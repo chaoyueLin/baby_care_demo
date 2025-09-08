@@ -155,5 +155,7 @@
   "noBabyDataFound": "未找到宝宝数据",
   "dataLoadingFailed": "数据加载失败",
   "poopCount": "便便",
-  "times": "次"
+  "times": "次",
+  "deleteHourRecordsConfirm": "是否删除这个小时所有的记录?",
+  "deleteSuccess": "删除成功"
 }
