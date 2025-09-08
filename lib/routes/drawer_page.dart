@@ -1,3 +1,4 @@
+import 'package:baby_care_demo/utils/date_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -255,40 +256,6 @@ class _DrawerPageState extends State<DrawerPage> {
     );
   }
 
-  Widget _buildBabyListSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "My Babies",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 100,
-            child: _babies.isEmpty
-                ? _buildEmptyBabyState()
-                : ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _babies.length + 1, // +1 for the add button
-              itemBuilder: (context, index) {
-                if (index == _babies.length) {
-                  return _buildAddBabyButton();
-                }
-                return _buildBabyCard(index);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyBabyState() {
     return Center(
       child: Column(
@@ -305,15 +272,15 @@ class _DrawerPageState extends State<DrawerPage> {
     );
   }
 
+  // 修改 _buildBabyCard 方法
   Widget _buildBabyCard(int index) {
     final baby = _babies[index];
     final isSelected = _selectedBabyIndex == index;
 
     return Container(
-      width: 80,
+      width: 180, // 宽度改为原来的两倍
       margin: const EdgeInsets.only(right: 12),
       child: GestureDetector(
-
         onTap: () => _switchToBaby(index),
         child: Container(
           decoration: BoxDecoration(
@@ -326,39 +293,104 @@ class _DrawerPageState extends State<DrawerPage> {
               color: Theme.of(context).colorScheme.primary,
               width: 2,
             )
-                : null,
+                : Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              width: 1,
+            ),
           ),
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(12),
+          child: Row(
             children: [
+
               CircleAvatar(
                 radius: 24,
-                backgroundColor:
-                Theme.of(context).colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.child_care,
-                  size: 30,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                child: Text(_formatSex(baby)),
               ),
-              const SizedBox(height: 8),
-              Text(
-                baby.name ?? 'Unnamed',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface,
+              const SizedBox(width: 12),
+              // 右边的信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 名字
+                    Text(
+                      baby.name ?? 'Unnamed',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    // 生日
+                    Text(
+                      _formatBirthday(baby.birthdate),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
+                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+// 添加格式化生日的辅助方法
+  String _formatBirthday(DateTime date) {
+    return DateUtil.dateToString(date);
+  }
+
+  String _formatSex(Baby baby) {
+    if(baby.sex==1){
+        return 'M';
+    }
+    return 'F';
+  }
+
+// 同时修改 _buildBabyListSection 中的高度
+  Widget _buildBabyListSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "My Babies",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 100, // 保持现有高度，或者可以稍微调整为 110
+            child: _babies.isEmpty
+                ? _buildEmptyBabyState()
+                : ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _babies.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _babies.length) {
+                  return _buildAddBabyButton();
+                }
+                return _buildBabyCard(index);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -397,16 +429,6 @@ class _DrawerPageState extends State<DrawerPage> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                "Add Baby",
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 10,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
             ],
           ),
         ),
