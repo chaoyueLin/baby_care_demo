@@ -158,5 +158,7 @@
   "poopCount": "Poop",
   "times": "times",
   "deleteHourRecordsConfirm": "Delete all records for this hour?",
-  "deleteSuccess": "Deleted successfully"
+  "deleteSuccess": "Deleted successfully",
+  "babies": "My Babies",
+  "babyGrowthRecord": "Baby Growth Record"
 }

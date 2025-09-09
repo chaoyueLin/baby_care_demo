@@ -157,5 +157,7 @@
   "poopCount": "便便",
   "times": "次",
   "deleteHourRecordsConfirm": "是否删除这个小时所有的记录?",
-  "deleteSuccess": "删除成功"
+  "deleteSuccess": "删除成功",
+  "babies": "宝宝信息",
+  "babyGrowthRecord": "宝宝成长记录"
 }

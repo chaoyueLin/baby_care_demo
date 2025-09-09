@@ -1,3 +1,5 @@
+import 'package:baby_care_demo/utils/dialog_util.dart';
+import 'package:baby_care_demo/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
@@ -9,7 +11,6 @@ import '../models/baby.dart';
 import '../models/baby_care.dart';
 import '../utils/date_util.dart';
 import '../widget/custom_tab_button.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CarePage extends StatelessWidget {
   @override
@@ -125,123 +126,67 @@ class _CarePageContentState extends State<CarePageContent> {
   void _showMlSelector(FeedType type) {
     final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
-          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-          backgroundColor: cs.surface,
-          title: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12.0),
-                topRight: Radius.circular(12.0),
-              ),
-            ),
-            child: Text(
-              s?.selectMilliliters ?? 'Select Milliliters',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          titlePadding: EdgeInsets.zero,
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: ListView.separated(
-              itemCount: 25,
-              itemBuilder: (context, index) {
-                int ml = (index + 1) * 10;
-                return ListTile(
-                  title: Text('$ml ml'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    _showTimePicker(type, ml.toString());
-                  },
-                );
+    DialogUtil.showStyledDialog(
+      context:context,
+      title: s?.selectMilliliters ?? 'Select Milliliters',
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 300,
+        child: ListView.separated(
+          itemCount: 25,
+          itemBuilder: (context, index) {
+            int ml = (index + 1) * 10;
+            return ListTile(
+              title: Text('$ml ml'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _showTimePicker(type, ml.toString());
               },
-              separatorBuilder: (BuildContext context, int index) =>
-                  Divider(height: 1.0, color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)),
-            ),
-          ),
-        );
-      },
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) =>
+              Divider(height: 1.0, color: cs.primaryContainer.withOpacity(0.5)),
+        ),
+      ),
     );
   }
 
   /// 输入辅食重量（g）并选择时间
   void _showBabyFoodInput() {
     final s = S.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
     final TextEditingController controller = TextEditingController();
 
-    showDialog(
+    DialogUtil.showStyledDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
-          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-          backgroundColor: cs.surface,
-          title: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12.0),
-                topRight: Radius.circular(12.0),
-              ),
-            ),
-            child: Text(
-              s?.enterBabyFoodWeight ?? 'Enter Baby Food Weight',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          titlePadding: EdgeInsets.zero,
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: s?.pleaseEnterBabyFoodWeight ?? 'Please enter baby food weight',
-              suffixText: 'g',
-            ),
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(s?.cancel ?? 'Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final input = controller.text.trim();
-                if (input.isNotEmpty && int.tryParse(input) != null) {
-                  Navigator.of(context).pop();
-                  _showTimePicker(FeedType.babyFood, input);
-                } else {
-                  Fluttertoast.showToast(
-                    msg: s?.pleaseEnterValidNumber ?? "Please enter a valid number",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.black54,
-                    textColor: Colors.white,
-                    fontSize: 16.0,
-                  );
-                }
-              },
-              child: Text(s?.confirm ?? 'Confirm'),
-            ),
-          ],
-        );
-      },
+      title: s?.enterBabyFoodWeight ?? 'Enter Baby Food Weight',
+      content: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          hintText: s?.pleaseEnterBabyFoodWeight ?? 'Please enter baby food weight',
+          suffixText: 'g',
+        ),
+        autofocus: true,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.cancel ?? 'Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            final input = controller.text.trim();
+            if (input.isNotEmpty && int.tryParse(input) != null) {
+              Navigator.of(context).pop();
+              _showTimePicker(FeedType.babyFood, input);
+            } else {
+              ToastUtil.showToast(s?.pleaseEnterValidNumber ?? "Please enter a valid number");
+            }
+          },
+          child: Text(s?.confirm ?? 'Confirm'),
+        ),
+      ],
     );
   }
 
@@ -251,14 +196,7 @@ class _CarePageContentState extends State<CarePageContent> {
 
     // 检查当前 PageView 显示的日期是否超过今天
     if (currentDate.isAfter(DateTime(today.year, today.month, today.day))) {
-      Fluttertoast.showToast(
-        msg: s?.cannotRecordDataForFutureDates ?? "Cannot record data for future dates",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast(s?.cannotRecordDataForFutureDates ?? "Cannot record data for future dates");
       return;
     }
 
@@ -306,14 +244,7 @@ class _CarePageContentState extends State<CarePageContent> {
 
         // 最终检查：确保组合后的时间不超过今天当前时间
         if (fullDateTime.isAfter(DateTime.now())) {
-          Fluttertoast.showToast(
-            msg: s?.cannotRecordDataForFutureTime ?? "Cannot record data for future time",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.black54,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+          ToastUtil.showToast(s?.cannotRecordDataForFutureTime ?? "Cannot record data for future time");
           return;
         }
 
@@ -387,8 +318,7 @@ class _CarePageContentState extends State<CarePageContent> {
   }
 
   /// 点击小时行时显示 Dialog
-  void _showHourDetailDialog(
-      DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
+  void _showHourDetailDialog(DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
     final s = S.of(context);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -408,182 +338,124 @@ class _CarePageContentState extends State<CarePageContent> {
         .expand((r) => r.mush.split(',').where((p) => p.isNotEmpty))
         .toList();
 
-    showDialog(
+    DialogUtil.showStyledDialog(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
-          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-          backgroundColor: cs.surface,
-          title: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12.0),
-                topRight: Radius.circular(12.0),
-              ),
-            ),
-            child: Text(
-              '${hourIndex.toString().padLeft(2, '0')}:00 - '
-                  '${(hourIndex + 1).toString().padLeft(2, '0')}:00',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          titlePadding: EdgeInsets.zero,
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${s?.breastMilk ?? 'Breast Milk'}: $milkTotal ml'),
-                const SizedBox(height: 6),
-                Text('${s?.formula ?? 'Formula'}: $formulaTotal ml'),
-                const SizedBox(height: 6),
-                Text('${s?.babyFood ?? 'Baby Food'}: $babyFoodTotal g'),
-                const SizedBox(height: 12),
-                Divider(color: cs.outline),
-                const SizedBox(height: 8),
-                Text('${s?.poop ?? 'Poop'}:',
-                    style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                if (allPoopImagePaths.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(s?.noPoopRecords ?? 'No poop records'),
-                  )
-                else
-                  Column(
-                    children: allPoopImagePaths.map((path) {
-                      return GestureDetector(
-                        onTap: () {
-                          // 点击查看大图
-                          showDialog(
-                            context: context,
-                            builder: (_) {
-                              return AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                backgroundColor: cs.surface,
-                                title: Text(s?.poopImage ?? 'Poop Image'),
-                                content: path.isNotEmpty
-                                    ? Image.file(
-                                  File(path),
-                                  fit: BoxFit.contain,
-                                )
-                                    : const SizedBox.shrink(),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: Text(s?.close ?? 'Close'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 150,
-                          margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            color: cs.surfaceVariant,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: path.isNotEmpty
-                              ? ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.file(
-                              File(path),
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                              : const SizedBox.shrink(),
+      title: '${hourIndex.toString().padLeft(2, '0')}:00 - '
+          '${(hourIndex + 1).toString().padLeft(2, '0')}:00',
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${s?.breastMilk ?? 'Breast Milk'}: $milkTotal ml'),
+            const SizedBox(height: 6),
+            Text('${s?.formula ?? 'Formula'}: $formulaTotal ml'),
+            const SizedBox(height: 6),
+            Text('${s?.babyFood ?? 'Baby Food'}: $babyFoodTotal g'),
+            const SizedBox(height: 12),
+            Divider(color: cs.outline),
+            const SizedBox(height: 8),
+            Text('${s?.poop ?? 'Poop'}:',
+                style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            if (allPoopImagePaths.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(s?.noPoopRecords ?? 'No poop records'),
+              )
+            else
+              Column(
+                children: allPoopImagePaths.map((path) {
+                  return GestureDetector(
+                    onTap: () => _showPoopImageDialog(path),
+                    child: Container(
+                      width: double.infinity,
+                      height: 150,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceVariant,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: path.isNotEmpty
+                          ? ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.file(
+                          File(path),
+                          fit: BoxFit.cover,
                         ),
-                      );
-                    }).toList(),
-                  ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(s?.close ?? 'Close'),
-            ),
+                      )
+                          : const SizedBox.shrink(),
+                    ),
+                  );
+                }).toList(),
+              ),
           ],
-        );
-      },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.close ?? 'Close'),
+        ),
+      ],
     );
   }
 
+  void _showPoopImageDialog(String imagePath) {
+    final s = S.of(context);
 
+    DialogUtil.showStyledDialog(
+      context: context,
+      title: s?.poopImage ?? 'Poop Image',
+      content: imagePath.isNotEmpty
+          ? Image.file(
+        File(imagePath),
+        fit: BoxFit.contain,
+      )
+          : const SizedBox.shrink(),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.close ?? 'Close'),
+        ),
+      ],
+    );
+  }
 
   void _confirmDeleteHourRecords(
       DateTime pageDate, int hourIndex, List<BabyCare> hourRecords) {
     final s = S.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    showDialog(
+
+    DialogUtil.showStyledDialog(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
-          contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-          backgroundColor: cs.surface,
-          title: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12.0),
-                topRight: Radius.circular(12.0),
-              ),
-            ),
-            child: Text(
-              s?.confirm ?? 'Confirm',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          titlePadding: EdgeInsets.zero,
-          content: Text(s?.deleteHourRecordsConfirm ?? "Delete all records for this hour?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(s?.cancel ?? 'Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(ctx).pop();
+      title: s?.confirm ?? 'Confirm',
+      content: Text(s?.deleteHourRecordsConfirm ?? "Delete all records for this hour?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.cancel ?? 'Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
 
-                // 1. 从数据库删除
-                for (var record in hourRecords) {
-                  await DBProvider().deleteCare(record.id!);
-                }
+            // 1. 从数据库删除
+            for (var record in hourRecords) {
+              await DBProvider().deleteCare(record.id!);
+            }
 
-                // 2. 从缓存删除
-                final key = _startOfDayMillis(pageDate);
-                _recordsCache[key]?.removeWhere((r) =>
-                DateTime.fromMillisecondsSinceEpoch(r.date!).hour ==
-                    hourIndex);
+            // 2. 从缓存删除
+            final key = _startOfDayMillis(pageDate);
+            _recordsCache[key]?.removeWhere((r) =>
+            DateTime.fromMillisecondsSinceEpoch(r.date!).hour == hourIndex);
 
-                // 3. 刷新 UI
-                if (mounted) setState(() {});
+            // 3. 刷新 UI
+            if (mounted) setState(() {});
 
-                Fluttertoast.showToast(
-                  msg: s?.deleteSuccess ?? "Deleted successfully",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                );
-              },
-              child: Text(s?.confirm ?? 'Confirm'),
-            ),
-          ],
-        );
-      },
+            ToastUtil.showToast(s?.deleteSuccess ?? "Deleted successfully");
+          },
+          child: Text(s?.confirm ?? 'Confirm'),
+        ),
+      ],
     );
   }
 

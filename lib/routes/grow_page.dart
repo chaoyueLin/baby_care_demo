@@ -1,12 +1,14 @@
+import 'package:baby_care_demo/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:baby_care_demo/models/grow_standard.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
+    as dtp;
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import '../models/baby_grow.dart';
+import '../utils/dialog_util.dart';
 import '../widget/custom_tab_button.dart';
 
 class GrowPage extends StatefulWidget {
@@ -53,7 +55,7 @@ class _GrowPageState extends State<GrowPage> {
       final visibleBabies = await DBProvider().getVisiblePersons();
       if (visibleBabies != null && visibleBabies.isNotEmpty) {
         final baby = visibleBabies.firstWhere(
-              (b) => b.show == 1,
+          (b) => b.show == 1,
           orElse: () => visibleBabies.first,
         );
         setState(() => currentBaby = baby);
@@ -143,33 +145,81 @@ class _GrowPageState extends State<GrowPage> {
       end = birth.add(const Duration(days: (365 * 2)));
     }
 
-    final type = _toGrowType(selectedType);
-    if (type == null) return;
-
     try {
-      final List<BabyGrow> list = await DBProvider().getBabyGrows(
-        babyId: currentBaby!.id ?? 0,
-        type: type,
-        startMs: start.millisecondsSinceEpoch,
-        endMs: end.millisecondsSinceEpoch,
-      );
+      if (selectedType == TYPE_BMI) {
+        // 1. 查询体重
+        final weightList = await DBProvider().getBabyGrows(
+          babyId: currentBaby!.id ?? 0,
+          type: GrowType.weight,
+          startMs: start.millisecondsSinceEpoch,
+          endMs: end.millisecondsSinceEpoch,
+        );
 
-      final spots = <FlSpot>[];
-      for (final g in list) {
-        final t = DateTime.fromMillisecondsSinceEpoch(g.date ?? 0);
-        final x = _calcXByBirth(birth, t);
-        final xAdj = (selectedRange == RANGE_24M) ? x.clamp(12.0, 24.0) : x;
-        final y = double.tryParse(g.mush ?? '') ?? 0.0;
-        if (y > 0) spots.add(FlSpot(xAdj, y));
+        // 2. 查询身高
+        final heightList = await DBProvider().getBabyGrows(
+          babyId: currentBaby!.id ?? 0,
+          type: GrowType.height,
+          startMs: start.millisecondsSinceEpoch,
+          endMs: end.millisecondsSinceEpoch,
+        );
+
+        // 3. 按日期对齐
+        final Map<String, double> weightMap = {};
+        for (final g in weightList) {
+          final d = DateTime.fromMillisecondsSinceEpoch(g.date ?? 0);
+          final key = "${d.year}-${d.month}-${d.day}";
+          weightMap[key] = double.tryParse(g.mush ?? '') ?? 0;
+        }
+
+        final spots = <FlSpot>[];
+        for (final g in heightList) {
+          final d = DateTime.fromMillisecondsSinceEpoch(g.date ?? 0);
+          final key = "${d.year}-${d.month}-${d.day}";
+          if (weightMap.containsKey(key)) {
+            final weight = weightMap[key]!;
+            final heightCm = double.tryParse(g.mush ?? '') ?? 0;
+            if (weight > 0 && heightCm > 0) {
+              final heightM = heightCm / 100.0;
+              final bmi = weight / (heightM * heightM);
+              final x = _calcXByBirth(birth, d);
+              final xAdj = (selectedRange == RANGE_24M) ? x.clamp(12.0, 24.0) : x;
+              spots.add(FlSpot(xAdj, bmi));
+            }
+          }
+        }
+
+        spots.sort((a, b) => a.x.compareTo(b.x));
+        babySeries = spots;
+      } else {
+        // weight / height 走原来的逻辑
+        final type = _toGrowType(selectedType);
+        if (type == null) return;
+
+        final list = await DBProvider().getBabyGrows(
+          babyId: currentBaby!.id ?? 0,
+          type: type,
+          startMs: start.millisecondsSinceEpoch,
+          endMs: end.millisecondsSinceEpoch,
+        );
+
+        final spots = <FlSpot>[];
+        for (final g in list) {
+          final t = DateTime.fromMillisecondsSinceEpoch(g.date ?? 0);
+          final x = _calcXByBirth(birth, t);
+          final xAdj = (selectedRange == RANGE_24M) ? x.clamp(12.0, 24.0) : x;
+          final y = double.tryParse(g.mush ?? '') ?? 0.0;
+          if (y > 0) spots.add(FlSpot(xAdj, y));
+        }
+
+        spots.sort((a, b) => a.x.compareTo(b.x));
+        babySeries = spots;
       }
-
-      spots.sort((a, b) => a.x.compareTo(b.x));
-      babySeries = spots;
     } catch (e) {
       debugPrint('load baby series error: $e');
       babySeries = [];
     }
   }
+
 
   GrowType? _toGrowType(String t) {
     switch (t) {
@@ -183,125 +233,131 @@ class _GrowPageState extends State<GrowPage> {
   }
 
   void _showAddDataDialog() {
+    if (selectedType == TYPE_BMI) {
+      // 🚫 BMI 不允许手动添加
+      ToastUtil.showToast("BMI 由体重和身高自动计算，不能手动添加");
+      return;
+    }
+
     _valueController.clear();
     _selectedDate = DateTime.now();
 
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    showDialog(
+    DialogUtil.showStyledDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              titleTextStyle: tt.titleMedium?.copyWith(color: Colors.white),
-              contentTextStyle: tt.bodyMedium?.copyWith(color: cs.onSurface),
-              backgroundColor: cs.surface,
-              title: Container(
+      title: _getDialogTitle() ?? '',
+      content: StatefulBuilder(
+        builder: (context, setDialogState) {
+          final cs = Theme.of(context).colorScheme;
+          final tt = Theme.of(context).textTheme;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  selectedType == TYPE_WEIGHT
+                      ? "BMI = weight(kg) / (height(m)²)\n请输入宝宝体重 (kg)，超过 2 岁或超过 16kg 的数据不会显示在图表中"
+                      : "BMI = weight(kg) / (height(m)²)\n请输入宝宝身高 (cm)，超过 2 岁或超过 94cm 的数据不会显示在图表中",
+                  style: tt.bodySmall?.copyWith(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              TextField(
+                controller: _valueController,
+                keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: _getInputLabel() ?? '',
+                  hintText: _getInputHint() ?? '',
+                  border: const OutlineInputBorder(),
+                ),
+                style: tt.bodyMedium?.copyWith(color: cs.onSurface),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: cs.primary,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12.0),
-                    topRight: Radius.circular(12.0),
+                child: ElevatedButton(
+                  onPressed: () => _showDatePicker(setDialogState),
+                  child: Text(
+                    '${S.of(context)?.chooseDate ?? 'Choose Date'}: ${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
                   ),
-                ),
-                child:  Text(
-                  _getDialogTitle() ?? '',
-                  style: TextStyle(color: Colors.white),
                 ),
               ),
-              titlePadding: EdgeInsets.zero,
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: _valueController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: _getInputLabel() ?? '',
-                      hintText: _getInputHint() ?? '',
-                      border: const OutlineInputBorder(),
-                    ),
-                    style: tt.bodyMedium?.copyWith(color: cs.onSurface),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => _showDatePicker(setDialogState),
-                      child: Text(
-                        '${S.of(context)?.chooseDate ?? 'Choose Date'}: ${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(S.of(context)?.cancel ?? 'Cancel', style: tt.labelLarge?.copyWith(color: cs.primary)),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await _saveGrowData();
-                    if (context.mounted) Navigator.of(context).pop();
-                  },
-                  child: Text(S.of(context)?.save ?? 'Save', style: tt.labelLarge?.copyWith(color: cs.primary)),
-                ),
-              ],
-            );
+            ],
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(S.of(context)?.cancel ?? '取消'),
+        ),
+        TextButton(
+          onPressed: () async {
+            await _saveGrowData();
+            if (context.mounted) Navigator.of(context).pop();
           },
-        );
-      },
+          child: Text(S.of(context)?.save ?? '保存'),
+        ),
+      ],
     );
   }
+
 
   void _showDatePicker(StateSetter setDialogState) {
     final min = currentBaby?.birthdate ?? DateTime(2000, 1, 1);
     final max = DateTime.now();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    dtp.DatePicker.showDatePicker(context,
+        showTitleActions: true,
+        minTime: min.isAfter(max) ? max : min,
+        maxTime: max,
+        currentTime: _selectedDate,
+        onConfirm: (date) => setDialogState(() => _selectedDate = date),
+        locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
+        theme: dtp.DatePickerTheme(
+          backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
+          headerColor: isDarkMode ? const Color(0xFF2D2D2D) : Colors.lightGreen,
+          doneStyle: TextStyle(
+            color: isDarkMode ? Colors.lightGreenAccent : Colors.white,
+            fontSize: 16,
+          ),
+          cancelStyle: TextStyle(
+            color: isDarkMode ? Colors.white70 : Colors.white,
+            fontSize: 16,
+          ),
+          itemStyle: TextStyle(
+            color: isDarkMode ? Colors.white70 : const Color(0xFF2D2D2D),
+            fontSize: 16,
+          ),
+        ));
+  }
 
-    DatePicker.showDatePicker(
-      context,
-      showTitleActions: true,
-      minTime: min.isAfter(max) ? max : min,
-      maxTime: max,
-      currentTime: _selectedDate,
-      onConfirm: (date) => setDialogState(() => _selectedDate = date),
-      locale: LocaleType.zh,
-    );
+  dtp.LocaleType _mapLocaleToPickerLocale(Locale locale) {
+    switch (locale.languageCode) {
+      case 'zh': // 中文
+        return dtp.LocaleType.zh;
+      default:   // 默认英文
+        return dtp.LocaleType.en;
+    }
   }
 
   Future<void> _saveGrowData() async {
     if (_valueController.text.trim().isEmpty) return;
     if (currentBaby == null) {
       if (!mounted) return;
-
-      Fluttertoast.showToast(
-        msg:  "Please add or select a baby first",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast("Please add or select a baby first");
       return;
     }
 
     final value = double.tryParse(_valueController.text.trim());
     if (value == null) {
       if (!mounted) return;
-      Fluttertoast.showToast(
-        msg:  "Please enter a valid value",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast("Please enter a valid value");
       return;
     }
 
@@ -309,15 +365,41 @@ class _GrowPageState extends State<GrowPage> {
     if (growType == null) {
       if (!mounted) return;
 
-      Fluttertoast.showToast(
-        msg:  "BMI data needs to be calculated from height and weight",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast("BMI 由体重和身高自动计算，不能手动添加");
       return;
+    }
+
+    final birth = currentBaby!.birthdate ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final diff = _selectedDate.difference(birth).inDays;
+
+
+    if (diff > 365 * 2) {
+      final confirm = await DialogUtil.showConfirmDialog(
+        context,
+        title: "提示",
+        content: "超过 2 岁的记录不会显示在图表中，是否仍要添加？",
+      );
+      if (confirm != true) return;
+    }
+
+
+    if (selectedType == TYPE_WEIGHT && value > 16) {
+      final confirm = await DialogUtil.showConfirmDialog(
+        context,
+        title: "提示",
+        content: "体重超过 16kg 的记录不会显示在图表中，是否仍要添加？",
+      );
+      if (confirm != true) return;
+    }
+
+
+    if (selectedType == TYPE_HEIGHT && value > 94) {
+      final confirm = await DialogUtil.showConfirmDialog(
+        context,
+        title: "提示",
+        content: "身高超过 94cm 的记录不会显示在图表中，是否仍要添加？",
+      );
+      if (confirm != true) return;
     }
 
     final growData = BabyGrow(
@@ -330,28 +412,14 @@ class _GrowPageState extends State<GrowPage> {
     try {
       await DBProvider().insertGrow(growData);
       if (!mounted) return;
-      Fluttertoast.showToast(
-        msg:  "Data saved successfully",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast("Data saved successfully");
       await _refreshAll();
     } catch (e) {
       if (!mounted) return;
-
-      Fluttertoast.showToast(
-        msg:  "Save failed",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast("Save failed");
     }
   }
+
 
   String? _getDialogTitle() {
     switch (selectedType) {
@@ -398,32 +466,57 @@ class _GrowPageState extends State<GrowPage> {
     final tt = Theme.of(context).textTheme;
 
     final tertiary = cs.tertiary ?? cs.secondary;
-    final lineColors = [Colors.lightGreen.shade200, Colors.lightGreen.shade300, Colors.lightGreen.shade400];
+    final lineColors = [
+      Colors.lightGreen.shade200,
+      Colors.lightGreen.shade300,
+      Colors.lightGreen.shade400
+    ];
 
     double maxX = 0, minX = 0, minY = 0, maxY = 0;
     if (selectedType == TYPE_WEIGHT) {
       if (selectedRange == RANGE_13W) {
-        maxX = 13; minY = 2; maxY = 8.5;
+        maxX = 13;
+        minY = 2;
+        maxY = 8.5;
       } else if (selectedRange == RANGE_12M) {
-        maxX = 12; minY = 2; maxY = 12;
+        maxX = 12;
+        minY = 2;
+        maxY = 12;
       } else {
-        minX = 12; maxX = 24; minY = 7; maxY = 16;
+        minX = 12;
+        maxX = 24;
+        minY = 7;
+        maxY = 16;
       }
     } else if (selectedType == TYPE_HEIGHT) {
       if (selectedRange == RANGE_13W) {
-        maxX = 13; minY = 45; maxY = 66;
+        maxX = 13;
+        minY = 45;
+        maxY = 66;
       } else if (selectedRange == RANGE_12M) {
-        maxX = 12; minY = 46; maxY = 81;
+        maxX = 12;
+        minY = 46;
+        maxY = 81;
       } else {
-        minX = 12; maxX = 24; minY = 68; maxY = 94;
+        minX = 12;
+        maxX = 24;
+        minY = 68;
+        maxY = 94;
       }
     } else if (selectedType == TYPE_BMI) {
       if (selectedRange == RANGE_13W) {
-        maxX = 13; minY = 10; maxY = 20;
+        maxX = 13;
+        minY = 10;
+        maxY = 20;
       } else if (selectedRange == RANGE_12M) {
-        maxX = 12; minY = 11; maxY = 20.5;
+        maxX = 12;
+        minY = 11;
+        maxY = 20.5;
       } else {
-        minX = 12; maxX = 24; minY = 13; maxY = 20;
+        minX = 12;
+        maxX = 24;
+        minY = 13;
+        maxY = 20;
       }
     }
 
@@ -434,7 +527,6 @@ class _GrowPageState extends State<GrowPage> {
           // 顶部 Tab
           Container(
             height: 80,
-
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -475,16 +567,20 @@ class _GrowPageState extends State<GrowPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildRangeRadio(RANGE_13W, S.of(context)?.range0to13Week ?? '0-13 Weeks'),
-                _buildRangeRadio(RANGE_12M, S.of(context)?.range0to12Month ?? '0-12 Months'),
-                _buildRangeRadio(RANGE_24M, S.of(context)?.range12to24Month ?? '12-24 Months'),
+                _buildRangeRadio(
+                    RANGE_13W, S.of(context)?.range0to13Week ?? '0-13 Weeks'),
+                _buildRangeRadio(
+                    RANGE_12M, S.of(context)?.range0to12Month ?? '0-12 Months'),
+                _buildRangeRadio(RANGE_24M,
+                    S.of(context)?.range12to24Month ?? '12-24 Months'),
               ],
             ),
           ),
           // 折线图
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 6.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 6.0),
               child: LineChart(
                 LineChartData(
                   lineTouchData: const LineTouchData(enabled: false),
@@ -499,8 +595,10 @@ class _GrowPageState extends State<GrowPage> {
                         ),
                       ),
                     ),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
@@ -513,14 +611,17 @@ class _GrowPageState extends State<GrowPage> {
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(show: true, border: Border.all(color: cs.outline)),
+                  borderData: FlBorderData(
+                      show: true, border: Border.all(color: cs.outline)),
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: true,
                     horizontalInterval: 1,
                     verticalInterval: 1,
-                    getDrawingHorizontalLine: (value) => FlLine(color: cs.outline, strokeWidth: 0.5),
-                    getDrawingVerticalLine: (value) => FlLine(color: cs.outline, strokeWidth: 0.5),
+                    getDrawingHorizontalLine: (value) =>
+                        FlLine(color: cs.outline, strokeWidth: 0.5),
+                    getDrawingVerticalLine: (value) =>
+                        FlLine(color: cs.outline, strokeWidth: 0.5),
                   ),
                   minX: minX,
                   maxX: maxX,
@@ -530,7 +631,7 @@ class _GrowPageState extends State<GrowPage> {
                     // 虚线
                     ...List.generate(
                       selectedData.length,
-                          (index) => LineChartBarData(
+                      (index) => LineChartBarData(
                         spots: selectedData[index],
                         isCurved: true,
                         color: lineColors[index % lineColors.length],
@@ -577,7 +678,8 @@ class _GrowPageState extends State<GrowPage> {
                 // +号
                 Visibility(
                   visible: selectedType != TYPE_BMI,
-                  maintainSize: true,   // 保持大小
+                  maintainSize: true,
+                  // 保持大小
                   maintainAnimation: true,
                   maintainState: true,
                   child: GestureDetector(
@@ -618,7 +720,8 @@ class _GrowPageState extends State<GrowPage> {
           },
           fillColor: MaterialStateProperty.all(cs.primary),
         ),
-        Text(label, style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+        Text(label,
+            style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
       ],
     );
   }

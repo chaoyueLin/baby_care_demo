@@ -1,4 +1,5 @@
 import 'package:baby_care_demo/utils/date_util.dart';
+import 'package:baby_care_demo/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -97,14 +98,8 @@ class _DrawerPageState extends State<DrawerPage> {
   }
 
   void _showExitToast() {
-    Fluttertoast.showToast(
-      msg: S.of(context)?.exitPrompt ?? "Press again to exit",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black87,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
+
+    ToastUtil.showToast(S.of(context)?.exitPrompt ?? "Press again to exit");
   }
 
   String _getCurrentPageTitle() {
@@ -168,7 +163,7 @@ class _DrawerPageState extends State<DrawerPage> {
       Navigator.pop(context); // 关闭 Drawer
     } catch (e) {
       debugPrint('Switch baby failed: $e');
-      Fluttertoast.showToast(msg: 'Switch baby failed');
+      ToastUtil.showToast('Switch baby failed');
     }
   }
 
@@ -242,7 +237,7 @@ class _DrawerPageState extends State<DrawerPage> {
                   ),
                 ),
                 Text(
-                  "Baby Growth Record",
+                  S.of(context)?.babyGrowthRecord ??"Baby Growth Record",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color:
                     Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
@@ -368,7 +363,7 @@ class _DrawerPageState extends State<DrawerPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "My Babies",
+            S.of(context)?.babies ??"My Babies",
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.onSurface,

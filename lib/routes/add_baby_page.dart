@@ -1,8 +1,8 @@
+import 'package:baby_care_demo/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
 import '../common/db_provider.dart';
 import '../models/baby.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
 
 class AddBabyPage extends StatefulWidget {
@@ -55,14 +55,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
     String name = _nameController.text.trim();
 
     if (name.isEmpty || _selectedDate == null) {
-      Fluttertoast.showToast(
-        msg: s?.pleaseEnterCompleteInformation ?? 'Please enter complete information',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast(s?.pleaseEnterCompleteInformation ?? 'Please enter complete information');
       return;
     }
 
@@ -78,14 +71,7 @@ class _AddBabyPageState extends State<AddBabyPage> {
         baby.birthdate.day == _selectedDate!.day) ?? false;
 
     if (duplicateExists) {
-      Fluttertoast.showToast(
-        msg: s?.thisBabyAlreadyExists ?? 'This baby already exists',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast(s?.thisBabyAlreadyExists ?? 'This baby already exists');
       return;
     }
 
@@ -120,27 +106,14 @@ class _AddBabyPageState extends State<AddBabyPage> {
       }
 
       // 成功提示
-      Fluttertoast.showToast(
-        msg: s?.babyAddedSuccessfully ?? 'Baby added successfully!',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast(s?.babyAddedSuccessfully ?? 'Baby added successfully!');
 
     } catch (e) {
       debugPrint('Error adding baby: $e');
-      Fluttertoast.showToast(
-        msg: s?.failedToAddBaby ?? 'Failed to add baby',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      ToastUtil.showToast(s?.failedToAddBaby ?? 'Failed to add baby');
     }
   }
+
 
   dtp.LocaleType _mapLocaleToPickerLocale(Locale locale) {
     switch (locale.languageCode) {
