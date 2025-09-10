@@ -5,10 +5,13 @@ import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../utils/ad_manager.dart';
+import 'baby_management_page.dart';
 import 'dart:io' show Platform;
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final VoidCallback? onDeleted;
+
+  SettingsPage({Key? key, this.onDeleted}) : super(key: key);
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -126,50 +129,26 @@ class _SettingsPageState extends State<SettingsPage> {
       String url;
 
       if (Platform.isAndroid) {
-        // Android Play Store
-        // 优先尝试打开Play Store应用
         url = 'market://details?id=$_packageName';
-
         if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(
-            Uri.parse(url),
-            mode: LaunchMode.externalApplication,
-          );
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         } else {
-          // 如果Play Store应用不可用，打开网页版
           url = 'https://play.google.com/store/apps/details?id=$_packageName';
-          await launchUrl(
-            Uri.parse(url),
-            mode: LaunchMode.externalApplication,
-          );
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         }
       } else if (Platform.isIOS) {
-        // iOS App Store
-        // 注意：你需要将 YOUR_APP_ID 替换为你的实际App Store ID
-        const appId = 'YOUR_APP_ID'; // 例如: '123456789'
-
-        // 优先尝试打开App Store应用
+        const appId = 'YOUR_APP_ID';
         url = 'itms-apps://itunes.apple.com/app/id$appId';
-
         if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(
-            Uri.parse(url),
-            mode: LaunchMode.externalApplication,
-          );
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         } else {
-          // 如果App Store应用不可用，打开网页版
           url = 'https://apps.apple.com/app/id$appId';
-          await launchUrl(
-            Uri.parse(url),
-            mode: LaunchMode.externalApplication,
-          );
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         }
       } else {
-        // 其他平台（Web、Desktop等）
         throw UnsupportedError('Platform not supported');
       }
 
-      // 显示检查更新提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -193,7 +172,6 @@ class _SettingsPageState extends State<SettingsPage> {
         );
       }
     } catch (e) {
-      // 显示错误提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -216,6 +194,106 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
+          // Premium Membership Section
+          _buildSectionHeader(context, s?.premium ?? 'Premium'),
+          Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: _adManager.isCoffeeBought
+                ? ListTile(
+              title: Row(
+                children: [
+                  Text(s?.premiumMember ?? 'Premium Member'),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.amber,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      s?.active ?? 'ACTIVE',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: Text(
+                s?.premiumMemberDescription ??
+                    'Thank you for supporting the developer! Enjoy ad-free experience.',
+              ),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.star, color: Colors.amber),
+              ),
+              trailing: const Icon(Icons.check_circle, color: Colors.green),
+            )
+                : ListTile(
+              title: Text(s?.becomePremium ?? 'Become Premium Member'),
+              subtitle: Text(
+                s?.becomePremiumDescription ??
+                    'Support the developer with a coffee and enjoy ad-free experience',
+              ),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.local_cafe, color: cs.primary),
+              ),
+              trailing: _isPurchasing
+                  ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+                  : Icon(Icons.chevron_right, color: cs.primary),
+              onTap: _isPurchasing ? null : _handlePurchaseCoffee,
+            ),
+          ),
+
+          // Data Management Section
+          _buildSectionHeader(context, '数据管理'),
+
+          Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              children: [
+                ListTile(
+                  title: const Text('宝宝信息管理'),
+                  subtitle: const Text('查看和管理所有宝宝信息'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.primaryContainer.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.child_care, color: cs.primary),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BabyManagementPage()),
+                    );
+
+                    if (result == true) {
+                      widget.onDeleted?.call();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+
           // Theme Section
           _buildSectionHeader(context, s?.theme ?? 'Theme'),
           Card(
@@ -232,10 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       notifier.setMode(value);
                     }
                   },
-                  secondary: Icon(
-                    Icons.light_mode,
-                    color: cs.primary,
-                  ),
+                  secondary: Icon(Icons.light_mode, color: cs.primary),
                 ),
                 const Divider(height: 1),
                 RadioListTile<ThemeMode>(
@@ -248,10 +323,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       notifier.setMode(value);
                     }
                   },
-                  secondary: Icon(
-                    Icons.dark_mode,
-                    color: cs.primary,
-                  ),
+                  secondary: Icon(Icons.dark_mode, color: cs.primary),
                 ),
                 const Divider(height: 1),
                 RadioListTile<ThemeMode>(
@@ -264,10 +336,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       notifier.setMode(value);
                     }
                   },
-                  secondary: Icon(
-                    Icons.settings_suggest,
-                    color: cs.primary,
-                  ),
+                  secondary: Icon(Icons.settings_suggest, color: cs.primary),
                 ),
               ],
             ),
@@ -285,11 +354,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: cs.primary,
-                    size: 20,
-                  ),
+                  Icon(Icons.info_outline, color: cs.primary, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -318,87 +383,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ],
-
-          // Premium Membership Section
-          _buildSectionHeader(context, s?.premium ?? 'Premium'),
-          Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: _adManager.isCoffeeBought
-                ? ListTile(
-              title: Row(
-                children: [
-                  Text(s?.premiumMember ?? 'Premium Member'),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.amber,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      s?.active ?? 'ACTIVE',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              subtitle: Text(
-                s?.premiumMemberDescription ??
-                    'Thank you for supporting the developer! Enjoy ad-free experience.',
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                ),
-              ),
-              trailing: const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-              ),
-            )
-                : ListTile(
-              title: Text(s?.becomePremium ?? 'Become Premium Member'),
-              subtitle: Text(
-                s?.becomePremiumDescription ??
-                    'Support the developer with a coffee and enjoy ad-free experience',
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: cs.primaryContainer.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.local_cafe,
-                  color: cs.primary,
-                ),
-              ),
-              trailing: _isPurchasing
-                  ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-                  : Icon(
-                Icons.chevron_right,
-                color: cs.primary,
-              ),
-              onTap: _isPurchasing ? null : _handlePurchaseCoffee,
-            ),
-          ),
 
           // About Section
           _buildSectionHeader(context, s?.about ?? 'About'),
@@ -441,15 +425,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   const Icon(Icons.chevron_right),
                 ],
               ),
-              leading: Icon(
-                Icons.info_outline,
-                color: cs.primary,
-              ),
+              leading: Icon(Icons.info_outline, color: cs.primary),
               onTap: _launchAppStore,
             ),
           ),
 
-          // App Info Section (Additional info)
+          // App Info Section
           if (!_isLoading && _appName.isNotEmpty) ...[
             _buildSectionHeader(context, s?.appInfo ?? 'App Information'),
             Card(
@@ -473,9 +454,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildInfoRow(
                       context,
                       s?.membershipStatus ?? 'Membership Status',
-                      _adManager.isCoffeeBought
-                          ? (s?.premium ?? 'Premium')
-                          : (s?.free ?? 'Free'),
+                      _adManager.isCoffeeBought ? (s?.premium ?? 'Premium') : (s?.free ?? 'Free'),
                     ),
                   ],
                 ),

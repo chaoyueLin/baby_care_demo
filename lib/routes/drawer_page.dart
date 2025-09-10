@@ -30,14 +30,14 @@ class _DrawerPageState extends State<DrawerPage> {
   List<Baby> _babies = [];
   bool _isLoading = true;
 
-
-
   // Page configuration（注意：care 页用 KeyedSubtree 包一层动态 Key）
   late List<PageConfig> _pageConfigs = [
     PageConfig(Icons.home, 'care', () => KeyedSubtree(key: UniqueKey(), child: CarePage())),
     PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: DataPage())),
     PageConfig(Icons.trending_up, 'grow', () => KeyedSubtree(key: UniqueKey(), child: GrowPage())),
-    PageConfig(Icons.settings, 'setting', () => const SettingsPage()),
+    PageConfig(Icons.settings, 'setting', () =>  SettingsPage(onDeleted: () {
+      _loadBabies();
+    },)),
   ];
 
 
@@ -155,7 +155,9 @@ class _DrawerPageState extends State<DrawerPage> {
         PageConfig(Icons.home, 'care', () => KeyedSubtree(key: UniqueKey(), child: CarePage())),
         PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: DataPage())),
         PageConfig(Icons.trending_up, 'grow', () => KeyedSubtree(key: UniqueKey(), child: GrowPage())),
-        PageConfig(Icons.settings, 'setting', () => const SettingsPage()),
+        PageConfig(Icons.settings, 'setting', () =>  SettingsPage(onDeleted: () {
+            _loadBabies();
+        },)),
       ];
 
 

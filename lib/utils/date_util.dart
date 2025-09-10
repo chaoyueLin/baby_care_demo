@@ -7,6 +7,16 @@ class DateUtil {
     return formatter.format(date);
   }
 
+  /// 毫秒时间戳 转字符串
+  static String? msToDateString(int? ms, {String pattern = 'yyyy-MM-dd HH:mm'}) {
+    if (ms == null) return null;
+    try {
+      final date = DateTime.fromMillisecondsSinceEpoch(ms);
+      return DateFormat(pattern).format(date);
+    } catch (e) {
+      return null;
+    }
+  }
   // 字符串转日期
   static DateTime stringToDate(String dateStr, {String format = 'yyyy-MM-dd'}) {
     final DateFormat formatter = DateFormat(format);
