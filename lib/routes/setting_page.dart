@@ -34,6 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _initAdManager();
   }
 
+  // 初始化广告管理器
   Future<void> _initAdManager() async {
     await _adManager.init();
     if (mounted) {
@@ -41,6 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  // 加载应用信息
   Future<void> _loadAppInfo() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -62,6 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  // 处理购买咖啡
   Future<void> _handlePurchaseCoffee() async {
     setState(() {
       _isPurchasing = true;
@@ -124,6 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  // 打开应用商店
   Future<void> _launchAppStore() async {
     try {
       String url;
@@ -261,15 +265,14 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           // Data Management Section
-          _buildSectionHeader(context, '数据管理'),
-
+          _buildSectionHeader(context, s?.dataManagement ?? 'Data Management'),
           Card(
             margin: const EdgeInsets.only(bottom: 16),
             child: Column(
               children: [
                 ListTile(
-                  title: const Text('宝宝信息管理'),
-                  subtitle: const Text('查看和管理所有宝宝信息'),
+                  title: Text( s?.babyManagement ?? 'Baby Management'),
+                  subtitle: Text(s?.allBabyInfo ?? 'View and manage all baby info'),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -342,7 +345,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Current Status Info
+          // Current Theme Info
           if (notifier.themeMode == ThemeMode.system) ...[
             Container(
               padding: const EdgeInsets.all(16),
@@ -466,6 +469,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // 构建 Section Header
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -479,6 +483,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // 构建信息行
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     final cs = Theme.of(context).colorScheme;
     return Row(
