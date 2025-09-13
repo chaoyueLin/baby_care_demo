@@ -1,7 +1,6 @@
 import 'package:baby_care_demo/utils/dialog_util.dart';
 import 'package:baby_care_demo/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
 import 'package:flutter_gen/gen_l10n/S.dart';
 import 'package:image_pickers/image_pickers.dart';
@@ -211,7 +210,7 @@ class _CarePageContentState extends State<CarePageContent> {
       currentTime.minute,
     );
 
-    DatePicker.showTimePicker(
+    dtp.DatePicker.showTimePicker(
       context,
       locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
       showSecondsColumn: false,

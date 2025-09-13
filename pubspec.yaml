@@ -80,6 +80,18 @@ flutter:
      - assets/icons/formula_milk.png
      - assets/icons/water.png
      - assets/icons/poop.png
+     - assets/weight/wfa-boys-0-13-percentiles_page.jpg
+     - assets/weight/wfa-boys-0-5-percentiles_page.jpg
+     - assets/weight/wfa-girls-0-13-percentiles_page.jpg
+     - assets/weight/wfa-girls-0-5-percentiles_page.jpg
+     - assets/height/lfa-boys-0-13-percentiles_page.jpg
+     - assets/height/lfa-boys-0-2-percentiles_page.jpg
+     - assets/height/lfa-girls-0-13-percentiles_page.jpg
+     - assets/height/lfa-girls-0-2-percentiles_page.jpg
+     - assets/bmi/bmi-boys-0-13-percentiles_page.jpg
+     - assets/bmi/bmi-boys-0-2-percentiles_page.jpg
+     - assets/bmi/bmi-girls-0-13-percentiles_page.jpg
+     - assets/bmi/bmi-girls-0-2-percentiles_page.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

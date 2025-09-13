@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:baby_care_demo/models/grow_standard.dart';
 import 'package:flutter_gen/gen_l10n/S.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
-    as dtp;
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart' as dtp;
 import '../common/db_provider.dart';
 import '../models/baby.dart';
 import '../models/baby_grow.dart';
 import '../utils/dialog_util.dart';
 import '../widget/custom_tab_button.dart';
+import 'image_preview.dart';
 
 class GrowPage extends StatefulWidget {
   const GrowPage({super.key});
@@ -32,6 +32,7 @@ class _GrowPageState extends State<GrowPage> {
 
   List<List<FlSpot>> selectedData = [];
   List<FlSpot> babySeries = [];
+
 
   Baby? currentBaby;
 
@@ -672,9 +673,16 @@ class _GrowPageState extends State<GrowPage> {
                       _buildLegend(lineColors[1], '50%'),
                       const SizedBox(width: 8),
                       _buildLegend(lineColors[2], '97%'),
+                      const SizedBox(width: 8),
+                      // + 号旁边的问号
+                      GestureDetector(
+                        onTap: _openPreview,
+                        child: const Icon(Icons.help_outline, size: 16, color: Colors.grey),
+                      )
                     ],
                   ),
                 ),
+
                 // +号
                 Visibility(
                   visible: selectedType != TYPE_BMI,
@@ -727,12 +735,60 @@ class _GrowPageState extends State<GrowPage> {
   }
 
   Widget _buildLegend(Color color, String text) {
-    return Row(
-      children: [
-        Container(width: 20, height: 2, color: color),
-        const SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontSize: 12)),
-      ],
+    return GestureDetector(
+      onTap: () {
+        // 点击图例，打开图片预览
+        _openPreview();
+      },
+      child: Row(
+        children: [
+          Container(width: 20, height: 2, color: color),
+          const SizedBox(width: 4),
+          Text(text, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
+  void _openPreview() {
+    List<String> listImagePaths = [];
+    switch (selectedType) {
+      case TYPE_WEIGHT:
+        listImagePaths = [
+          'assets/weight/wfa-boys-0-13-percentiles_page.jpg',
+          'assets/weight/wfa-boys-0-5-percentiles_page.jpg',
+          'assets/weight/wfa-girls-0-13-percentiles_page.jpg',
+          'assets/weight/wfa-girls-0-5-percentiles_page.jpg',
+        ];
+        break;
+      case TYPE_HEIGHT:
+        listImagePaths = [
+          'assets/height/lfa-boys-0-13-percentiles_page.jpg',
+          'assets/height/lfa-boys-0-2-percentiles_page.jpg',
+          'assets/height/lfa-girls-0-13-percentiles_page.jpg',
+          'assets/height/lfa-girls-0-2-percentiles_page.jpg',
+        ];
+        break;
+      case TYPE_BMI:
+        listImagePaths = [
+          'assets/bmi/bmi-boys-0-13-percentiles_page.jpg',
+          'assets/bmi/bmi-boys-0-2-percentiles_page.jpg',
+          'assets/bmi/bmi-girls-0-13-percentiles_page.jpg',
+          'assets/bmi/bmi-girls-0-2-percentiles_page.jpg',
+        ];
+        break;
+    }
+
+    if (listImagePaths.isEmpty) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ImagePreview(
+          images: listImagePaths,
+        ),
+      ),
+    );
+  }
+
+
 }
