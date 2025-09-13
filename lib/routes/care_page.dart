@@ -189,6 +189,183 @@ class _CarePageContentState extends State<CarePageContent> {
     );
   }
 
+  /// 睡眠时间选择器
+  void _showSleepTimePicker() {
+    final s = S.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    DateTime? startTime;
+    DateTime? endTime;
+
+    final DateTime yesterday = DateTime(today.year, today.month, today.day - 1);
+    final DateTime todayDate = DateTime(today.year, today.month, today.day);
+
+    DialogUtil.showStyledDialog(
+      context: context,
+      title: s?.selectSleepTime ?? 'Select Sleep Time',
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 开始时间选择
+              ListTile(
+                title: Text(s?.startTime ?? 'Start Time'),
+                subtitle: Text(startTime != null
+                    ? '${startTime!.year}-${startTime!.month.toString().padLeft(2, '0')}-${startTime!.day.toString().padLeft(2, '0')} ${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}'
+                    : s?.pleaseSelectStartTime ?? 'Tap to select'),
+                onTap: () {
+                  _showDateTimePicker(
+                      initialTime: startTime ?? todayDate,
+                      onConfirm: (selectedTime) {
+                        setDialogState(() {
+                          startTime = selectedTime;
+                        });
+                      }
+                  );
+                },
+              ),
+              // 结束时间选择
+              ListTile(
+                title: Text(s?.endTime ?? 'End Time'),
+                subtitle: Text(endTime != null
+                    ? '${endTime!.year}-${endTime!.month.toString().padLeft(2, '0')}-${endTime!.day.toString().padLeft(2, '0')} ${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}'
+                    : s?.pleaseSelectEndTime ?? 'Tap to select'),
+                onTap: () {
+                  _showDateTimePicker(
+                      initialTime: endTime ?? (startTime ?? todayDate),
+                      onConfirm: (selectedTime) {
+                        setDialogState(() {
+                          endTime = selectedTime;
+                        });
+                      }
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.cancel ?? 'Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            if (startTime != null && endTime != null) {
+              Navigator.of(context).pop();
+              _addSleepRecord(startTime!, endTime!);
+            } else {
+              ToastUtil.showToast(s?.pleaseSelectBothTimes ?? "Please select both start and end time");
+            }
+          },
+          child: Text(s?.confirm ?? 'Confirm'),
+        ),
+      ],
+    );
+  }
+
+  /// 显示日期时间选择器，只能选择昨天或今天
+  void _showDateTimePicker({
+    required DateTime initialTime,
+    required Function(DateTime) onConfirm,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final DateTime yesterday = DateTime(today.year, today.month, today.day - 1);
+    final DateTime todayDate = DateTime(today.year, today.month, today.day);
+
+    dtp.DatePicker.showDateTimePicker(
+      context,
+      locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
+      currentTime: initialTime,
+      minTime: yesterday,
+      maxTime: DateTime(today.year, today.month, today.day, 23, 59),
+      theme: dtp.DatePickerTheme(
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
+        headerColor: isDarkMode ? const Color(0xFF2D2D2D) : Colors.lightGreen,
+        doneStyle: TextStyle(
+          color: isDarkMode ? Colors.lightGreenAccent : Colors.white,
+          fontSize: 16,
+        ),
+        cancelStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : Colors.white,
+          fontSize: 16,
+        ),
+        itemStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : const Color(0xFF2D2D2D),
+          fontSize: 16,
+        ),
+      ),
+      onConfirm: onConfirm,
+    );
+  }
+
+  /// 添加睡眠记录，处理跨天情况
+  Future<void> _addSleepRecord(DateTime startTime, DateTime endTime) async {
+    final s = S.of(context);
+
+    if (endTime.isBefore(startTime)) {
+      ToastUtil.showToast(s?.endTimeMustBeAfterStartTime ?? "End time must be after start time");
+      return;
+    }
+
+    List<BabyCare> sleepRecords = [];
+
+    // 检查是否跨天
+    final startDate = DateTime(startTime.year, startTime.month, startTime.day);
+    final endDate = DateTime(endTime.year, endTime.month, endTime.day);
+
+    if (startDate == endDate) {
+      // 不跨天，插入一条记录
+      BabyCare care = BabyCare(
+        babyId: _currentBaby?.id ?? 0,
+        date: startTime.millisecondsSinceEpoch,
+        type: FeedType.sleep,
+        mush: endTime.millisecondsSinceEpoch.toString(),
+      );
+      sleepRecords.add(care);
+    } else {
+      // 跨天，插入两条记录
+      // 第一条：从开始时间到当天23:59
+      DateTime firstEndTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59);
+      BabyCare firstCare = BabyCare(
+        babyId: _currentBaby?.id ?? 0,
+        date: startTime.millisecondsSinceEpoch,
+        type: FeedType.sleep,
+        mush: firstEndTime.millisecondsSinceEpoch.toString(),
+      );
+      sleepRecords.add(firstCare);
+
+      // 第二条：从第二天00:00到结束时间
+      DateTime secondStartTime = DateTime(endTime.year, endTime.month, endTime.day, 0, 0);
+      BabyCare secondCare = BabyCare(
+        babyId: _currentBaby?.id ?? 0,
+        date: secondStartTime.millisecondsSinceEpoch,
+        type: FeedType.sleep,
+        mush: endTime.millisecondsSinceEpoch.toString(),
+      );
+      sleepRecords.add(secondCare);
+    }
+
+    // 插入数据库并更新缓存
+    for (BabyCare care in sleepRecords) {
+      BabyCare inserted = await DBProvider().insertCare(care);
+
+      // 更新对应日期的缓存
+      DateTime recordDate = DateTime.fromMillisecondsSinceEpoch(care.date!);
+      final key = _startOfDayMillis(recordDate);
+      final list = _recordsCache.putIfAbsent(key, () => []);
+      list.add(inserted);
+    }
+
+    // 刷新UI
+    if (mounted) setState(() {});
+
+    ToastUtil.showToast(s?.sleepRecordAdded ?? "Sleep record added successfully");
+  }
+
   /// 时间选择器：只选择时间，日期固定为 PageView 当前显示的日期
   void _showTimePicker(FeedType type, String mush) {
     final s = S.of(context);
@@ -297,6 +474,144 @@ class _CarePageContentState extends State<CarePageContent> {
     _showTimePicker(FeedType.poop, mush);
   }
 
+  /// 计算某天的总睡眠时间（分钟）
+  int _calculateDaySleepMinutes(DateTime date) {
+    final records = _getCachedRecordsForDate(date);
+    final sleepRecords = records.where((r) => r.type == FeedType.sleep).toList();
+
+    int totalMinutes = 0;
+
+    for (var record in sleepRecords) {
+      final startTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
+      final endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(record.mush));
+
+      // 只计算当天范围内的睡眠时间
+      final dayStart = DateTime(date.year, date.month, date.day);
+      final dayEnd = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+      final effectiveStart = startTime.isBefore(dayStart) ? dayStart : startTime;
+      final effectiveEnd = endTime.isAfter(dayEnd) ? dayEnd : endTime;
+
+      if (effectiveStart.isBefore(effectiveEnd)) {
+        totalMinutes += effectiveEnd.difference(effectiveStart).inMinutes;
+      }
+    }
+
+    return totalMinutes;
+  }
+
+  /// 显示睡眠详情对话框
+  void _showSleepDetailDialog(DateTime pageDate) {
+    final s = S.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    final sleepRecords = _getCachedRecordsForDate(pageDate)
+        .where((r) => r.type == FeedType.sleep)
+        .toList();
+
+    final totalMinutes = _calculateDaySleepMinutes(pageDate);
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    DialogUtil.showStyledDialog(
+      context: context,
+      title: '${DateUtil.dateToString(pageDate)} ${s?.sleepRecords ?? "Sleep Record"}',
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${s?.totalSleepTime ?? "Total Sleep Time"}: ${hours}h ${minutes}m',
+              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            if (sleepRecords.isEmpty)
+              Text(s?.sleepRecords ?? 'No sleep records')
+            else
+              ...sleepRecords.map((record) {
+                final startTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
+                final endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(record.mush));
+
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.bedtime, color: cs.primary, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - '
+                              '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.close ?? 'Close'),
+        ),
+      ],
+    );
+  }
+
+  /// 删除某天所有睡眠记录
+  void _confirmDeleteDaySleepRecords(DateTime pageDate) {
+    final s = S.of(context);
+
+    final sleepRecords = _getCachedRecordsForDate(pageDate)
+        .where((r) => r.type == FeedType.sleep)
+        .toList();
+
+    if (sleepRecords.isEmpty) {
+      ToastUtil.showToast(s?.sleepRecords ?? "No sleep records to delete");
+      return;
+    }
+
+    DialogUtil.showStyledDialog(
+      context: context,
+      title: s?.confirm ?? 'Confirm',
+      content: Text(s?.deleteDailySleepRecordsConfirm ?? "Delete all sleep records for this day?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s?.cancel ?? 'Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+
+            // 从数据库删除
+            for (var record in sleepRecords) {
+              await DBProvider().deleteCare(record.id!);
+            }
+
+            // 从缓存删除
+            final key = _startOfDayMillis(pageDate);
+            _recordsCache[key]?.removeWhere((r) => r.type == FeedType.sleep);
+
+            // 刷新 UI
+            if (mounted) setState(() {});
+
+            ToastUtil.showToast(s?.deleteSuccess ?? "Deleted successfully");
+          },
+          child: Text(s?.confirm ?? 'Confirm'),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _pageController?.dispose();
@@ -337,6 +652,11 @@ class _CarePageContentState extends State<CarePageContent> {
         .expand((r) => r.mush.split(',').where((p) => p.isNotEmpty))
         .toList();
 
+    // 获取睡眠记录
+    List<BabyCare> sleepRecords = hourRecords
+        .where((r) => r.type == FeedType.sleep)
+        .toList();
+
     DialogUtil.showStyledDialog(
       context: context,
       title: '${hourIndex.toString().padLeft(2, '0')}:00 - '
@@ -351,6 +671,26 @@ class _CarePageContentState extends State<CarePageContent> {
             const SizedBox(height: 6),
             Text('${s?.babyFood ?? 'Baby Food'}: $babyFoodTotal g'),
             const SizedBox(height: 12),
+
+            // 睡眠记录
+            if (sleepRecords.isNotEmpty) ...[
+              Text('${s?.sleep ?? 'Sleep'}:',
+                  style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ...sleepRecords.map((record) {
+                final startTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
+                final endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(record.mush));
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Text(
+                    '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - '
+                        '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
+                  ),
+                );
+              }).toList(),
+              const SizedBox(height: 12),
+            ],
+
             Divider(color: cs.outline),
             const SizedBox(height: 8),
             Text('${s?.poop ?? 'Poop'}:',
@@ -494,9 +834,43 @@ class _CarePageContentState extends State<CarePageContent> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        DateUtil.dateToString(pageDate),
-                        style: tt.headlineSmall?.copyWith(color: cs.onBackground),
+                      child: GestureDetector(
+                        onTap: () => _showSleepDetailDialog(pageDate),
+                        onLongPress: () => _confirmDeleteDaySleepRecords(pageDate),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              DateUtil.dateToString(pageDate),
+                              style: tt.headlineSmall?.copyWith(color: cs.onBackground),
+                            ),
+                            const SizedBox(width: 8),
+                            // 睡眠标识
+                            if (_getCachedRecordsForDate(pageDate).any((r) => r.type == FeedType.sleep))
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.bedtime, color: cs.onPrimary, size: 12),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      '${(_calculateDaySleepMinutes(pageDate) / 60).toStringAsFixed(1)}h',
+                                      style: TextStyle(
+                                        color: cs.onPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                     Expanded(
@@ -520,6 +894,9 @@ class _CarePageContentState extends State<CarePageContent> {
                               case FeedType.poop:
                                 path = 'assets/icons/poop.png';
                                 break;
+                              case FeedType.sleep:
+                              // 睡眠记录不显示在小时列表中
+                                return const SizedBox.shrink();
                             }
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -594,6 +971,13 @@ class _CarePageContentState extends State<CarePageContent> {
                   iconPath: 'assets/icons/poop.png',
                   onTap: () {
                     _addPoopRecord();
+                  },
+                ),
+                TouchFeedbackTabButton(
+                  label: s?.sleep ?? "sleep",
+                  iconPath: 'assets/icons/formula_milk.png',
+                  onTap: () {
+                    _showSleepTimePicker();
                   },
                 ),
               ],

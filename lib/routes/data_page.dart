@@ -498,6 +498,8 @@ class _DailyStackedChartScrollable extends StatelessWidget {
           break;
         case FeedType.poop:
           break;
+        case FeedType.sleep:
+          break;
       }
       if (s.milk + s.formula > maxMilkFormula) {
         maxMilkFormula = s.milk + s.formula;
@@ -702,6 +704,8 @@ class _DailyStackedChart extends StatelessWidget {
           s.babyFood += amount;
           break;
         case FeedType.poop:
+          break;
+        case FeedType.sleep:
           break;
       }
       if (s.milk + s.formula > maxMilkFormula) {

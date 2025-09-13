@@ -181,5 +181,18 @@
   "notSet": "未设置",
   "status": "状态",
   "visible": "显示",
-  "hidden": "隐藏"
+  "hidden": "隐藏",
+  "selectSleepTime": "选择睡眠时间",
+  "startTime": "开始时间",
+  "endTime": "结束时间",
+  "pleaseSelectStartTime": "请选择睡眠开始时间",
+  "pleaseSelectEndTime": "请选择睡眠结束时间",
+  "pleaseSelectBothTimes": "请选择开始和结束时间",
+  "endTimeMustBeAfterStartTime": "结束时间必须晚于开始时间",
+  "sleepRecordAdded": "睡眠记录添加成功",
+  "sleep": "睡眠",
+  "sleepStats": "睡眠统计",
+  "totalSleepTime": "总睡眠时间",
+  "sleepRecords": "睡眠记录",
+  "deleteDailySleepRecordsConfirm": "删除当日所有睡眠记录"
 }

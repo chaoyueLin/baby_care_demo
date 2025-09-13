@@ -182,5 +182,18 @@
   "notSet": "Not set",
   "status": "Status",
   "visible": "Visible",
-  "hidden": "Hidden"
+  "hidden": "Hidden",
+  "selectSleepTime": "Select Sleep Time",
+  "startTime": "Start Time",
+  "endTime": "End Time",
+  "pleaseSelectStartTime": "Please select the time to start to sleep",
+  "pleaseSelectEndTime": "Please select the time to end to sleep",
+  "pleaseSelectBothTimes": "Please select both start and end times",
+  "endTimeMustBeAfterStartTime": "End time must be after start time",
+  "sleepRecordAdded": "Sleep record added successfully",
+  "sleep": "Sleep",
+  "sleepStats": "Sleep Stats",
+  "totalSleepTime": "Total Sleep Time",
+  "sleepRecords": "Sleep Records",
+  "deleteDailySleepRecordsConfirm": "Delete all sleep records for"
 }

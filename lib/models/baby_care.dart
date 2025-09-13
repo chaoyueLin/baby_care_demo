@@ -2,7 +2,7 @@
 
 import '../common/db_constants.dart';
 
-enum FeedType { milk, formula, babyFood, poop }
+enum FeedType { milk, formula, babyFood, poop,sleep }
 
 extension FeedTypeExtension on FeedType {
   int get value => index;
