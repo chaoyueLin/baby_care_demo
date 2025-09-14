@@ -330,30 +330,30 @@ class _CarePageContentState extends State<CarePageContent> {
         babyId: _currentBaby?.id ?? 0,
         date: startTime.millisecondsSinceEpoch,
         type: FeedType.sleep,
-        mush: endTime.millisecondsSinceEpoch.toString(),
+        mush: (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString(),
       );
       sleepRecords.add(care);
     } else {
-      // 跨天，插入两条记录
-      // 第一条：从开始时间到当天23:59
-      DateTime firstEndTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59);
-      BabyCare firstCare = BabyCare(
-        babyId: _currentBaby?.id ?? 0,
-        date: startTime.millisecondsSinceEpoch,
-        type: FeedType.sleep,
-        mush: firstEndTime.millisecondsSinceEpoch.toString(),
-      );
-      sleepRecords.add(firstCare);
+      // 跨天，需要按天拆分记录
+      DateTime currentStart = startTime;
 
-      // 第二条：从第二天00:00到结束时间
-      DateTime secondStartTime = DateTime(endTime.year, endTime.month, endTime.day, 0, 0);
-      BabyCare secondCare = BabyCare(
-        babyId: _currentBaby?.id ?? 0,
-        date: secondStartTime.millisecondsSinceEpoch,
-        type: FeedType.sleep,
-        mush: endTime.millisecondsSinceEpoch.toString(),
-      );
-      sleepRecords.add(secondCare);
+      while (currentStart.isBefore(endTime)) {
+        final currentDate = DateTime(currentStart.year, currentStart.month, currentStart.day);
+        final nextDayStart = DateTime(currentDate.year, currentDate.month, currentDate.day + 1);
+        final currentEnd = endTime.isBefore(nextDayStart) ? endTime : nextDayStart;
+
+        // 创建当天的睡眠记录
+        BabyCare care = BabyCare(
+          babyId: _currentBaby?.id ?? 0,
+          date: currentStart.millisecondsSinceEpoch,
+          type: FeedType.sleep,
+          mush: (currentEnd.millisecondsSinceEpoch - currentStart.millisecondsSinceEpoch).toString(),
+        );
+        sleepRecords.add(care);
+
+        // 移动到下一天的开始
+        currentStart = nextDayStart;
+      }
     }
 
     // 插入数据库并更新缓存
@@ -490,11 +490,11 @@ class _CarePageContentState extends State<CarePageContent> {
 
     for (var record in sleepRecords) {
       final startTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
-      final endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(record.mush));
+      final endTime = DateTime.fromMillisecondsSinceEpoch(record.date! + int.parse(record.mush));
 
       // 只计算当天范围内的睡眠时间
       final dayStart = DateTime(date.year, date.month, date.day);
-      final dayEnd = DateTime(date.year, date.month, date.day, 23, 59, 59);
+      final dayEnd = DateTime(date.year, date.month, date.day + 1); // 修复：使用下一天的开始时间
 
       final effectiveStart = startTime.isBefore(dayStart) ? dayStart : startTime;
       final effectiveEnd = endTime.isAfter(dayEnd) ? dayEnd : endTime;
@@ -538,7 +538,7 @@ class _CarePageContentState extends State<CarePageContent> {
             else
               ...sleepRecords.map((record) {
                 final startTime = DateTime.fromMillisecondsSinceEpoch(record.date!);
-                final endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(record.mush));
+                final endTime = DateTime.fromMillisecondsSinceEpoch(record.date! + int.parse(record.mush));
 
                 return Container(
                   padding: const EdgeInsets.all(12),

@@ -11,7 +11,7 @@ import '../models/baby.dart';
 import '../utils/theme_mode_notifier.dart';
 import '../utils/baby_notifier.dart';
 import 'care_page.dart';
-import 'data_page.dart';
+import 'recent_page.dart';
 import 'setting_page.dart';
 import 'grow_page.dart';
 import 'add_baby_page.dart';
@@ -33,7 +33,7 @@ class _DrawerPageState extends State<DrawerPage> {
   // Page configuration（注意：care 页用 KeyedSubtree 包一层动态 Key）
   late List<PageConfig> _pageConfigs = [
     PageConfig(Icons.home, 'care', () => KeyedSubtree(key: UniqueKey(), child: CarePage())),
-    PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: DataPage())),
+    PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: RecentPage())),
     PageConfig(Icons.trending_up, 'grow', () => KeyedSubtree(key: UniqueKey(), child: GrowPage())),
     PageConfig(Icons.settings, 'setting', () =>  SettingsPage(onDeleted: () {
       _loadBabies();
@@ -153,7 +153,7 @@ class _DrawerPageState extends State<DrawerPage> {
       // --- 强制 CarePage 重建：让它走 initState 按 show==1 重新拉取 ---
       _pageConfigs = [
         PageConfig(Icons.home, 'care', () => KeyedSubtree(key: UniqueKey(), child: CarePage())),
-        PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: DataPage())),
+        PageConfig(Icons.analytics, 'recent', () => KeyedSubtree(key: UniqueKey(), child: RecentPage())),
         PageConfig(Icons.trending_up, 'grow', () => KeyedSubtree(key: UniqueKey(), child: GrowPage())),
         PageConfig(Icons.settings, 'setting', () =>  SettingsPage(onDeleted: () {
             _loadBabies();

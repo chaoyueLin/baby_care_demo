@@ -195,5 +195,7 @@
   "sleepStats": "Sleep Stats",
   "totalSleepTime": "Total Sleep Time",
   "sleepRecords": "Sleep Records",
-  "deleteDailySleepRecordsConfirm": "Delete all sleep records for"
+  "deleteDailySleepRecordsConfirm": "Delete all sleep records for",
+  "privacyStatement": "Privacy Statement",
+  "privacyPolicy": "Privacy Policy"
 }

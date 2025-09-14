@@ -271,8 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               children: [
                 ListTile(
-                  title: Text( s?.babyManagement ?? 'Baby Management'),
-                  subtitle: Text(s?.allBabyInfo ?? 'View and manage all baby info'),
+                  title: Text( s?.allBabyInfo ?? 'View and manage all baby info'),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -386,14 +385,42 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ],
+          _buildSectionHeader(context, s?.privacyStatement ?? 'Privacy Statement'),
+          Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text( s?.privacyPolicy ?? 'Privacy Policy'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.primaryContainer.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.info_outline, color: cs.primary),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BabyManagementPage()),
+                    );
 
+                    if (result == true) {
+                      widget.onDeleted?.call();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
           // About Section
           _buildSectionHeader(context, s?.about ?? 'About'),
           Card(
             margin: const EdgeInsets.only(bottom: 16),
             child: ListTile(
-              title: Text(s?.about ?? 'About'),
-              subtitle: Text(s?.checkForUpdates ?? 'Tap to check for updates'),
+              title: Text(s?.checkForUpdates ?? 'Tap to check for updates'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -415,55 +442,25 @@ class _SettingsPageState extends State<SettingsPage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        if (_buildNumber.isNotEmpty)
-                          Text(
-                            'Build $_buildNumber',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: cs.onSurface.withOpacity(0.5),
-                            ),
-                          ),
                       ],
                     ),
                   const SizedBox(width: 8),
                   const Icon(Icons.chevron_right),
                 ],
               ),
-              leading: Icon(Icons.info_outline, color: cs.primary),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.info_outline, color: cs.primary),
+              ),
               onTap: _launchAppStore,
             ),
           ),
 
-          // App Info Section
-          if (!_isLoading && _appName.isNotEmpty) ...[
-            _buildSectionHeader(context, s?.appInfo ?? 'App Information'),
-            Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInfoRow(context, s?.appName ?? 'App Name', _appName),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(context, s?.version ?? 'Version', _currentVersion),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(context, s?.buildNumber ?? 'Build Number', _buildNumber),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(context, s?.packageName ?? 'Package Name', _packageName),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(context, s?.platform ?? 'Platform',
-                        Platform.isAndroid ? 'Android' : Platform.isIOS ? 'iOS' : 'Unknown'),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(
-                      context,
-                      s?.membershipStatus ?? 'Membership Status',
-                      _adManager.isCoffeeBought ? (s?.premium ?? 'Premium') : (s?.free ?? 'Free'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+
         ],
       ),
     );

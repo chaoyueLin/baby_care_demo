@@ -194,5 +194,7 @@
   "sleepStats": "睡眠统计",
   "totalSleepTime": "总睡眠时间",
   "sleepRecords": "睡眠记录",
-  "deleteDailySleepRecordsConfirm": "删除当日所有睡眠记录"
+  "deleteDailySleepRecordsConfirm": "删除当日所有睡眠记录",
+  "privacyStatement": "隐私声明",
+  "privacyPolicy": "查看隐私政策"
 }
