@@ -31,7 +31,7 @@ class _DataPageState extends State<DataPage> {
       final visibleBabies = await DBProvider().getVisiblePersons();
       if (visibleBabies != null && visibleBabies.isNotEmpty) {
         final baby = visibleBabies.firstWhere(
-              (b) => b.show == 1,
+          (b) => b.show == 1,
           orElse: () => visibleBabies.first,
         );
         setState(() => currentBaby = baby);
@@ -135,14 +135,13 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
       FeedRange.quarter => 90,
     };
 
-    final endExclusive = _anchorDay.add(const Duration(days: 1)).millisecondsSinceEpoch;
-    final startMs = _anchorDay
-        .subtract(Duration(days: days - 1))
-        .millisecondsSinceEpoch;
+    final endExclusive =
+        _anchorDay.add(const Duration(days: 1)).millisecondsSinceEpoch;
+    final startMs =
+        _anchorDay.subtract(Duration(days: days - 1)).millisecondsSinceEpoch;
 
     return dbp.getCareByRange(startMs, endExclusive, widget.babyId);
   }
-
 
   void _setRange(FeedRange r) {
     setState(() {
@@ -169,7 +168,9 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.week,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.week)),
-                Text(s?.recentWeek ?? 'Recent Week',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(s?.recentWeek ?? 'Recent Week',
+                    style: tt.bodySmall
+                        ?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
             const SizedBox(width: 6),
@@ -179,7 +180,9 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.month,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.month)),
-                Text(s?.recentMonth ?? 'Recent Month',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(s?.recentMonth ?? 'Recent Month',
+                    style: tt.bodySmall
+                        ?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
             const SizedBox(width: 6),
@@ -189,7 +192,9 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                     value: FeedRange.quarter,
                     groupValue: _range,
                     onChanged: (v) => _setRange(FeedRange.quarter)),
-                Text(s?.recentQuarter ?? 'Recent Quarter',style: tt.bodySmall?.copyWith(color: cs.onSurface, fontSize: 12)),
+                Text(s?.recentQuarter ?? 'Recent Quarter',
+                    style: tt.bodySmall
+                        ?.copyWith(color: cs.onSurface, fontSize: 12)),
               ],
             ),
           ],
@@ -206,14 +211,16 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
             if (snap.hasError) {
               return SizedBox(
                   height: 300,
-                  child: Center(child: Text('${s?.dataLoadingFailed ?? 'Data loading failed'}: ${snap.error}')));
+                  child: Center(
+                      child: Text(
+                          '${s?.dataLoadingFailed ?? 'Data loading failed'}: ${snap.error}')));
             }
             final list = snap.data ?? const <BabyCare>[];
             final days = _range == FeedRange.week
                 ? 7
                 : _range == FeedRange.month
-                ? 30
-                : 90;
+                    ? 30
+                    : 90;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -221,11 +228,14 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildLegendItem(Colors.blue.shade400,  s?.breastMilk ?? "Breast Milk"),
+                    _buildLegendItem(
+                        Colors.blue.shade400, s?.breastMilk ?? "Breast Milk"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.green.shade400, s?.formula ?? "Formula"),
+                    _buildLegendItem(
+                        Colors.green.shade400, s?.formula ?? "Formula"),
                     const SizedBox(width: 12),
-                    _buildLegendItem(Colors.orange.shade400, s?.babyFood ?? "Baby Food"),
+                    _buildLegendItem(
+                        Colors.orange.shade400, s?.babyFood ?? "Baby Food"),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -233,36 +243,51 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
                   height: 300,
                   child: _range == FeedRange.quarter
                       ? _DailyStackedChartScrollable(
-                    records: list,
-                    endDayInclusive: _anchorDay,
-                    days: days,
-                    barWidth: widget.barWidth,
-                    onBarTapped: (dayStat) {
-                      setState(() {
-                        _selectedDay = dayStat;
-                      });
-                    },
-                  )
+                          records: list,
+                          endDayInclusive: _anchorDay,
+                          days: days,
+                          barWidth: widget.barWidth,
+                          onBarTapped: (dayStat) {
+                            setState(() {
+                              _selectedDay = dayStat;
+                            });
+                          },
+                        )
                       : _DailyStackedChart(
-                    records: list,
-                    endDayInclusive: _anchorDay,
-                    days: days,
-                    barWidth: widget.barWidth,
-                    onBarTapped: (dayStat) {
-                      setState(() {
-                        _selectedDay = dayStat;
-                      });
-                    },
+                          records: list,
+                          endDayInclusive: _anchorDay,
+                          days: days,
+                          barWidth: widget.barWidth,
+                          onBarTapped: (dayStat) {
+                            setState(() {
+                              _selectedDay = dayStat;
+                            });
+                          },
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _selectedDay == null
+                        ? '请选择柱状图查看详细数据'
+                        : '${DateUtil.dateToString(_selectedDay!.day)}:\n'
+                            '${s?.breastMilk ?? 'Breast Milk'}: ${_selectedDay!.milk.toInt()}ml, '
+                            '${s?.formula ?? 'Formula'}: ${_selectedDay!.formula.toInt()}ml, '
+                            '${s?.babyFood ?? 'Baby Food'}: ${_selectedDay!.babyFood.toInt()}g, '
+                            '${s?.poopCount ?? 'Poop'}: ${_selectedDay!.poopCount} ${s?.times ?? 'times'}, '
+                            '${s?.sleep ?? 'Sleep'}: ${_selectedDay!.sleepHours.toStringAsFixed(1)}h',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
-                if (_selectedDay != null)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      '${DateUtil.dateToString(_selectedDay!.day)}:\n${s?.breastMilk ?? 'Breast Milk'}: ${_selectedDay!.milk.toInt()}ml, ${s?.formula ?? 'Formula'}: ${_selectedDay!.formula.toInt()}ml, ${s?.babyFood ?? 'Baby Food'}: ${_selectedDay!.babyFood.toInt()}g, ${s?.poopCount ?? 'Poop'}: ${_selectedDay!.poopCount} ${s?.times ?? 'times'}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 200,
+                  child: SleepLineChart(
+                    records: list,
+                    endDayInclusive: _anchorDay,
+                    days: days,
                   ),
+                ),
               ],
             );
           },
@@ -288,6 +313,138 @@ class _DailyFeedingChartAllInOneState extends State<DailyFeedingChartAllInOne> {
     );
   }
 }
+
+/// ---------------- SleepLineChart ----------------
+
+class SleepLineChart extends StatelessWidget {
+  final List<BabyCare> records;
+  final DateTime endDayInclusive;
+  final int days;
+
+  const SleepLineChart({
+    super.key,
+    required this.records,
+    required this.endDayInclusive,
+    required this.days,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final agg = _aggregateByDay(records, endDayInclusive, days);
+    final series = agg.series;
+
+    // 每天都要有点，即使是 0 小时
+    final spots = <FlSpot>[];
+    for (int i = 0; i < series.length; i++) {
+      final h = series[i].sleepHours.round(); // 取整小时
+      spots.add(FlSpot(i.toDouble(), h.toDouble()));
+    }
+
+    return SizedBox(
+      height: 200,
+      child: LineChart(
+        LineChartData(
+          minY: 0,
+          maxY: 24, // 固定 0–24 小时
+          gridData: FlGridData(show: true),
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: Theme.of(context).dividerColor),
+          ),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 28,
+                getTitlesWidget: (v, m) {
+                  final idx = v.toInt();
+                  if (idx < 0 || idx >= series.length) {
+                    return const SizedBox.shrink();
+                  }
+                  final d = series[idx].day;
+                  // 根据总天数决定步长
+                  final step = series.length <= 10
+                      ? 1
+                      : series.length <= 20
+                      ? 2
+                      : series.length <= 40
+                      ? 4
+                      : 7;
+                  if (idx % step == 0) {
+                    return Text('${d.month}/${d.day}',
+                        style: Theme.of(context).textTheme.bodySmall);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 32,
+                getTitlesWidget: (v, m) {
+                  // Y 轴固定显示 0, 4, 8, 12, 16, 20, 24
+                  if (v % 4 == 0) {
+                    return Text(
+                      v.toInt().toString(),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              barWidth: 2,
+              color: Colors.purple,
+              dotData: FlDotData(show: true), // 显示每天的点
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _AggDay _aggregateByDay(List<BabyCare> list, DateTime endDayInclusive, int days) {
+    final end = DateTime(endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
+        .add(const Duration(days: 1));
+    final start = end.subtract(Duration(days: days));
+    final series = <_DayStat>[];
+    final indexOfDay = <String, int>{};
+
+    DateTime cursor = start;
+    while (cursor.isBefore(end)) {
+      final key = '${cursor.year}-${cursor.month}-${cursor.day}';
+      indexOfDay[key] = series.length;
+      series.add(_DayStat(day: cursor));
+      cursor = cursor.add(const Duration(days: 1));
+    }
+
+    for (final r in list) {
+      if (r.date == null) continue;
+      final t = DateTime.fromMillisecondsSinceEpoch(r.date!);
+      if (t.isBefore(start) || !t.isBefore(end)) continue;
+      final d = DateTime(t.year, t.month, t.day);
+      final idx = indexOfDay['${d.year}-${d.month}-${d.day}'];
+      if (idx == null) continue;
+      final s = series[idx];
+      final amount = double.tryParse(r.mush.trim()) ?? 0;
+      if (r.type == FeedType.sleep) {
+        s.sleepHours += amount;
+      }
+    }
+
+    return _AggDay(series: series, maxMilkFormula: 0, maxBabyFood: 0);
+  }
+}
+
+
 
 class _DailyStackedChartScrollable extends StatelessWidget {
   final List<BabyCare> records;
@@ -332,7 +489,7 @@ class _DailyStackedChartScrollable extends StatelessWidget {
                     milk, milk + formula, Colors.green.shade400),
             ],
             borderSide:
-            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+                BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
           ),
         );
       }
@@ -344,7 +501,7 @@ class _DailyStackedChartScrollable extends StatelessWidget {
             width: barWidth,
             color: Colors.orange.shade400,
             borderSide:
-            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+                BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
           ),
         );
       }
@@ -411,10 +568,10 @@ class _DailyStackedChartScrollable extends StatelessWidget {
                             final step = totalBars <= 10
                                 ? 1
                                 : totalBars <= 20
-                                ? 2
-                                : totalBars <= 40
-                                ? 4
-                                : 7;
+                                    ? 2
+                                    : totalBars <= 40
+                                        ? 4
+                                        : 7;
                             if (idx % step == 0) {
                               return Text('${d.month}/${d.day}',
                                   style: Theme.of(context).textTheme.bodySmall);
@@ -428,7 +585,7 @@ class _DailyStackedChartScrollable extends StatelessWidget {
                       show: true,
                       border: Border(
                         bottom:
-                        BorderSide(color: Theme.of(context).dividerColor),
+                            BorderSide(color: Theme.of(context).dividerColor),
                       ),
                     ),
                     barTouchData: BarTouchData(
@@ -456,7 +613,7 @@ class _DailyStackedChartScrollable extends StatelessWidget {
   _AggDay _aggregateByDay(
       List<BabyCare> list, DateTime endDayInclusive, int days) {
     final end = DateTime(
-        endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
+            endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
         .add(const Duration(days: 1));
     final start = end.subtract(Duration(days: days));
     final series = <_DayStat>[];
@@ -561,7 +718,7 @@ class _DailyStackedChart extends StatelessWidget {
                     milk, milk + formula, Colors.green.shade400),
             ],
             borderSide:
-            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+                BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
           ),
         );
       }
@@ -573,7 +730,7 @@ class _DailyStackedChart extends StatelessWidget {
             width: barWidth,
             color: Colors.orange.shade400,
             borderSide:
-            BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
+                BorderSide(color: Theme.of(context).dividerColor, width: 0.5),
           ),
         );
       }
@@ -620,10 +777,10 @@ class _DailyStackedChart extends StatelessWidget {
                 final step = totalBars <= 10
                     ? 1
                     : totalBars <= 20
-                    ? 2
-                    : totalBars <= 40
-                    ? 4
-                    : 7;
+                        ? 2
+                        : totalBars <= 40
+                            ? 4
+                            : 7;
                 if (idx % step == 0) {
                   return Text('${d.month}/${d.day}',
                       style: Theme.of(context).textTheme.bodySmall);
@@ -633,9 +790,9 @@ class _DailyStackedChart extends StatelessWidget {
             ),
           ),
           rightTitles:
-          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           topTitles:
-          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(
           show: true,
@@ -663,7 +820,7 @@ class _DailyStackedChart extends StatelessWidget {
   _AggDay _aggregateByDay(
       List<BabyCare> list, DateTime endDayInclusive, int days) {
     final end = DateTime(
-        endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
+            endDayInclusive.year, endDayInclusive.month, endDayInclusive.day)
         .add(const Duration(days: 1));
     final start = end.subtract(Duration(days: days));
     final series = <_DayStat>[];
@@ -725,12 +882,15 @@ class _DailyStackedChart extends StatelessWidget {
   String _key(DateTime d) => '${d.year}-${d.month}-${d.day}';
 }
 
+/// ---------------- 公用类 ----------------
+
 class _DayStat {
   final DateTime day;
   double milk = 0;
   double formula = 0;
   double babyFood = 0; // g
   int poopCount = 0;
+  double sleepHours = 0; // 新增：睡眠时长（小时）
 
   _DayStat({required this.day});
 }
@@ -740,14 +900,12 @@ class _AggDay {
   final double maxMilkFormula;
   final double maxBabyFood;
 
-  _AggDay(
-      {required this.series,
-        required this.maxMilkFormula,
-        required this.maxBabyFood});
+  _AggDay({
+    required this.series,
+    required this.maxMilkFormula,
+    required this.maxBabyFood,
+  });
 }
-
-
-
 
 double _niceCeil(double v) {
   if (v <= 100) return 100;

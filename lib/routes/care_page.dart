@@ -197,8 +197,9 @@ class _CarePageContentState extends State<CarePageContent> {
     DateTime? startTime;
     DateTime? endTime;
 
-    final DateTime yesterday = DateTime(today.year, today.month, today.day - 1);
-    final DateTime todayDate = DateTime(today.year, today.month, today.day);
+    // 修复：使用 PageView 当前显示的日期作为基准
+    final DateTime yesterday = DateTime(currentDate.year, currentDate.month, currentDate.day - 1);
+    final DateTime todayDate = DateTime(currentDate.year, currentDate.month, currentDate.day);
 
     DialogUtil.showStyledDialog(
       context: context,
@@ -217,6 +218,7 @@ class _CarePageContentState extends State<CarePageContent> {
                     : s?.pleaseSelectStartTime ?? 'Tap to select'),
                 onTap: () {
                   _showDateTimePicker(
+                      pageDate: currentDate, // 传递当前页面日期
                       initialTime: startTime ?? todayDate,
                       onConfirm: (selectedTime) {
                         setDialogState(() {
@@ -234,6 +236,7 @@ class _CarePageContentState extends State<CarePageContent> {
                     : s?.pleaseSelectEndTime ?? 'Tap to select'),
                 onTap: () {
                   _showDateTimePicker(
+                      pageDate: currentDate, // 传递当前页面日期
                       initialTime: endTime ?? (startTime ?? todayDate),
                       onConfirm: (selectedTime) {
                         setDialogState(() {
@@ -267,21 +270,25 @@ class _CarePageContentState extends State<CarePageContent> {
     );
   }
 
-  /// 显示日期时间选择器，只能选择昨天或今天
+  /// 显示日期时间选择器，只能选择相对于页面日期的昨天或今天
   void _showDateTimePicker({
+    required DateTime pageDate, // 新增：页面当前日期参数
     required DateTime initialTime,
     required Function(DateTime) onConfirm,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final DateTime yesterday = DateTime(today.year, today.month, today.day - 1);
-    final DateTime todayDate = DateTime(today.year, today.month, today.day);
+
+    // 修复：基于页面日期计算相对的昨天和今天
+    final DateTime yesterday = DateTime(pageDate.year, pageDate.month, pageDate.day - 1);
+    final DateTime todayDate = DateTime(pageDate.year, pageDate.month, pageDate.day);
+    final DateTime maxTime = DateTime(pageDate.year, pageDate.month, pageDate.day, 23, 59);
 
     dtp.DatePicker.showDateTimePicker(
       context,
       locale: _mapLocaleToPickerLocale(Localizations.localeOf(context)),
       currentTime: initialTime,
       minTime: yesterday,
-      maxTime: DateTime(today.year, today.month, today.day, 23, 59),
+      maxTime: maxTime, // 修复：使用页面日期的23:59作为最大时间
       theme: dtp.DatePickerTheme(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
         headerColor: isDarkMode ? const Color(0xFF2D2D2D) : Colors.lightGreen,
